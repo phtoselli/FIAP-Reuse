@@ -1,7 +1,80 @@
+"use client";
+
+import {
+  Button,
+  Col,
+  Divider,
+  Flex,
+  Form,
+  Input,
+  Row,
+  theme,
+  Typography,
+} from "antd";
+import { useForm } from "antd/es/form/Form";
+
 export default function Login() {
+  const [form] = useForm();
+  const { token } = theme.useToken();
+
   return (
-    <div>
-      <p>Login</p>
-    </div>
+    <Row style={{ height: "100vh" }}>
+      <Col span={12} style={{ backgroundColor: token.colorPrimary }}>
+        <Flex align="center" justify="center" style={{ height: "100%" }}>
+          <Typography.Title>ReUse</Typography.Title>
+        </Flex>
+      </Col>
+
+      <Col span={12}>
+        <Flex
+          align="center"
+          justify="center"
+          vertical
+          style={{ height: "100%" }}
+        >
+          <Flex vertical style={{ width: "320px" }}>
+            <Flex vertical style={{ marginBottom: "24px" }}>
+              <Typography.Title level={2}>Login</Typography.Title>
+              <Typography.Paragraph>
+                Acesse a plataforma agora e experimente a melhor maneira trocar
+                seus itens!
+              </Typography.Paragraph>
+            </Flex>
+
+            <Form form={form} layout="vertical">
+              <Row>
+                <Col span={24}>
+                  <Form.Item name="email" label="E-mail">
+                    <Input placeholder="Digite seu e-mail..." />
+                  </Form.Item>
+                </Col>
+
+                <Col span={24}>
+                  <Form.Item name="password" label="Senha">
+                    <Input.Password placeholder="Digite sua senha..." />
+                  </Form.Item>
+                </Col>
+
+                <Col span={24}>
+                  <Button
+                    color="primary"
+                    variant="link"
+                    style={{ padding: "0px" }}
+                  >
+                    Esqueceu sua senha?
+                  </Button>
+                </Col>
+              </Row>
+            </Form>
+
+            <Divider style={{ width: "100px" }}>ou</Divider>
+
+            <Button color="primary" variant="filled">
+              Cadastre-se
+            </Button>
+          </Flex>
+        </Flex>
+      </Col>
+    </Row>
   );
 }
