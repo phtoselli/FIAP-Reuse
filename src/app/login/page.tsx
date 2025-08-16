@@ -1,5 +1,6 @@
 "use client";
 
+import { Routes } from "@/types/routes";
 import {
   Button,
   Col,
@@ -12,10 +13,16 @@ import {
   Typography,
 } from "antd";
 import { useForm } from "antd/es/form/Form";
+import { useRouter } from "next/navigation";
 
 export default function Login() {
+  const router = useRouter();
   const [form] = useForm();
   const { token } = theme.useToken();
+
+  const changeRoute = (route: string) => {
+    router.push(route);
+  };
 
   return (
     <Row style={{ height: "100vh" }}>
@@ -69,7 +76,11 @@ export default function Login() {
 
             <Divider style={{ width: "100px" }}>ou</Divider>
 
-            <Button color="primary" variant="filled">
+            <Button
+              color="primary"
+              variant="solid"
+              onClick={() => changeRoute(Routes.REGISTER)}
+            >
               Cadastre-se
             </Button>
           </Flex>

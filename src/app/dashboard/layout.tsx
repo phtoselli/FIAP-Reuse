@@ -23,37 +23,38 @@ import {
 } from "@ant-design/icons";
 import React, { useState } from "react";
 import type { MenuProps } from "antd";
+import { Routes } from "@/types/routes";
 
 const { Header, Sider, Content } = Layout;
 
 const menuItems: MenuProps["items"] = [
   {
-    key: "/dashboard",
+    key: Routes.DASHBOARD,
     icon: <DashboardOutlined />,
     label: "Dashboard",
   },
   {
-    key: "/dashboard/users",
+    key: Routes.USERS,
     icon: <TeamOutlined />,
     label: "Gestão de Usuários",
   },
   {
-    key: "/dashboard/posts",
+    key: Routes.POSTS,
     icon: <FileTextOutlined />,
     label: "Publicações",
   },
   {
-    key: "/dashboard/tags",
+    key: Routes.TAGS,
     icon: <TagsOutlined />,
     label: "Tags",
   },
   {
-    key: "/dashboard/reports",
+    key: Routes.REPORTS,
     icon: <BarChartOutlined />,
     label: "Relatórios",
   },
   {
-    key: "/dashboard/categories",
+    key: Routes.CATEGORIES,
     icon: <FolderOpenOutlined />,
     label: "Categorias",
   },
