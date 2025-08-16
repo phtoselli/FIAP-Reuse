@@ -1,0 +1,166 @@
+"use client";
+
+import {
+  Avatar,
+  Card,
+  Col,
+  Divider,
+  Flex,
+  Input,
+  Rate,
+  Row,
+  Space,
+  Statistic,
+  Switch,
+  Table,
+  Typography,
+} from "antd";
+import {
+  UserOutlined,
+  CalendarOutlined,
+  SwapOutlined,
+} from "@ant-design/icons";
+import { useState } from "react";
+
+const { Title } = Typography;
+const { Search } = Input;
+
+interface User {
+  key: string;
+  name: string;
+  avatar: string;
+  location: string;
+  createdAt: string;
+  score: number;
+  active: boolean;
+}
+
+const mockUsers: User[] = [
+  {
+    key: "1",
+    name: "João Silva",
+    avatar: "https://i.pravatar.cc/150?img=1",
+    location: "São Paulo, BR",
+    createdAt: "2023-08-01",
+    score: 4,
+    active: true,
+  },
+  {
+    key: "2",
+    name: "Maria Oliveira",
+    avatar: "https://i.pravatar.cc/150?img=2",
+    location: "Lisboa, PT",
+    createdAt: "2023-07-15",
+    score: 5,
+    active: false,
+  },
+  {
+    key: "3",
+    name: "Carlos Souza",
+    avatar: "https://i.pravatar.cc/150?img=3",
+    location: "Rio de Janeiro, BR",
+    createdAt: "2023-06-20",
+    score: 3,
+    active: true,
+  },
+];
+
+export default function Users() {
+  const [searchText, setSearchText] = useState("");
+  const [filteredUsers, setFilteredUsers] = useState<User[]>(mockUsers);
+
+  const handleSearch = (value: string) => {
+    setSearchText(value);
+    const filtered = mockUsers.filter((user) =>
+      user.name.toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredUsers(filtered);
+  };
+
+  const columns = [
+    {
+      title: "Usuário",
+      dataIndex: "name",
+      key: "name",
+      render: (_: string, record: User) => (
+        <Space>
+          <Avatar src={record.avatar} />
+          <span>{record.name}</span>
+        </Space>
+      ),
+    },
+    {
+      title: "Localização",
+      dataIndex: "location",
+      key: "location",
+    },
+    {
+      title: "Data de Cadastro",
+      dataIndex: "createdAt",
+      key: "createdAt",
+    },
+    {
+      title: "Score",
+      dataIndex: "score",
+      key: "score",
+      render: (score: number) => <Rate disabled defaultValue={score} />,
+    },
+    {
+      title: "Ativo",
+      dataIndex: "active",
+      key: "active",
+      render: (active: boolean) => <Switch defaultChecked={active} />,
+    },
+  ];
+
+  return (
+    <div>
+      <Flex align="center" justify="space-between">
+        <Title level={3}>Gestão de Usuários</Title>
+      </Flex>
+
+      <Divider />
+
+      <Row gutter={16} style={{ marginBottom: 24 }}>
+        <Col span={8}>
+          <Card>
+            <Statistic
+              title="Usuários Ativos"
+              value={128}
+              prefix={<UserOutlined />}
+            />
+          </Card>
+        </Col>
+        <Col span={8}>
+          <Card>
+            <Statistic title="Trocas" value={12} prefix={<SwapOutlined />} />
+          </Card>
+        </Col>
+        <Col span={8}>
+          <Card>
+            <Statistic
+              title="Novos Este Mês"
+              value={24}
+              prefix={<CalendarOutlined />}
+            />
+          </Card>
+        </Col>
+      </Row>
+
+      <Search
+        placeholder="Buscar usuário pelo nome"
+        allowClear
+        onSearch={handleSearch}
+        onChange={(e) => handleSearch(e.target.value)}
+        value={searchText}
+        style={{ marginBottom: 16 }}
+      />
+
+      <Table
+        columns={columns}
+        dataSource={filteredUsers}
+        pagination={{ pageSize: 5 }}
+      />
+    </div>
+  );
+}
