@@ -4,7 +4,6 @@ import React from "react";
 
 import { Layout } from "antd";
 import Header from "@/components/Header";
-import Sider from "@/components/Sider";
 
 const { Content } = Layout;
 
@@ -15,7 +14,6 @@ export default function DashboardLayout({
 }) {
   return (
     <Layout style={{ minHeight: "100vh" }}>
-      <Sider />
       <Layout>
         <Header />
         <Content style={{ margin: "16px", background: "#fff", padding: 24 }}>

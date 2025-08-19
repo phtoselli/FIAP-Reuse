@@ -1,19 +1,12 @@
 "use client";
 
 import { Routes } from "@/types/routes";
-import {
-  Button,
-  Col,
-  Divider,
-  Flex,
-  Form,
-  Input,
-  Row,
-  theme,
-  Typography,
-} from "antd";
+import { Button, Col, Divider, Flex, Form, Input, Row, theme } from "antd";
 import { useForm } from "antd/es/form/Form";
 import { useRouter } from "next/navigation";
+
+import Title from "antd/es/typography/Title";
+import Paragraph from "antd/es/typography/Paragraph";
 
 export default function Login() {
   const router = useRouter();
@@ -28,7 +21,7 @@ export default function Login() {
     <Row style={{ height: "100vh" }}>
       <Col span={12} style={{ backgroundColor: token.colorPrimary }}>
         <Flex align="center" justify="center" style={{ height: "100%" }}>
-          <Typography.Title>ReUse</Typography.Title>
+          <Title>ReUse</Title>
         </Flex>
       </Col>
 
@@ -41,11 +34,11 @@ export default function Login() {
         >
           <Flex vertical style={{ width: "320px" }}>
             <Flex vertical style={{ marginBottom: "24px" }}>
-              <Typography.Title level={2}>Login</Typography.Title>
-              <Typography.Paragraph>
+              <Title level={2}>Login</Title>
+              <Paragraph>
                 Acesse a plataforma agora e experimente a melhor maneira trocar
                 seus itens!
-              </Typography.Paragraph>
+              </Paragraph>
             </Flex>
 
             <Form form={form} layout="vertical">

@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import {
   Avatar,
   Card,
@@ -13,17 +15,13 @@ import {
   Statistic,
   Switch,
   Table,
-  Typography,
 } from "antd";
+import Title from "antd/es/typography/Title";
 import {
   UserOutlined,
   CalendarOutlined,
   SwapOutlined,
 } from "@ant-design/icons";
-import { useState } from "react";
-
-const { Title } = Typography;
-const { Search } = Input;
 
 interface User {
   key: string;
@@ -147,7 +145,7 @@ export default function Users() {
         </Col>
       </Row>
 
-      <Search
+      <Input.Search
         placeholder="Buscar usuário pelo nome"
         allowClear
         onSearch={handleSearch}

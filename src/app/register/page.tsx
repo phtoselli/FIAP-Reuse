@@ -1,18 +1,10 @@
 "use client";
 
 import { Routes } from "@/types/routes";
-import {
-  Button,
-  Col,
-  Divider,
-  Flex,
-  Form,
-  Input,
-  Row,
-  theme,
-  Typography,
-} from "antd";
+import { Button, Col, Divider, Flex, Form, Input, Row, theme } from "antd";
 import { useForm } from "antd/es/form/Form";
+import Paragraph from "antd/es/typography/Paragraph";
+import Title from "antd/es/typography/Title";
 import { useRouter } from "next/navigation";
 
 export default function Register() {
@@ -28,7 +20,7 @@ export default function Register() {
     <Row style={{ height: "100vh" }}>
       <Col span={12} style={{ backgroundColor: token.colorPrimary }}>
         <Flex align="center" justify="center" style={{ height: "100%" }}>
-          <Typography.Title>ReUse</Typography.Title>
+          <Title>ReUse</Title>
         </Flex>
       </Col>
 
@@ -41,11 +33,11 @@ export default function Register() {
         >
           <Flex vertical style={{ width: "320px" }}>
             <Flex vertical style={{ marginBottom: "24px" }}>
-              <Typography.Title level={2}>Cadastre-se</Typography.Title>
-              <Typography.Paragraph>
+              <Title level={2}>Cadastre-se</Title>
+              <Paragraph>
                 Preencha os dados abaixo e comece a trocar seus itens agora
                 mesmo!
-              </Typography.Paragraph>
+              </Paragraph>
             </Flex>
 
             <Form form={form} layout="vertical">
