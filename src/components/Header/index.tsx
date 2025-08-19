@@ -1,4 +1,3 @@
-// Header.tsx
 "use client";
 
 import {
@@ -28,24 +27,27 @@ import {
 } from "@ant-design/icons";
 import { usePathname, useRouter } from "next/navigation";
 import { Routes } from "@/types/routes";
+import { useState } from "react";
 
 export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const notifications: MenuProps["items"] = [
-    { key: "1", label: "Mensagem 1" },
-    { key: "2", label: "Mensagem 2" },
-    { key: "3", label: "Mensagem 3" },
-  ];
+  const [notifications, setNotifications] = useState<[]>([]);
 
-  const settings: MenuProps["items"] = [
-    { key: "changeName", label: "Alterar nome", icon: <EditOutlined /> },
-    { key: "changePicture", label: "Alterar foto", icon: <CameraOutlined /> },
-    { key: "changePassword", label: "Alterar senha", icon: <LockOutlined /> },
-    { type: "divider" },
-    { key: "logout", label: "Sair", icon: <LogoutOutlined /> },
-  ];
+  const logout = () => {
+    router.push(Routes.LOGIN);
+  };
+
+  const changeName = () => {};
+
+  const changePicture = () => {};
+
+  const changePassword = () => {};
+
+  const handleMenuClick = (e: { key: string }) => {
+    router.push(e.key);
+  };
 
   const menuItems: MenuProps["items"] = [
     { key: Routes.USERS, icon: <TeamOutlined />, label: "Usuários" },
@@ -59,9 +61,28 @@ export default function Header() {
     },
   ];
 
-  const handleMenuClick = (e: { key: string }) => {
-    router.push(e.key);
-  };
+  const settings: MenuProps["items"] = [
+    {
+      key: "changeName",
+      label: "Alterar nome",
+      icon: <EditOutlined />,
+      onClick: changeName,
+    },
+    {
+      key: "changePicture",
+      label: "Alterar foto",
+      icon: <CameraOutlined />,
+      onClick: changePicture,
+    },
+    {
+      key: "changePassword",
+      label: "Alterar senha",
+      icon: <LockOutlined />,
+      onClick: changePassword,
+    },
+    { type: "divider" },
+    { key: "logout", label: "Sair", icon: <LogoutOutlined />, onClick: logout },
+  ];
 
   return (
     <Layout.Header
