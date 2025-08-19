@@ -54,11 +54,6 @@ export default function Header() {
     { key: Routes.POSTS, icon: <FileTextOutlined />, label: "Publicações" },
     { key: Routes.TAGS, icon: <TagsOutlined />, label: "Tags" },
     { key: Routes.REPORTS, icon: <BarChartOutlined />, label: "Relatórios" },
-    {
-      key: Routes.CATEGORIES,
-      icon: <FolderOpenOutlined />,
-      label: "Categorias",
-    },
   ];
 
   const settings: MenuProps["items"] = [
