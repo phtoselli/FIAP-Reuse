@@ -12,6 +12,7 @@ import {
   Spin,
   Breadcrumb,
 } from "antd";
+import Title from "antd/es/typography/Title";
 
 type Produto = {
   id: number;
@@ -94,8 +95,26 @@ export default function Categories() {
 
       <Divider />
 
+      {produtosFiltrados.length > 0 && (
+        <>
+          <Title style={{ marginBottom: 16 }}>Em destaque</Title>
+          <List
+            grid={{ gutter: 16, column: 5 }}
+            dataSource={produtosFiltrados.slice(0, 5)}
+            renderItem={(produto) => (
+              <List.Item>
+                <Card title={produto.nome}>Categoria: {produto.categoria}</Card>
+              </List.Item>
+            )}
+          />
+
+          <Divider />
+        </>
+      )}
+
+      <h2 style={{ marginBottom: 16 }}>Todos os produtos</h2>
       <List
-        grid={{ gutter: 16, column: 4 }}
+        grid={{ gutter: 16, column: 5 }}
         dataSource={produtosVisiveis}
         loading={carregando}
         renderItem={(produto) => (
