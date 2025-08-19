@@ -34,4 +34,5 @@ a {
   align-items: center !important;
   justify-content: center !important;
   text-align: center !important;
+  border-radius: 4px !important;
 }

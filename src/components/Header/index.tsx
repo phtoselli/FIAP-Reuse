@@ -112,7 +112,7 @@ export default function Header() {
             selectedKeys={[pathname]}
             onClick={handleMenuClick}
             items={menuItems}
-            style={{ borderBottom: "none", flex: 1, height: "40px" }}
+            style={{ borderBottom: "none", flex: 1, height: "30px" }}
           />
         </div>
 
