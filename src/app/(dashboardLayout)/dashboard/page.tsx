@@ -63,7 +63,7 @@ const mockUsers: User[] = [
   },
 ];
 
-export default function Users() {
+export default function Dashboard() {
   const [searchText, setSearchText] = useState("");
   const [filteredUsers, setFilteredUsers] = useState<User[]>(mockUsers);
 

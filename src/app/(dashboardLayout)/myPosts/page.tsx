@@ -1,6 +1,7 @@
 "use client";
 
 import { useModalController } from "@/hooks/useModalController";
+import { StringMap } from "@/types";
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import {
   Button,
@@ -50,9 +51,7 @@ export default function MyPosts() {
   const { open: openCreatePostModal } = useModalController("createPost");
 
   const [form] = Form.useForm();
-  const [filterValues, setFilterValues] = useState<{ [key: string]: string }>(
-    {}
-  );
+  const [filterValues, setFilterValues] = useState<StringMap>({});
 
   const filteredItems = useMemo(() => {
     return sampleItems.filter((item) => {
@@ -71,7 +70,7 @@ export default function MyPosts() {
   }, [filterValues]);
 
   return (
-    <div style={{ padding: "24px" }}>
+    <div>
       <Flex align="center" justify="space-between">
         <Title level={3}>Minhas publicações</Title>
 

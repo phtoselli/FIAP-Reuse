@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Avatar,
   Badge,
   Button,
   Dropdown,
@@ -18,11 +19,7 @@ import {
   LockOutlined,
   LogoutOutlined,
   NotificationOutlined,
-  SettingOutlined,
-  TeamOutlined,
-  FileTextOutlined,
-  TagsOutlined,
-  BarChartOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import { usePathname, useRouter } from "next/navigation";
 import { Routes } from "@/types/routes";
@@ -34,8 +31,18 @@ export default function Header() {
 
   const [notifications, setNotifications] = useState<[]>([]);
 
+  const user = {
+    id: "123",
+    name: "João Silva",
+    avatar: "https://i.pravatar.cc/150?img=3",
+  };
+
   const logout = () => {
     router.push(Routes.LOGIN);
+  };
+
+  const goToProfile = () => {
+    router.push(`${Routes.USERS}/${user.id}`);
   };
 
   const changeName = () => {};
@@ -49,11 +56,11 @@ export default function Header() {
   };
 
   const menuItems: MenuProps["items"] = [
-    { key: Routes.USERS, label: "Usuários" },
+    { key: Routes.DASHBOARD, label: "Dashboard" },
     { key: Routes.POSTS, label: "Publicações" },
+    { key: Routes.CATEGORIES, label: "Categorias" },
     { key: Routes.MY_POSTS, label: "Minhas Publicações" },
-    { key: Routes.REPORTS, label: "Relatórios" },
-    { key: Routes.TAGS, label: "Tags" },
+    { key: Routes.TRADES, label: "Minhas Trocas" },
   ];
 
   const settings: MenuProps["items"] = [
@@ -76,6 +83,12 @@ export default function Header() {
       onClick: changePassword,
     },
     { type: "divider" },
+    {
+      key: "profile",
+      label: "Meu perfil",
+      icon: <UserOutlined />,
+      onClick: goToProfile,
+    },
     { key: "logout", label: "Sair", icon: <LogoutOutlined />, onClick: logout },
   ];
 
@@ -99,7 +112,7 @@ export default function Header() {
           />
         </div>
 
-        <div>
+        <Flex align="center" justify="center" style={{ flex: 1 }}>
           <Menu
             className="custom-menu-spacing"
             mode="horizontal"
@@ -107,9 +120,9 @@ export default function Header() {
             selectedKeys={[pathname]}
             onClick={handleMenuClick}
             items={menuItems}
-            style={{ borderBottom: "none", flex: 1, height: "30px" }}
+            style={{ borderBottom: "none", height: "30px" }}
           />
-        </div>
+        </Flex>
 
         <div>
           <Space size={8}>
@@ -134,16 +147,16 @@ export default function Header() {
               </Dropdown>
             </Tooltip>
 
-            <Tooltip title="Configurações">
+            <Tooltip title="Meu perfil">
               <Dropdown
                 menu={{ items: settings }}
                 placement="bottomRight"
                 trigger={["click"]}
               >
-                <Button
-                  color="primary"
-                  variant="filled"
-                  icon={<SettingOutlined />}
+                <Avatar
+                  src={user.avatar}
+                  icon={!user.avatar && <UserOutlined />}
+                  style={{ cursor: "pointer" }}
                 />
               </Dropdown>
             </Tooltip>

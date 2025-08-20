@@ -28,7 +28,7 @@ export default function Login() {
   };
 
   const doLogin = () => {
-    changeRoute(Routes.USERS);
+    changeRoute(Routes.POSTS);
   };
 
   return (

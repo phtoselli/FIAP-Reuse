@@ -15,6 +15,7 @@ import {
 } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import { SearchOutlined } from "@ant-design/icons";
+import { StringMap } from "@/types";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -58,9 +59,7 @@ export default function Categories() {
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [carregando, setCarregando] = useState(false);
   const [produtosVisiveis, setProdutosVisiveis] = useState<Produto[]>([]);
-  const [filterValues, setFilterValues] = useState<{ [key: string]: string }>(
-    {}
-  );
+  const [filterValues, setFilterValues] = useState<StringMap>({});
 
   const produtosFiltrados = useMemo(() => {
     return todosProdutos.filter((item) => {
@@ -102,7 +101,7 @@ export default function Categories() {
   const acabouOsProdutos = produtosVisiveis.length >= produtosFiltrados.length;
 
   return (
-    <div style={{ padding: 24 }}>
+    <div>
       <Flex align="center" justify="space-between" style={{ marginBottom: 24 }}>
         <Breadcrumb
           items={[{ title: "Publicações" }, { title: "Categorias" }]}

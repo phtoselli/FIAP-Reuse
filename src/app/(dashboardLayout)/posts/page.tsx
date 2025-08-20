@@ -1,5 +1,6 @@
 "use client";
 
+import { Routes } from "@/types/routes";
 import {
   Button,
   Carousel,
@@ -38,11 +39,11 @@ export default function Posts() {
     const params = new URLSearchParams(searchParams.toString());
     params.set("category", category);
 
-    router.push(`/categories?${params.toString()}`);
+    router.push(`${Routes.CATEGORIES}?${params.toString()}`);
   };
 
   return (
-    <div style={{ padding: "24px" }}>
+    <div>
       <Flex
         align="center"
         justify="space-between"
