@@ -2,7 +2,7 @@ export enum Routes {
   DASHBOARD = "/dashboard",
   USERS = "/users",
   POSTS = "/posts",
-  MY_POSTS = "/myPosts",
+  MY_POSTS = "/posts/my",
   TRADES = "/trades",
   CATEGORIES = "/posts/categories",
   SETTINGS = "/settings",

@@ -22,6 +22,7 @@ import {
   CalendarOutlined,
   SwapOutlined,
 } from "@ant-design/icons";
+import ContentLayout from "@/components/ContentLayout";
 
 interface User {
   key: string;
@@ -112,13 +113,7 @@ export default function Dashboard() {
   ];
 
   return (
-    <div>
-      <Flex align="center" justify="space-between">
-        <Title level={3}>Gestão de Usuários</Title>
-      </Flex>
-
-      <Divider />
-
+    <ContentLayout title="Dashboard">
       <Row gutter={16} style={{ marginBottom: 24 }}>
         <Col span={8}>
           <Card>
@@ -159,6 +154,6 @@ export default function Dashboard() {
         dataSource={filteredUsers}
         pagination={{ pageSize: 5 }}
       />
-    </div>
+    </ContentLayout>
   );
 }

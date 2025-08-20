@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Breadcrumb,
   Button,
   Card,
   Divider,
@@ -16,6 +15,8 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { SearchOutlined } from "@ant-design/icons";
 import { StringMap } from "@/types";
+import ContentLayout from "@/components/ContentLayout";
+import BreadcrumbRoute from "@/components/BreadcrumbRoute";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -101,19 +102,8 @@ export default function Categories() {
   const acabouOsProdutos = produtosVisiveis.length >= produtosFiltrados.length;
 
   return (
-    <div>
-      <Flex align="center" justify="space-between" style={{ marginBottom: 24 }}>
-        <Breadcrumb
-          items={[{ title: "Publicações" }, { title: "Categorias" }]}
-        />
-        <Title level={4} style={{ margin: 0 }}>
-          Lista de Produtos por Categoria
-        </Title>
-      </Flex>
-
-      <Divider />
-
-      <Flex gap={24} style={{ height: "calc(100vh - 250px)" }}>
+    <ContentLayout title="Publicações" extra={<BreadcrumbRoute />}>
+      <Flex gap={8}>
         <Card
           title="Filtros"
           style={{ width: 280, flexShrink: 0 }}
@@ -161,7 +151,7 @@ export default function Categories() {
         </Card>
 
         <Card
-          style={{ flex: 1, overflowY: "auto" }}
+          style={{ flex: 1, overflowY: "auto", height: "calc(100vh - 205px)" }}
           styles={{ body: { padding: 24 } }}
         >
           {produtosFiltrados.length > 0 && (
@@ -217,6 +207,6 @@ export default function Categories() {
           </div>
         </Card>
       </Flex>
-    </div>
+    </ContentLayout>
   );
 }

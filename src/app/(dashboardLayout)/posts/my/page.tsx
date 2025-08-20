@@ -1,5 +1,6 @@
 "use client";
 
+import ContentLayout from "@/components/ContentLayout";
 import { useModalController } from "@/hooks/useModalController";
 import { StringMap } from "@/types";
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
@@ -70,10 +71,9 @@ export default function MyPosts() {
   }, [filterValues]);
 
   return (
-    <div>
-      <Flex align="center" justify="space-between">
-        <Title level={3}>Minhas publicações</Title>
-
+    <ContentLayout
+      title="Minhas Publicações"
+      extra={
         <Button
           type="primary"
           icon={<PlusOutlined />}
@@ -81,11 +81,9 @@ export default function MyPosts() {
         >
           Criar publicação
         </Button>
-      </Flex>
-
-      <Divider />
-
-      <Flex gap={24} style={{ height: "calc(100vh - 250px)" }}>
+      }
+    >
+      <Flex gap={8}>
         <Card
           title="Filtros"
           style={{ width: 280, flexShrink: 0 }}
@@ -133,7 +131,7 @@ export default function MyPosts() {
         </Card>
 
         <Card
-          style={{ flex: 1, overflowY: "auto" }}
+          style={{ flex: 1, overflowY: "auto", height: "calc(100vh - 180px)" }}
           styles={{ body: { padding: 24 } }}
         >
           {categories.map((cat) => {
@@ -176,6 +174,6 @@ export default function MyPosts() {
           })}
         </Card>
       </Flex>
-    </div>
+    </ContentLayout>
   );
 }

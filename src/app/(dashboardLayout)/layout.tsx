@@ -16,7 +16,7 @@ export default function DashboardLayout({
     <Layout style={{ minHeight: "100vh" }}>
       <Layout>
         <Header />
-        <Content style={{ margin: "16px", background: "#fff", padding: 24 }}>
+        <Content style={{ margin: "8px", background: "#fff", padding: "16px" }}>
           {children}
         </Content>
       </Layout>

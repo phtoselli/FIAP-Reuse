@@ -2,26 +2,24 @@
 
 import {
   Card,
-  Divider,
   Flex,
   Form,
   Input,
   Select,
-  Typography,
   List,
   Tag,
   Tooltip,
   Button,
   Image,
 } from "antd";
-import { SearchOutlined, EyeOutlined } from "@ant-design/icons";
+import { SearchOutlined, EditOutlined } from "@ant-design/icons";
 import { useMemo, useState } from "react";
 import getStatusColor from "@/lib/utils/getStatusColor";
 import { TradeStatus } from "@/types/status";
 import { useRouter } from "next/navigation";
 import { StringMap } from "@/types";
+import ContentLayout from "@/components/ContentLayout";
 
-const { Title } = Typography;
 const { Option } = Select;
 
 const mockTrades = [
@@ -40,6 +38,70 @@ const mockTrades = [
     status: "aceita",
     data: "2025-07-28",
     imagem: "https://picsum.photos/seed/2/120/120",
+  },
+  {
+    id: 3,
+    titulo: "Troca com Lucas",
+    descricao: "Boné por óculos",
+    status: "recusada",
+    data: "2025-07-20",
+    imagem: "https://picsum.photos/seed/3/120/120",
+  },
+  {
+    id: 3,
+    titulo: "Troca com Lucas",
+    descricao: "Boné por óculos",
+    status: "recusada",
+    data: "2025-07-20",
+    imagem: "https://picsum.photos/seed/3/120/120",
+  },
+  {
+    id: 3,
+    titulo: "Troca com Lucas",
+    descricao: "Boné por óculos",
+    status: "recusada",
+    data: "2025-07-20",
+    imagem: "https://picsum.photos/seed/3/120/120",
+  },
+  {
+    id: 3,
+    titulo: "Troca com Lucas",
+    descricao: "Boné por óculos",
+    status: "recusada",
+    data: "2025-07-20",
+    imagem: "https://picsum.photos/seed/3/120/120",
+  },
+  {
+    id: 3,
+    titulo: "Troca com Lucas",
+    descricao: "Boné por óculos",
+    status: "recusada",
+    data: "2025-07-20",
+    imagem: "https://picsum.photos/seed/3/120/120",
+  },
+  {
+    id: 3,
+    titulo: "Troca com Lucas",
+    descricao: "Boné por óculos",
+    status: "recusada",
+    data: "2025-07-20",
+    imagem: "https://picsum.photos/seed/3/120/120",
+  },
+  {
+    id: 3,
+    titulo: "Troca com Lucas",
+    descricao: "Boné por óculos",
+    status: "recusada",
+    data: "2025-07-20",
+    imagem: "https://picsum.photos/seed/3/120/120",
+  },
+  {
+    id: 3,
+    titulo: "Troca com Lucas",
+    descricao: "Boné por óculos",
+    status: "recusada",
+    data: "2025-07-20",
+    imagem: "https://picsum.photos/seed/3/120/120",
   },
   {
     id: 3,
@@ -80,61 +142,61 @@ export default function Trades() {
   }, [filters]);
 
   return (
-    <div>
-      <Flex align="center" justify="space-between">
-        <Title level={3}>Minhas trocas</Title>
+    <ContentLayout
+      title="Minhas Trocas"
+      extra={[
+        <Form
+          key="myTradesForm"
+          layout="vertical"
+          form={form}
+          onValuesChange={(_, allValues) => setFilters(allValues)}
+        >
+          <Flex gap={8} wrap>
+            <Form.Item name="search" style={{ margin: 0 }}>
+              <Input
+                placeholder="Buscar por título ou descrição"
+                prefix={<SearchOutlined />}
+                allowClear
+              />
+            </Form.Item>
 
-        <Flex>
-          <Form
-            layout="vertical"
-            form={form}
-            onValuesChange={(_, allValues) => setFilters(allValues)}
-          >
-            <Flex gap={8} wrap>
-              <Form.Item name="search" style={{ margin: 0 }}>
-                <Input
-                  placeholder="Buscar por título ou descrição"
-                  prefix={<SearchOutlined />}
-                  allowClear
-                />
-              </Form.Item>
+            <Form.Item name="status" style={{ margin: 0 }}>
+              <Select placeholder="Todos" allowClear style={{ width: 200 }}>
+                <Option value="pendente">Pendente</Option>
+                <Option value="aceita">Aceita</Option>
+                <Option value="recusada">Recusada</Option>
+                <Option value="finalizada">Finalizada</Option>
+              </Select>
+            </Form.Item>
 
-              <Form.Item name="status" style={{ margin: 0 }}>
-                <Select placeholder="Todos" allowClear style={{ width: 200 }}>
-                  <Option value="pendente">Pendente</Option>
-                  <Option value="aceita">Aceita</Option>
-                  <Option value="recusada">Recusada</Option>
-                  <Option value="finalizada">Finalizada</Option>
-                </Select>
-              </Form.Item>
-
-              <Form.Item name="ordem" style={{ margin: 0 }}>
-                <Select defaultValue="maisRecentes" style={{ width: 200 }}>
-                  <Option value="maisRecentes">Mais recentes</Option>
-                  <Option value="maisAntigos">Mais antigos</Option>
-                </Select>
-              </Form.Item>
-            </Flex>
-          </Form>
-        </Flex>
-      </Flex>
-
-      <Divider />
-
+            <Form.Item name="ordem" style={{ margin: 0 }}>
+              <Select defaultValue="maisRecentes" style={{ width: 200 }}>
+                <Option value="maisRecentes">Mais recentes</Option>
+                <Option value="maisAntigos">Mais antigos</Option>
+              </Select>
+            </Form.Item>
+          </Flex>
+        </Form>,
+      ]}
+    >
       <List
-        grid={{ gutter: 16, column: 3 }}
+        style={{ height: "calc(100vh - 170px)" }}
+        grid={{ gutter: 16, column: 4 }}
         dataSource={filteredTrades}
         locale={{ emptyText: "Nenhuma troca encontrada." }}
         renderItem={(trade) => (
           <List.Item key={trade.id}>
             <Card
+              size="small"
               title={trade.titulo}
               extra={
                 <Tooltip title="Ver detalhes da troca">
                   <Button
-                    type="link"
-                    icon={<EyeOutlined />}
+                    color="primary"
+                    variant="filled"
+                    icon={<EditOutlined />}
                     onClick={() => router.push(`/trades/details/${trade.id}`)}
+                    style={{ width: "30px", height: "20px" }}
                   />
                 </Tooltip>
               }
@@ -163,6 +225,6 @@ export default function Trades() {
           </List.Item>
         )}
       />
-    </div>
+    </ContentLayout>
   );
 }
