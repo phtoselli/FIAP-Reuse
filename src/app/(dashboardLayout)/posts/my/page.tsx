@@ -1,13 +1,15 @@
 "use client";
 
 import ContentLayout from "@/components/ContentLayout";
-import { useModalController } from "@/hooks/useModalController";
+import {
+  useURLControlledModal,
+  URLControlledModalKeys,
+} from "@/hooks/useURLControlledModal";
 import { StringMap } from "@/types";
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import {
   Button,
   Carousel,
-  Divider,
   Flex,
   Image,
   Typography,
@@ -49,7 +51,9 @@ const sampleItems = Array.from({ length: 20 }, (_, i) => ({
 }));
 
 export default function MyPosts() {
-  const { open: openCreatePostModal } = useModalController("createPost");
+  const { open: openCreatePostModal } = useURLControlledModal(
+    URLControlledModalKeys.CREATE_POST_MODAL
+  );
 
   const [form] = Form.useForm();
   const [filterValues, setFilterValues] = useState<StringMap>({});
@@ -77,7 +81,7 @@ export default function MyPosts() {
         <Button
           type="primary"
           icon={<PlusOutlined />}
-          onClick={openCreatePostModal}
+          onClick={() => openCreatePostModal()}
         >
           Criar publicação
         </Button>
