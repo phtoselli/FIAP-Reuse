@@ -1,3 +1,4 @@
+import CreatePostModal from "@/components/CreatePostModal";
 import "./globals.css";
 
 import AntdProvider from "@/lib/antd/AntdProvider";
@@ -12,7 +13,13 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AntdStyleRegistry>
-          <AntdProvider>{children}</AntdProvider>
+          <AntdProvider>
+            {/* GLOBAL OPENED MODALS */}
+            <CreatePostModal />
+            {/* ==================== */}
+
+            {children}
+          </AntdProvider>
         </AntdStyleRegistry>
       </body>
     </html>

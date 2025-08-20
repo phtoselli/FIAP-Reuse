@@ -1,7 +1,17 @@
 "use client";
 
 import { Routes } from "@/types/routes";
-import { Button, Col, Divider, Flex, Form, Input, Row, theme } from "antd";
+import {
+  Button,
+  Col,
+  Divider,
+  Flex,
+  Form,
+  Image,
+  Input,
+  Row,
+  theme,
+} from "antd";
 import { useForm } from "antd/es/form/Form";
 import Paragraph from "antd/es/typography/Paragraph";
 import Title from "antd/es/typography/Title";
@@ -16,11 +26,20 @@ export default function Register() {
     router.push(route);
   };
 
+  const doRegister = () => {
+    changeRoute(Routes.USERS);
+  };
+
   return (
     <Row style={{ height: "100vh" }}>
       <Col span={12} style={{ backgroundColor: token.colorPrimary }}>
         <Flex align="center" justify="center" style={{ height: "100%" }}>
-          <Title>ReUse</Title>
+          <Image
+            src="/logo.png"
+            alt="Logo da empresa ReUse"
+            width={200}
+            preview={false}
+          />
         </Flex>
       </Col>
 
@@ -59,6 +78,17 @@ export default function Register() {
                     <Input.Password placeholder="Confirme sua senha..." />
                   </Form.Item>
                 </Col>
+
+                <Col span={24}>
+                  <Button
+                    color="primary"
+                    variant="solid"
+                    style={{ width: "100%" }}
+                    onClick={() => doRegister()}
+                  >
+                    Cadastrar-se
+                  </Button>
+                </Col>
               </Row>
             </Form>
 
@@ -66,7 +96,7 @@ export default function Register() {
 
             <Button
               color="primary"
-              variant="solid"
+              variant="filled"
               onClick={() => changeRoute(Routes.LOGIN)}
             >
               Faça Login

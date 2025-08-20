@@ -1,7 +1,17 @@
 "use client";
 
 import { Routes } from "@/types/routes";
-import { Button, Col, Divider, Flex, Form, Input, Row, theme } from "antd";
+import {
+  Button,
+  Col,
+  Divider,
+  Flex,
+  Form,
+  Image,
+  Input,
+  Row,
+  theme,
+} from "antd";
 import { useForm } from "antd/es/form/Form";
 import { useRouter } from "next/navigation";
 
@@ -17,11 +27,20 @@ export default function Login() {
     router.push(route);
   };
 
+  const doLogin = () => {
+    changeRoute(Routes.POSTS);
+  };
+
   return (
     <Row style={{ height: "100vh" }}>
       <Col span={12} style={{ backgroundColor: token.colorPrimary }}>
         <Flex align="center" justify="center" style={{ height: "100%" }}>
-          <Title>ReUse</Title>
+          <Image
+            src="/logo.png"
+            alt="Logo da empresa ReUse"
+            width={200}
+            preview={false}
+          />
         </Flex>
       </Col>
 
@@ -50,7 +69,11 @@ export default function Login() {
                 </Col>
 
                 <Col span={24}>
-                  <Form.Item name="password" label="Senha">
+                  <Form.Item
+                    name="password"
+                    label="Senha"
+                    style={{ marginBottom: "4px" }}
+                  >
                     <Input.Password placeholder="Digite sua senha..." />
                   </Form.Item>
                 </Col>
@@ -59,9 +82,23 @@ export default function Login() {
                   <Button
                     color="primary"
                     variant="link"
-                    style={{ padding: "0px" }}
+                    style={{
+                      padding: "0px",
+                      marginBottom: "16px",
+                    }}
                   >
                     Esqueceu sua senha?
+                  </Button>
+                </Col>
+
+                <Col span={24}>
+                  <Button
+                    color="primary"
+                    variant="solid"
+                    style={{ width: "100%" }}
+                    onClick={() => doLogin()}
+                  >
+                    Entrar
                   </Button>
                 </Col>
               </Row>
@@ -71,7 +108,7 @@ export default function Login() {
 
             <Button
               color="primary"
-              variant="solid"
+              variant="filled"
               onClick={() => changeRoute(Routes.REGISTER)}
             >
               Cadastre-se

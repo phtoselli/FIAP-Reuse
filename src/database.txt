@@ -1,0 +1,87 @@
+---------------------------------------------------------------------
+------------------------ TABELAS ESSENCIAIS -------------------------
+---------------------------------------------------------------------
+🔹 Users
+Armazena os dados dos usuários do sistema.
+
+Coluna	Tipo	Observações
+id	UUID / BIGINT	Chave primária
+name	VARCHAR	Nome do usuário
+email	VARCHAR (único)	E-mail de login
+password_hash	TEXT	Senha criptografada
+avatar_url	TEXT	URL da imagem de perfil
+created_at	TIMESTAMP	
+updated_at	TIMESTAMP	
+
+---------------------------------------------------------------------
+
+🔹 Types
+Pode conter enums como status de trocas, estado de conservação, categorias, Subcategorias.
+
+Coluna	Tipo	Observações
+id	UUID	
+code	VARCHAR	Ex: pendente, aceita, etc.
+type	VARCHAR	Ex: trade_status, condition
+description	VARCHAR	Descrição mais amigável
+
+* facilita a expansão e customização sem mudar o código.
+
+---------------------------------------------------------------------
+
+🔹 Posts
+Publicações dos usuários.
+
+Coluna	Tipo	Observações
+id	UUID	
+title	VARCHAR	
+description	TEXT	
+user_id	UUID	FK para Users(id)
+category_id	UUID	FK para Categories(id)
+subcategory_id	UUID	FK para Subcategories(id)
+condition	VARCHAR	Ex: novo, usado, etc. (ou FK para Types)
+image_url	TEXT	Foto principal do produto
+created_at	TIMESTAMP	
+updated_at	TIMESTAMP	
+is_active	BOOLEAN	Se a publicação está disponível
+
+---------------------------------------------------------------------
+
+🔹 Trades
+Representa uma tentativa de troca entre dois usuários.
+
+Coluna	Tipo	Observações
+id	UUID	
+requester_id	UUID	Quem iniciou a troca (FK para Users)
+responder_id	UUID	Quem recebeu a proposta (FK para Users)
+status	VARCHAR	Ex: pendente, aceita, etc. (ou FK para Types)
+created_at	TIMESTAMP	
+updated_at	TIMESTAMP	
+finalized_at	TIMESTAMP	Opcional – se a troca foi finalizada
+
+---------------------------------------------------------------------
+
+🔹 TradeItems (ligação entre posts e trocas)
+Indica quais produtos foram trocados.
+
+Coluna	Tipo	Observações
+id	UUID	
+trade_id	UUID	FK para Trades(id)
+post_id	UUID	FK para Posts(id)
+owner_id	UUID	FK para Users(id) — dono do item na troca
+
+* Permite trocas com múltiplos itens.
+
+---------------------------------------------------------------------
+--------------------- RELACIONAMENTOS PRINCIPAIS --------------------
+---------------------------------------------------------------------
+
+Users → Posts (1:N)
+Users → Trades (requester_id, responder_id)
+Trades ↔ Posts (M:N via TradeItems)
+Categories ↔ Subcategories (1:N)
+Posts → Categories / Subcategories
+Posts → Users
+
+---------------------------------------------------------------------
+FK: Foreign KEY (chave estrangeira)
+---------------------------------------------------------------------
