@@ -1,23 +1,30 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 import {
+  Breadcrumb,
+  Button,
+  Card,
   Divider,
   Flex,
-  Select,
-  Button,
+  Form,
+  Input,
   List,
-  Card,
+  Select,
   Spin,
-  Breadcrumb,
+  Typography,
 } from "antd";
-import Title from "antd/es/typography/Title";
+import { useEffect, useMemo, useState } from "react";
+import { SearchOutlined } from "@ant-design/icons";
+
+const { Title } = Typography;
+const { Option } = Select;
 
 type Produto = {
   id: number;
   nome: string;
   categoria: string;
+  subcategoria: string;
+  estado: string;
 };
 
 const todasCategorias = [
@@ -29,25 +36,47 @@ const todasCategorias = [
   "Outros",
 ];
 
+const subCategorias = ["Subcategoria 1", "Subcategoria 2", "Subcategoria 3"];
+const estadosConservacao = [
+  "Novo",
+  "Usado - Bom estado",
+  "Usado - Sinais de uso",
+];
+
 const todosProdutos: Produto[] = Array.from({ length: 50 }, (_, i) => ({
   id: i + 1,
   nome: `Produto ${i + 1}`,
   categoria: todasCategorias[i % todasCategorias.length],
+  subcategoria: subCategorias[i % subCategorias.length],
+  estado: estadosConservacao[i % estadosConservacao.length],
 }));
 
 const PAGE_SIZE = 10;
 
 export default function Categories() {
-  const [categoriaSelecionada, setCategoriaSelecionada] = useState<
-    string | undefined
-  >(undefined);
-  const [produtosVisiveis, setProdutosVisiveis] = useState<Produto[]>([]);
+  const [form] = Form.useForm();
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [carregando, setCarregando] = useState(false);
+  const [produtosVisiveis, setProdutosVisiveis] = useState<Produto[]>([]);
+  const [filterValues, setFilterValues] = useState<{ [key: string]: string }>(
+    {}
+  );
 
-  const produtosFiltrados = categoriaSelecionada
-    ? todosProdutos.filter((p) => p.categoria === categoriaSelecionada)
-    : todosProdutos;
+  const produtosFiltrados = useMemo(() => {
+    return todosProdutos.filter((item) => {
+      const search = filterValues.search?.toLowerCase() || "";
+      const categoria = filterValues.categoria;
+      const subcategoria = filterValues.subcategoria;
+      const estado = filterValues.estado;
+
+      return (
+        item.nome.toLowerCase().includes(search) &&
+        (!categoria || item.categoria === categoria) &&
+        (!subcategoria || item.subcategoria === subcategoria) &&
+        (!estado || item.estado === estado)
+      );
+    });
+  }, [filterValues]);
 
   const carregarProdutos = () => {
     setCarregando(true);
@@ -55,7 +84,7 @@ export default function Categories() {
       const novosProdutos = produtosFiltrados.slice(0, paginaAtual * PAGE_SIZE);
       setProdutosVisiveis(novosProdutos);
       setCarregando(false);
-    }, 500); // Simula um delay
+    }, 500);
   };
 
   const handleCarregarMais = () => {
@@ -63,78 +92,132 @@ export default function Categories() {
   };
 
   useEffect(() => {
-    setPaginaAtual(1); // Reset ao trocar categoria
-  }, [categoriaSelecionada]);
+    setPaginaAtual(1);
+  }, [filterValues]);
 
   useEffect(() => {
     carregarProdutos();
-  }, [paginaAtual, categoriaSelecionada]);
+  }, [paginaAtual, filterValues]);
 
   const acabouOsProdutos = produtosVisiveis.length >= produtosFiltrados.length;
 
   return (
-    <div>
-      <Flex align="center" justify="space-between">
+    <div style={{ padding: 24 }}>
+      <Flex align="center" justify="space-between" style={{ marginBottom: 24 }}>
         <Breadcrumb
           items={[{ title: "Publicações" }, { title: "Categorias" }]}
         />
-        <Select
-          placeholder="Filtrar por categoria"
-          style={{ width: 200 }}
-          allowClear
-          value={categoriaSelecionada}
-          onChange={(value) => setCategoriaSelecionada(value)}
-        >
-          {todasCategorias.map((cat) => (
-            <Select.Option key={cat} value={cat}>
-              {cat}
-            </Select.Option>
-          ))}
-        </Select>
+        <Title level={4} style={{ margin: 0 }}>
+          Lista de Produtos por Categoria
+        </Title>
       </Flex>
 
       <Divider />
 
-      {produtosFiltrados.length > 0 && (
-        <>
-          <Title style={{ marginBottom: 16 }}>Em destaque</Title>
+      <Flex gap={24} style={{ height: "calc(100vh - 250px)" }}>
+        <Card
+          title="Filtros"
+          style={{ width: 280, flexShrink: 0 }}
+          styles={{ body: { paddingBottom: 0 } }}
+        >
+          <Form
+            form={form}
+            layout="vertical"
+            onValuesChange={(_, allValues) => setFilterValues(allValues)}
+          >
+            <Form.Item name="search" label="Buscar">
+              <Input placeholder="Buscar produto" prefix={<SearchOutlined />} />
+            </Form.Item>
+
+            <Form.Item name="categoria" label="Categoria">
+              <Select placeholder="Categoria" allowClear>
+                {todasCategorias.map((cat) => (
+                  <Option key={cat} value={cat}>
+                    {cat}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            <Form.Item name="subcategoria" label="Subcategoria">
+              <Select placeholder="Subcategoria" allowClear>
+                {subCategorias.map((sub) => (
+                  <Option key={sub} value={sub}>
+                    {sub}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            <Form.Item name="estado" label="Estado de conservação">
+              <Select placeholder="Estado de conservação" allowClear>
+                {estadosConservacao.map((estado) => (
+                  <Option key={estado} value={estado}>
+                    {estado}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Form>
+        </Card>
+
+        <Card
+          style={{ flex: 1, overflowY: "auto" }}
+          styles={{ body: { padding: 24 } }}
+        >
+          {produtosFiltrados.length > 0 && (
+            <>
+              <Title level={4} style={{ marginBottom: 16 }}>
+                Em destaque
+              </Title>
+              <List
+                grid={{ gutter: 16, column: 5 }}
+                dataSource={produtosFiltrados.slice(0, 5)}
+                renderItem={(produto) => (
+                  <List.Item>
+                    <Card title={produto.nome}>
+                      <div>Categoria: {produto.categoria}</div>
+                      <div>Subcategoria: {produto.subcategoria}</div>
+                      <div>Estado: {produto.estado}</div>
+                    </Card>
+                  </List.Item>
+                )}
+              />
+              <Divider />
+            </>
+          )}
+
+          <Title level={5} style={{ marginBottom: 16 }}>
+            Todos os produtos
+          </Title>
           <List
             grid={{ gutter: 16, column: 5 }}
-            dataSource={produtosFiltrados.slice(0, 5)}
+            dataSource={produtosVisiveis}
+            loading={carregando}
             renderItem={(produto) => (
               <List.Item>
-                <Card title={produto.nome}>Categoria: {produto.categoria}</Card>
+                <Card title={produto.nome}>
+                  <div>Categoria: {produto.categoria}</div>
+                  <div>Subcategoria: {produto.subcategoria}</div>
+                  <div>Estado: {produto.estado}</div>
+                </Card>
               </List.Item>
             )}
           />
 
-          <Divider />
-        </>
-      )}
-
-      <h2 style={{ marginBottom: 16 }}>Todos os produtos</h2>
-      <List
-        grid={{ gutter: 16, column: 5 }}
-        dataSource={produtosVisiveis}
-        loading={carregando}
-        renderItem={(produto) => (
-          <List.Item>
-            <Card title={produto.nome}>Categoria: {produto.categoria}</Card>
-          </List.Item>
-        )}
-      />
-
-      <div style={{ textAlign: "center", marginTop: 16 }}>
-        {carregando && <Spin />}
-        {!carregando && !acabouOsProdutos && (
-          <Button onClick={handleCarregarMais}>Carregar mais</Button>
-        )}
-        {!carregando && acabouOsProdutos && produtosVisiveis.length > 0 && (
-          <div style={{ marginTop: 12, color: "#999" }}>
-            Todos os produtos carregados
+          <div style={{ textAlign: "center", marginTop: 16 }}>
+            {carregando && <Spin />}
+            {!carregando && !acabouOsProdutos && (
+              <Button onClick={handleCarregarMais}>Carregar mais</Button>
+            )}
+            {!carregando && acabouOsProdutos && produtosVisiveis.length > 0 && (
+              <div style={{ marginTop: 12, color: "#999" }}>
+                Todos os produtos carregados
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </Card>
+      </Flex>
     </div>
   );
 }

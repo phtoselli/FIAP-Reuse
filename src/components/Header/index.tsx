@@ -23,7 +23,6 @@ import {
   FileTextOutlined,
   TagsOutlined,
   BarChartOutlined,
-  FolderOpenOutlined,
 } from "@ant-design/icons";
 import { usePathname, useRouter } from "next/navigation";
 import { Routes } from "@/types/routes";
@@ -50,10 +49,11 @@ export default function Header() {
   };
 
   const menuItems: MenuProps["items"] = [
-    { key: Routes.USERS, icon: <TeamOutlined />, label: "Usuários" },
-    { key: Routes.POSTS, icon: <FileTextOutlined />, label: "Publicações" },
-    { key: Routes.TAGS, icon: <TagsOutlined />, label: "Tags" },
-    { key: Routes.REPORTS, icon: <BarChartOutlined />, label: "Relatórios" },
+    { key: Routes.USERS, label: "Usuários" },
+    { key: Routes.POSTS, label: "Publicações" },
+    { key: Routes.MY_POSTS, label: "Minhas Publicações" },
+    { key: Routes.REPORTS, label: "Relatórios" },
+    { key: Routes.TAGS, label: "Tags" },
   ];
 
   const settings: MenuProps["items"] = [

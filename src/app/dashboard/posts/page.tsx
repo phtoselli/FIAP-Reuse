@@ -71,7 +71,11 @@ export default function Posts() {
       </Flex>
 
       <Title level={4}>Categorias</Title>
-      <Flex wrap gap="large" style={{ marginBottom: 48 }}>
+      <Flex
+        align="center"
+        justify="space-between"
+        style={{ marginBottom: "24px" }}
+      >
         {categories.map((cat) => (
           <div
             key={cat.name}
