@@ -3,7 +3,10 @@
 import React from "react";
 import { Modal, Form, Input, Select, Upload, Button, message } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
-import { useModalController } from "@/hooks/useModalController";
+import {
+  useURLControlledModal,
+  URLControlledModalKeys,
+} from "@/hooks/useURLControlledModal";
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -11,7 +14,9 @@ const { TextArea } = Input;
 export default function CreatePostModal() {
   const [form] = Form.useForm();
 
-  const { isOpen, close } = useModalController("createPost");
+  const { isOpen, close } = useURLControlledModal(
+    URLControlledModalKeys.CREATE_POST_MODAL
+  );
 
   const handleFinish = (values: Record<string, string>) => {
     console.log("Form Values:", values);

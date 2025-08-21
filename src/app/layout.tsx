@@ -1,5 +1,9 @@
-import CreatePostModal from "@/components/CreatePostModal";
+"use client";
+
 import "./globals.css";
+import "@ant-design/v5-patch-for-react-19";
+
+import CreatePostModal from "@/components/CreatePostModal";
 
 import AntdProvider from "@/lib/antd/AntdProvider";
 import { AntdStyleRegistry } from "@/lib/antd/antd-style-registry";

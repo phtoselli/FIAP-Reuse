@@ -1,6 +1,7 @@
 "use client";
 
 import { Routes } from "@/types/routes";
+import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import {
   Button,
   Carousel,
@@ -10,10 +11,13 @@ import {
   Typography,
   Card,
   Avatar,
+  theme,
+  Rate,
 } from "antd";
 import { useRouter, useSearchParams } from "next/navigation";
+import { JSXElementConstructor, ReactElement, ReactNode } from "react";
 
-const { Title, Paragraph } = Typography;
+const { Title, Paragraph, Text } = Typography;
 const { Meta } = Card;
 
 const categories = [
@@ -29,11 +33,14 @@ const sampleItems = Array.from({ length: 8 }, (_, i) => ({
   title: `Produto ${i + 1}`,
   description: "Descrição do produto",
   image: `https://picsum.photos/200/200?random=${i}`,
+  rate: Math.floor(Math.random() * 6),
+  rateNumber: Math.floor(Math.random() * 999),
 }));
 
 export default function Posts() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { token } = theme.useToken();
 
   const handleCategoryClick = (category: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -45,30 +52,32 @@ export default function Posts() {
   return (
     <div>
       <Flex
+        wrap
         align="center"
         justify="space-between"
         style={{
-          background: "#f5f5f5",
-          padding: "48px 24px",
+          background: token.colorPrimary,
           borderRadius: 8,
           marginBottom: 48,
         }}
       >
-        <div style={{ flex: 1 }}>
-          <Title>A primeira plataforma de troca do país</Title>
-          <Paragraph type="secondary">
+        <div style={{ width: "500px", padding: "40px" }}>
+          <Title level={1} style={{ color: token["yellow-6"] }}>
+            A primeira plataforma de troca do país
+          </Title>
+          <Paragraph
+            type="secondary"
+            style={{ color: token.colorWhite }}
+            strong
+          >
             Conectando pessoas para trocar produtos de forma segura, sustentável
             e fácil.
           </Paragraph>
         </div>
-        <Image
-          src="/images/hero-banner.jpg"
-          width={400}
-          height={300}
-          alt="Banner"
-          preview={false}
-          style={{ borderRadius: 8 }}
-        />
+
+        <Flex align="center" justify="center" style={{ flex: 1 }}>
+          <Image src="/hero.png" width={300} alt="Banner" preview={false} />
+        </Flex>
       </Flex>
 
       <Title level={4}>Categorias</Title>
@@ -108,15 +117,49 @@ export default function Posts() {
             </Button>
           </Flex>
 
-          <Carousel dots={false} slidesToShow={4} draggable>
+          <Carousel
+            arrows
+            draggable
+            dots={false}
+            slidesToShow={5.5}
+            style={{
+              padding: "0px",
+            }}
+          >
             {sampleItems.map((item, index) => (
-              <div key={index} style={{ padding: "0 8px" }}>
+              <div key={index} style={{ padding: "30px", margin: "8px" }}>
                 <Card
                   hoverable
-                  cover={<Image alt={item.title} src={item.image} />}
-                  style={{ width: 200, margin: "auto" }}
+                  cover={
+                    <Image
+                      alt={item.title}
+                      src={item.image}
+                      height={130}
+                      preview={false}
+                      style={{ borderRadius: "8px", border: "2px solid white" }}
+                    />
+                  }
+                  style={{
+                    width: 200,
+                    margin: "16px",
+                    border: "2px solid white",
+                  }}
+                  styles={{ body: { padding: "8px 4px 16px 4px" } }}
                 >
-                  <Meta title={item.title} description={item.description} />
+                  <Meta
+                    title={item.title}
+                    description={
+                      <Flex align="center" justify="space-between">
+                        <Rate disabled value={item.rate} />
+                        <Text
+                          type="secondary"
+                          style={{ fontSize: token.fontSizeSM }}
+                        >
+                          ({item.rateNumber} avaliações)
+                        </Text>
+                      </Flex>
+                    }
+                  />
                 </Card>
               </div>
             ))}
