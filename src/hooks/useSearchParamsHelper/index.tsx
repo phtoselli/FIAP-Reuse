@@ -5,7 +5,7 @@ export default function useSearchParamsHelper() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const getParam = (key: string): string | string[] | undefined => {
+  const getParam = (key: string): string[] | undefined => {
     const value = searchParams.get(key);
     if (!value) return undefined;
     return value.split(",");

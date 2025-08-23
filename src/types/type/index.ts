@@ -10,6 +10,7 @@ export interface Type {
   id: number;
   code: CategoryCode | ConditionCode;
   codeType: Types;
+  title: string;
   description: string;
 }
 

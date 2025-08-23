@@ -41,7 +41,7 @@ export default function Posts() {
     data: productsData,
     execute: getAllProducts,
     isLoading: isProductsLoading,
-  } = useService(productService.getAllProducts);
+  } = useService(productService.get);
 
   const handleCategoryClick = (category: CategoryCode) => {
     redirect(Routes.CATEGORIES, [{ [QueryParamsKey.CATEGORY]: category }]);
@@ -101,7 +101,7 @@ export default function Posts() {
                 align="center"
                 style={{ marginBottom: 16 }}
               >
-                <Title level={4}>{category.description}</Title>
+                <Title level={4}>{category.title}</Title>
                 <Button
                   type="link"
                   onClick={() =>

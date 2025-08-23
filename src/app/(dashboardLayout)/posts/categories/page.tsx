@@ -26,13 +26,19 @@ export default function Categories() {
   const { getParam, routerAddParam, routerRemoveParam } =
     useSearchParamsHelper();
 
-  const categoryParamValue = getParam(QueryParamsKey.CATEGORY) as string;
+  const searchParam = getParam(QueryParamsKey.SEARCH);
+  const categoryParam = getParam(QueryParamsKey.CATEGORY);
+  const conditionParam = getParam(QueryParamsKey.CONDITION);
+
+  const title = categoryParam
+    ? CategoryDescription[categoryParam[0] as keyof typeof CategoryDescription]
+    : "Produtos";
 
   const {
     data: productsData,
     execute: getAllProducts,
     isLoading: isProductsLoading,
-  } = useService(productService.getAllProducts);
+  } = useService(productService.get);
 
   const {
     get: getCategories,
@@ -51,7 +57,7 @@ export default function Categories() {
 
     return categoriesData.map((category) => ({
       value: category.code,
-      label: category.description,
+      label: category.title,
     }));
   }, [categoriesData]);
 
@@ -60,32 +66,36 @@ export default function Categories() {
 
     return conditionsData.map((condition) => ({
       value: condition.code,
-      label: condition.description,
+      label: condition.title,
     }));
   }, [conditionsData]);
 
   const filteredProducts = useMemo(() => {
     if (!productsData) return [];
 
-    const search = (getParam("search") as string) || "";
-    const category = getParam("category") || [];
-    const condition = getParam("condition") || [];
-
     return productsData.filter((product: Product) => {
       const matchesSearch =
-        !search ||
-        product.title.toLowerCase().includes(search) ||
-        product.description?.toLowerCase().includes(search);
+        !searchParam ||
+        searchParam.length === 0 ||
+        searchParam.some(
+          (term) =>
+            product.title.toLowerCase().includes(term.toLowerCase()) ||
+            product.description?.toLowerCase().includes(term.toLowerCase())
+        );
 
       const matchesCategory =
-        category.length === 0 || category.includes(product.categoryCode);
+        !categoryParam ||
+        categoryParam.length === 0 ||
+        categoryParam.includes(product.categoryCode);
 
       const matchesCondition =
-        condition.length === 0 || condition.includes(product.conditionCode);
+        !conditionParam ||
+        conditionParam.length === 0 ||
+        conditionParam.includes(product.conditionCode);
 
       return matchesSearch && matchesCategory && matchesCondition;
     });
-  }, [productsData, form, categoryParamValue, getParam]);
+  }, [productsData, searchParam, categoryParam, conditionParam]);
 
   const onFormValuesChange = (changedValue: GenericTypesMap) => {
     const key = Object.keys(changedValue)[0];
@@ -101,21 +111,24 @@ export default function Categories() {
   useEffect(() => {
     getAllProducts();
 
-    form.setFieldValue("category", categoryParamValue);
+    if (searchParam) {
+      form.setFieldValue("search", searchParam.join(","));
+    }
+
+    if (categoryParam) {
+      form.setFieldValue("category", categoryParam);
+    }
+
+    if (conditionParam) {
+      form.setFieldValue("condition", conditionParam);
+    }
 
     getCategories({ type: Types.CATEGORYTYPE });
     getConditions({ type: Types.CONDITIONTYPE });
   }, []);
 
   return (
-    <ContentLayout
-      title={
-        CategoryDescription[
-          categoryParamValue as keyof typeof CategoryDescription
-        ] ?? "Produtos"
-      }
-      extra={<BreadcrumbRoute />}
-    >
+    <ContentLayout title={title} extra={<BreadcrumbRoute />}>
       <Flex gap={8}>
         <Card
           title="Filtros"
@@ -128,7 +141,11 @@ export default function Categories() {
             onValuesChange={onFormValuesChange}
           >
             <Form.Item name="search" label="Buscar">
-              <Input placeholder="Buscar produto" prefix={<SearchOutlined />} />
+              <Input
+                allowClear
+                placeholder="Buscar produto"
+                prefix={<SearchOutlined />}
+              />
             </Form.Item>
 
             <Form.Item name="category" label="Categoria">
