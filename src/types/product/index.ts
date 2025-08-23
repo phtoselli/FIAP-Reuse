@@ -4,6 +4,7 @@ import { ConditionCode } from "../type/condition";
 export interface Product {
   id: number;
   code: string;
+  ownerId: number;
   title: string;
   imageUrl: string;
   description: string;
