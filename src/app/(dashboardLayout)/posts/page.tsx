@@ -1,7 +1,7 @@
 "use client";
 
+import ProductCard from "@/components/ProductCard";
 import { Routes } from "@/types/routes";
-import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import {
   Button,
   Carousel,
@@ -9,16 +9,12 @@ import {
   Flex,
   Image,
   Typography,
-  Card,
   Avatar,
   theme,
-  Rate,
 } from "antd";
 import { useRouter, useSearchParams } from "next/navigation";
-import { JSXElementConstructor, ReactElement, ReactNode } from "react";
 
-const { Title, Paragraph, Text } = Typography;
-const { Meta } = Card;
+const { Title, Paragraph } = Typography;
 
 const categories = [
   { name: "Roupas", img: "/images/roupas.jpg" },
@@ -32,7 +28,7 @@ const categories = [
 const sampleItems = Array.from({ length: 8 }, (_, i) => ({
   title: `Produto ${i + 1}`,
   description: "Descrição do produto",
-  image: `https://picsum.photos/200/200?random=${i}`,
+  imageUrl: `https://picsum.photos/200/200?random=${i}`,
   rate: Math.floor(Math.random() * 6),
   rateNumber: Math.floor(Math.random() * 999),
 }));
@@ -128,39 +124,7 @@ export default function Posts() {
           >
             {sampleItems.map((item, index) => (
               <div key={index} style={{ padding: "30px", margin: "8px" }}>
-                <Card
-                  hoverable
-                  cover={
-                    <Image
-                      alt={item.title}
-                      src={item.image}
-                      height={130}
-                      preview={false}
-                      style={{ borderRadius: "8px", border: "2px solid white" }}
-                    />
-                  }
-                  style={{
-                    width: 200,
-                    margin: "16px",
-                    border: "2px solid white",
-                  }}
-                  styles={{ body: { padding: "8px 4px 16px 4px" } }}
-                >
-                  <Meta
-                    title={item.title}
-                    description={
-                      <Flex align="center" justify="space-between">
-                        <Rate disabled value={item.rate} />
-                        <Text
-                          type="secondary"
-                          style={{ fontSize: token.fontSizeSM }}
-                        >
-                          ({item.rateNumber} avaliações)
-                        </Text>
-                      </Flex>
-                    }
-                  />
-                </Card>
+                <ProductCard product={item} />
               </div>
             ))}
           </Carousel>

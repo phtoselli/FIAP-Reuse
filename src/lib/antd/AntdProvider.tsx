@@ -1,6 +1,6 @@
 "use client";
 
-import { ConfigProvider, theme } from "antd";
+import { ConfigProvider, Empty, theme } from "antd";
 import React from "react";
 
 export default function AntdProvider({
@@ -10,6 +10,9 @@ export default function AntdProvider({
 }) {
   return (
     <ConfigProvider
+      renderEmpty={() => (
+        <Empty description="Sem dados" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+      )}
       theme={{
         algorithm: theme.compactAlgorithm,
         token: {
