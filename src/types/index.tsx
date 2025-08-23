@@ -2,12 +2,12 @@ export type StringMap = {
   [key: string]: string;
 };
 
-export type Types =
+export type GenericTypes =
   | string
   | number
   | boolean
   | Array<string | number | boolean>;
 
-export type TypesMap = {
-  [key: string]: Types;
+export type GenericTypesMap = {
+  [key: string]: GenericTypes;
 };

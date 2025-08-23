@@ -13,11 +13,12 @@ import ContentLayout from "@/components/ContentLayout";
 import BreadcrumbRoute from "@/components/BreadcrumbRoute";
 
 import { Types } from "@/types/type";
-import { TypesMap } from "@/types";
+import { GenericTypesMap } from "@/types";
 import { Product } from "@/types/product";
+import { QueryParamsKey } from "@/types/queryParams";
 import useSearchParamsHelper from "@/hooks/useSearchParamsHelper";
-
-const productService = async () => [];
+import productService from "@/service/products";
+import { CategoryDescription } from "@/types/type/category";
 
 export default function Categories() {
   const [form] = Form.useForm();
@@ -25,11 +26,13 @@ export default function Categories() {
   const { getParam, routerAddParam, routerRemoveParam } =
     useSearchParamsHelper();
 
+  const categoryParamValue = getParam(QueryParamsKey.CATEGORY) as string;
+
   const {
     data: productsData,
     execute: getAllProducts,
     isLoading: isProductsLoading,
-  } = useService(productService);
+  } = useService(productService.getAllProducts);
 
   const {
     get: getCategories,
@@ -82,9 +85,9 @@ export default function Categories() {
 
       return matchesSearch && matchesCategory && matchesCondition;
     });
-  }, [productsData, form]);
+  }, [productsData, form, categoryParamValue, getParam]);
 
-  const onFormValuesChange = (changedValue: TypesMap) => {
+  const onFormValuesChange = (changedValue: GenericTypesMap) => {
     const key = Object.keys(changedValue)[0];
     const value = changedValue[key];
 
@@ -98,12 +101,21 @@ export default function Categories() {
   useEffect(() => {
     getAllProducts();
 
+    form.setFieldValue("category", categoryParamValue);
+
     getCategories({ type: Types.CATEGORYTYPE });
     getConditions({ type: Types.CONDITIONTYPE });
   }, []);
 
   return (
-    <ContentLayout title="Publicações" extra={<BreadcrumbRoute />}>
+    <ContentLayout
+      title={
+        CategoryDescription[
+          categoryParamValue as keyof typeof CategoryDescription
+        ] ?? "Produtos"
+      }
+      extra={<BreadcrumbRoute />}
+    >
       <Flex gap={8}>
         <Card
           title="Filtros"
@@ -131,6 +143,7 @@ export default function Categories() {
             <Form.Item name="condition" label="Estado de conservação">
               <Select
                 allowClear
+                mode="multiple"
                 placeholder="Estado de conservação"
                 options={conditionOptions}
                 loading={isConditionsLoading}
@@ -150,11 +163,21 @@ export default function Categories() {
             title="Produtos"
             style={{
               flex: 1,
-              overflowY: "auto",
-              height: "calc(100vh - 175px)",
-              width: "calc(100vw - 307px)",
+              display: "flex",
+              flexDirection: "column",
+              width: "calc(100vw - 308px)",
+              height: "calc(100vh - 170px)",
             }}
-            styles={{ body: { padding: 24 } }}
+            styles={{
+              body: {
+                flex: 1,
+                minHeight: 0,
+                padding: "8px",
+                overflowY: "auto",
+                display: "flex",
+                flexWrap: "wrap",
+              },
+            }}
           >
             {filteredProducts?.map((product: Product) => (
               <ProductCard key={`categories${product.id}`} product={product} />

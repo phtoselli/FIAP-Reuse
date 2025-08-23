@@ -1,4 +1,4 @@
-import { Types } from "@/types";
+import { StringMap, GenericTypes } from "@/types";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function useSearchParamsHelper() {
@@ -11,7 +11,10 @@ export default function useSearchParamsHelper() {
     return value.split(",");
   };
 
-  const routerAddParam = (key: string, values: Types | Types[]) => {
+  const routerAddParam = (
+    key: string,
+    values: GenericTypes | GenericTypes[]
+  ) => {
     const params = new URLSearchParams(searchParams.toString());
 
     if (Array.isArray(values)) {
@@ -44,5 +47,26 @@ export default function useSearchParamsHelper() {
     router.push(queryString ? `${pathname}?${queryString}` : pathname);
   };
 
-  return { searchParams, router, getParam, routerAddParam, routerRemoveParam };
+  const redirect = (route: string, queryParams?: Array<StringMap>) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (queryParams) {
+      queryParams.forEach((queryParam) => {
+        Object.entries(queryParam).forEach(([key, value]) => {
+          params.set(key, value);
+        });
+      });
+    }
+
+    router.push(`${route}?${params.toString()}`);
+  };
+
+  return {
+    searchParams,
+    router,
+    getParam,
+    routerAddParam,
+    routerRemoveParam,
+    redirect,
+  };
 }

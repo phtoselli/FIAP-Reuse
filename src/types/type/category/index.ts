@@ -4,3 +4,10 @@ export enum CategoryCode {
   ELECTRONICS = "ELECTRONICS",
   FURNITURE = "FURNITURE",
 }
+
+export enum CategoryDescription {
+  CLOTHING = "Roupas",
+  APPLIANCES = "Eletrodomésticos",
+  ELECTRONICS = "Eletrônicos",
+  FURNITURE = "Móveis",
+}

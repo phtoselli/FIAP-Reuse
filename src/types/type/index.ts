@@ -1,3 +1,6 @@
+import { CategoryCode } from "./category";
+import { ConditionCode } from "./condition";
+
 export enum Types {
   CATEGORYTYPE = "CATEGORYTYPE",
   CONDITIONTYPE = "CONDITIONTYPE",
@@ -5,7 +8,8 @@ export enum Types {
 
 export interface Type {
   id: number;
-  code: Types;
+  code: CategoryCode | ConditionCode;
+  codeType: Types;
   description: string;
 }
 

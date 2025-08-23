@@ -1,7 +1,17 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import ProductCard from "@/components/ProductCard";
+import useSearchParamsHelper from "@/hooks/useSearchParamsHelper";
+import useService from "@/hooks/useService";
+import useTypeService from "@/hooks/useTypeService";
+import productService from "@/service/products";
+import { Product } from "@/types/product";
+import { QueryParamsKey } from "@/types/queryParams";
 import { Routes } from "@/types/routes";
+import { Type, Types } from "@/types/type";
+import { CategoryCode } from "@/types/type/category";
+import { LoadingOutlined } from "@ant-design/icons";
 import {
   Button,
   Carousel,
@@ -9,41 +19,39 @@ import {
   Flex,
   Image,
   Typography,
-  Avatar,
   theme,
+  Spin,
 } from "antd";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 const { Title, Paragraph } = Typography;
 
-const categories = [
-  { name: "Roupas", img: "/images/roupas.jpg" },
-  { name: "Casa", img: "/images/casa.jpg" },
-  { name: "Cosméticos", img: "/images/cosmeticos.jpg" },
-  { name: "Calçados", img: "/images/calcados.jpg" },
-  { name: "Acessórios", img: "/images/acessorios.jpg" },
-  { name: "Outros", img: "/images/outros.jpg" },
-];
-
-const sampleItems = Array.from({ length: 8 }, (_, i) => ({
-  title: `Produto ${i + 1}`,
-  description: "Descrição do produto",
-  imageUrl: `https://picsum.photos/200/200?random=${i}`,
-  rate: Math.floor(Math.random() * 6),
-  rateNumber: Math.floor(Math.random() * 999),
-}));
-
 export default function Posts() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const { token } = theme.useToken();
 
-  const handleCategoryClick = (category: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("category", category);
+  const { redirect } = useSearchParamsHelper();
 
-    router.push(`${Routes.CATEGORIES}?${params.toString()}`);
+  const {
+    get: getCategories,
+    data: categoriesData,
+    isLoading: isCategoriesLoading,
+  } = useTypeService();
+
+  const {
+    data: productsData,
+    execute: getAllProducts,
+    isLoading: isProductsLoading,
+  } = useService(productService.getAllProducts);
+
+  const handleCategoryClick = (category: CategoryCode) => {
+    redirect(Routes.CATEGORIES, [{ [QueryParamsKey.CATEGORY]: category }]);
   };
+
+  useEffect(() => {
+    getAllProducts();
+
+    getCategories({ type: Types.CATEGORYTYPE });
+  }, []);
 
   return (
     <div>
@@ -76,60 +84,53 @@ export default function Posts() {
         </Flex>
       </Flex>
 
-      <Title level={4}>Categorias</Title>
-      <Flex
-        align="center"
-        justify="space-between"
-        style={{ marginBottom: "24px" }}
-      >
-        {categories.map((cat) => (
-          <div
-            key={cat.name}
-            style={{ textAlign: "center", cursor: "pointer" }}
-            onClick={() => handleCategoryClick(cat.name)}
-          >
-            <Avatar
-              size={80}
-              src={cat.img}
-              style={{ border: "2px solid #d9d9d9" }}
-            />
-            <Paragraph>{cat.name}</Paragraph>
-          </div>
-        ))}
-      </Flex>
-
       <Divider />
 
-      {categories.map((cat) => (
-        <div key={cat.name} style={{ marginBottom: 64 }}>
-          <Flex
-            justify="space-between"
-            align="center"
-            style={{ marginBottom: 16 }}
-          >
-            <Title level={4}>{cat.name}</Title>
-            <Button type="link" onClick={() => handleCategoryClick(cat.name)}>
-              Ver mais
-            </Button>
-          </Flex>
+      <Spin
+        size="large"
+        spinning={isProductsLoading}
+        indicator={<LoadingOutlined />}
+        tip="Carregando produtos..."
+        style={{ width: "100%", height: "100%" }}
+      >
+        <div style={{ minHeight: 200 }}>
+          {categoriesData?.map((category: Type) => (
+            <div key={category.id} style={{ marginBottom: 64 }}>
+              <Flex
+                justify="space-between"
+                align="center"
+                style={{ marginBottom: 16 }}
+              >
+                <Title level={4}>{category.description}</Title>
+                <Button
+                  type="link"
+                  onClick={() =>
+                    handleCategoryClick(category.code as CategoryCode)
+                  }
+                >
+                  Ver mais
+                </Button>
+              </Flex>
 
-          <Carousel
-            arrows
-            draggable
-            dots={false}
-            slidesToShow={5.5}
-            style={{
-              padding: "0px",
-            }}
-          >
-            {sampleItems.map((item, index) => (
-              <div key={index} style={{ padding: "30px", margin: "8px" }}>
-                <ProductCard product={item} />
-              </div>
-            ))}
-          </Carousel>
+              <Carousel
+                arrows
+                draggable
+                dots={false}
+                slidesToShow={5}
+                style={{ padding: "0px" }}
+              >
+                {productsData
+                  ?.filter(
+                    (product: Product) => product.categoryCode === category.code
+                  )
+                  .map((product: Product) => (
+                    <ProductCard key={`posts${product.id}`} product={product} />
+                  ))}
+              </Carousel>
+            </div>
+          ))}
         </div>
-      ))}
+      </Spin>
     </div>
   );
 }

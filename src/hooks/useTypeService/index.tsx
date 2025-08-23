@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { TypeService } from "@/service/type";
 import { GetTypeParam, Type } from "@/types/type";
 import { useCallback, useState } from "react";
 

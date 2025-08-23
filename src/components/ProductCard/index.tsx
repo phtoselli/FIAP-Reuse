@@ -15,9 +15,10 @@ export default function ProductCard({ product }: Props) {
       cover={
         <Image
           alt={product.title}
-          src={product.imageUrl}
+          src={product.imageUrl || undefined}
           height={130}
           preview={false}
+          fallback="https://via.placeholder.com/400x400?text=No+Image"
           style={{ borderRadius: "8px", border: "2px solid white" }}
         />
       }
