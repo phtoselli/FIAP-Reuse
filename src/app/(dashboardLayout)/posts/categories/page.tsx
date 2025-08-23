@@ -1,211 +1,206 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import {
-  Button,
-  Card,
-  Divider,
-  Flex,
-  Form,
-  Input,
-  List,
-  Select,
-  Spin,
-  Typography,
-} from "antd";
-import { useEffect, useMemo, useState } from "react";
-import { SearchOutlined } from "@ant-design/icons";
-import { StringMap } from "@/types";
+import { useEffect, useMemo } from "react";
+
+import useTypeService from "@/hooks/useTypeService";
+import { LoadingOutlined, SearchOutlined } from "@ant-design/icons";
+import { Card, Flex, Form, Input, Select, Spin } from "antd";
+
+import useService from "@/hooks/useService";
+import ProductCard from "@/components/ProductCard";
 import ContentLayout from "@/components/ContentLayout";
 import BreadcrumbRoute from "@/components/BreadcrumbRoute";
 
-const { Title } = Typography;
-const { Option } = Select;
-
-type Produto = {
-  id: number;
-  nome: string;
-  categoria: string;
-  subcategoria: string;
-  estado: string;
-};
-
-const todasCategorias = [
-  "Roupas",
-  "Casa",
-  "Cosméticos",
-  "Calçados",
-  "Acessórios",
-  "Outros",
-];
-
-const subCategorias = ["Subcategoria 1", "Subcategoria 2", "Subcategoria 3"];
-const estadosConservacao = [
-  "Novo",
-  "Usado - Bom estado",
-  "Usado - Sinais de uso",
-];
-
-const todosProdutos: Produto[] = Array.from({ length: 50 }, (_, i) => ({
-  id: i + 1,
-  nome: `Produto ${i + 1}`,
-  categoria: todasCategorias[i % todasCategorias.length],
-  subcategoria: subCategorias[i % subCategorias.length],
-  estado: estadosConservacao[i % estadosConservacao.length],
-}));
-
-const PAGE_SIZE = 10;
+import { Types } from "@/types/type";
+import { GenericTypesMap } from "@/types";
+import { Product } from "@/types/product";
+import { QueryParamsKey } from "@/types/queryParams";
+import useSearchParamsHelper from "@/hooks/useSearchParamsHelper";
+import productService from "@/service/products";
+import { CategoryDescription } from "@/types/type/category";
 
 export default function Categories() {
   const [form] = Form.useForm();
-  const [paginaAtual, setPaginaAtual] = useState(1);
-  const [carregando, setCarregando] = useState(false);
-  const [produtosVisiveis, setProdutosVisiveis] = useState<Produto[]>([]);
-  const [filterValues, setFilterValues] = useState<StringMap>({});
 
-  const produtosFiltrados = useMemo(() => {
-    return todosProdutos.filter((item) => {
-      const search = filterValues.search?.toLowerCase() || "";
-      const categoria = filterValues.categoria;
-      const subcategoria = filterValues.subcategoria;
-      const estado = filterValues.estado;
+  const { getParam, routerAddParam, routerRemoveParam } =
+    useSearchParamsHelper();
 
-      return (
-        item.nome.toLowerCase().includes(search) &&
-        (!categoria || item.categoria === categoria) &&
-        (!subcategoria || item.subcategoria === subcategoria) &&
-        (!estado || item.estado === estado)
-      );
+  const searchParam = getParam(QueryParamsKey.SEARCH);
+  const categoryParam = getParam(QueryParamsKey.CATEGORY);
+  const conditionParam = getParam(QueryParamsKey.CONDITION);
+
+  const title = categoryParam
+    ? CategoryDescription[categoryParam[0] as keyof typeof CategoryDescription]
+    : "Produtos";
+
+  const {
+    data: productsData,
+    execute: getAllProducts,
+    isLoading: isProductsLoading,
+  } = useService(productService.get);
+
+  const {
+    get: getCategories,
+    data: categoriesData,
+    isLoading: isCategoriesLoading,
+  } = useTypeService();
+
+  const {
+    get: getConditions,
+    data: conditionsData,
+    isLoading: isConditionsLoading,
+  } = useTypeService();
+
+  const categoryOptions = useMemo(() => {
+    if (!categoriesData) return [];
+
+    return categoriesData.map((category) => ({
+      value: category.code,
+      label: category.title,
+    }));
+  }, [categoriesData]);
+
+  const conditionOptions = useMemo(() => {
+    if (!conditionsData) return [];
+
+    return conditionsData.map((condition) => ({
+      value: condition.code,
+      label: condition.title,
+    }));
+  }, [conditionsData]);
+
+  const filteredProducts = useMemo(() => {
+    if (!productsData) return [];
+
+    return productsData.filter((product: Product) => {
+      const matchesSearch =
+        !searchParam ||
+        searchParam.length === 0 ||
+        searchParam.some(
+          (term) =>
+            product.title.toLowerCase().includes(term.toLowerCase()) ||
+            product.description?.toLowerCase().includes(term.toLowerCase())
+        );
+
+      const matchesCategory =
+        !categoryParam ||
+        categoryParam.length === 0 ||
+        categoryParam.includes(product.categoryCode);
+
+      const matchesCondition =
+        !conditionParam ||
+        conditionParam.length === 0 ||
+        conditionParam.includes(product.conditionCode);
+
+      return matchesSearch && matchesCategory && matchesCondition;
     });
-  }, [filterValues]);
+  }, [productsData, searchParam, categoryParam, conditionParam]);
 
-  const carregarProdutos = () => {
-    setCarregando(true);
-    setTimeout(() => {
-      const novosProdutos = produtosFiltrados.slice(0, paginaAtual * PAGE_SIZE);
-      setProdutosVisiveis(novosProdutos);
-      setCarregando(false);
-    }, 500);
-  };
+  const onFormValuesChange = (changedValue: GenericTypesMap) => {
+    const key = Object.keys(changedValue)[0];
+    const value = changedValue[key];
 
-  const handleCarregarMais = () => {
-    setPaginaAtual((prev) => prev + 1);
+    if (!!value) {
+      routerAddParam(key, value);
+    } else {
+      routerRemoveParam(key);
+    }
   };
 
   useEffect(() => {
-    setPaginaAtual(1);
-  }, [filterValues]);
+    getAllProducts();
 
-  useEffect(() => {
-    carregarProdutos();
-  }, [paginaAtual, filterValues]);
+    if (searchParam) {
+      form.setFieldValue("search", searchParam.join(","));
+    }
 
-  const acabouOsProdutos = produtosVisiveis.length >= produtosFiltrados.length;
+    if (categoryParam) {
+      form.setFieldValue("category", categoryParam);
+    }
+
+    if (conditionParam) {
+      form.setFieldValue("condition", conditionParam);
+    }
+
+    getCategories({ type: Types.CATEGORYTYPE });
+    getConditions({ type: Types.CONDITIONTYPE });
+  }, []);
 
   return (
-    <ContentLayout title="Publicações" extra={<BreadcrumbRoute />}>
+    <ContentLayout title={title} extra={<BreadcrumbRoute />}>
       <Flex gap={8}>
         <Card
           title="Filtros"
-          style={{ width: 280, flexShrink: 0 }}
+          style={{ width: "250px", flexShrink: 0 }}
           styles={{ body: { paddingBottom: 0 } }}
         >
           <Form
             form={form}
             layout="vertical"
-            onValuesChange={(_, allValues) => setFilterValues(allValues)}
+            onValuesChange={onFormValuesChange}
           >
             <Form.Item name="search" label="Buscar">
-              <Input placeholder="Buscar produto" prefix={<SearchOutlined />} />
+              <Input
+                allowClear
+                placeholder="Buscar produto"
+                prefix={<SearchOutlined />}
+              />
             </Form.Item>
 
-            <Form.Item name="categoria" label="Categoria">
-              <Select placeholder="Categoria" allowClear>
-                {todasCategorias.map((cat) => (
-                  <Option key={cat} value={cat}>
-                    {cat}
-                  </Option>
-                ))}
-              </Select>
+            <Form.Item name="category" label="Categoria">
+              <Select
+                allowClear
+                placeholder="Categoria"
+                options={categoryOptions}
+                loading={isCategoriesLoading}
+              />
             </Form.Item>
 
-            <Form.Item name="subcategoria" label="Subcategoria">
-              <Select placeholder="Subcategoria" allowClear>
-                {subCategorias.map((sub) => (
-                  <Option key={sub} value={sub}>
-                    {sub}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-
-            <Form.Item name="estado" label="Estado de conservação">
-              <Select placeholder="Estado de conservação" allowClear>
-                {estadosConservacao.map((estado) => (
-                  <Option key={estado} value={estado}>
-                    {estado}
-                  </Option>
-                ))}
-              </Select>
+            <Form.Item name="condition" label="Estado de conservação">
+              <Select
+                allowClear
+                mode="multiple"
+                placeholder="Estado de conservação"
+                options={conditionOptions}
+                loading={isConditionsLoading}
+              />
             </Form.Item>
           </Form>
         </Card>
 
-        <Card
-          style={{ flex: 1, overflowY: "auto", height: "calc(100vh - 205px)" }}
-          styles={{ body: { padding: 24 } }}
+        <Spin
+          size="large"
+          spinning={isProductsLoading}
+          indicator={<LoadingOutlined />}
+          tip="Carregando produtos..."
+          style={{ width: "100%", height: "100%" }}
         >
-          {produtosFiltrados.length > 0 && (
-            <>
-              <Title level={4} style={{ marginBottom: 16 }}>
-                Em destaque
-              </Title>
-              <List
-                grid={{ gutter: 16, column: 5 }}
-                dataSource={produtosFiltrados.slice(0, 5)}
-                renderItem={(produto) => (
-                  <List.Item>
-                    <Card title={produto.nome}>
-                      <div>Categoria: {produto.categoria}</div>
-                      <div>Subcategoria: {produto.subcategoria}</div>
-                      <div>Estado: {produto.estado}</div>
-                    </Card>
-                  </List.Item>
-                )}
-              />
-              <Divider />
-            </>
-          )}
-
-          <Title level={5} style={{ marginBottom: 16 }}>
-            Todos os produtos
-          </Title>
-          <List
-            grid={{ gutter: 16, column: 5 }}
-            dataSource={produtosVisiveis}
-            loading={carregando}
-            renderItem={(produto) => (
-              <List.Item>
-                <Card title={produto.nome}>
-                  <div>Categoria: {produto.categoria}</div>
-                  <div>Subcategoria: {produto.subcategoria}</div>
-                  <div>Estado: {produto.estado}</div>
-                </Card>
-              </List.Item>
-            )}
-          />
-
-          <div style={{ textAlign: "center", marginTop: 16 }}>
-            {carregando && <Spin />}
-            {!carregando && !acabouOsProdutos && (
-              <Button onClick={handleCarregarMais}>Carregar mais</Button>
-            )}
-            {!carregando && acabouOsProdutos && produtosVisiveis.length > 0 && (
-              <div style={{ marginTop: 12, color: "#999" }}>
-                Todos os produtos carregados
-              </div>
-            )}
-          </div>
-        </Card>
+          <Card
+            title="Produtos"
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              width: "calc(100vw - 308px)",
+              height: "calc(100vh - 170px)",
+            }}
+            styles={{
+              body: {
+                flex: 1,
+                minHeight: 0,
+                padding: "8px",
+                overflowY: "auto",
+                display: "flex",
+                flexWrap: "wrap",
+              },
+            }}
+          >
+            {filteredProducts?.map((product: Product) => (
+              <ProductCard key={`categories${product.id}`} product={product} />
+            ))}
+          </Card>
+        </Spin>
       </Flex>
     </ContentLayout>
   );
