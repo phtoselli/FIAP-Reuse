@@ -21,10 +21,11 @@ import {
 import useService from "@/hooks/useService";
 import productService from "@/service/products";
 import { Product } from "@/types/product";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import ContentLayout from "@/components/ContentLayout";
 import { CategoryDescription } from "@/types/type/category";
 import { ConditionDescription } from "@/types/type/condition";
+import TradeRequestModal from "@/components/TradeRequestModal";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -33,12 +34,19 @@ export default function PostDetailsPage() {
 
   const { postId } = useParams();
 
+  const [isTradeRequestModalOpen, setIsTradeRequestModalOpen] =
+    useState<boolean>(false);
+
   const {
     data: postData,
     execute: getPostByCode,
     error: getPostError,
     isLoading: isLoadingGetPost,
   } = useService<Product | undefined>(productService.getByCode);
+
+  const openTradeRequestModal = () => {
+    setIsTradeRequestModalOpen(true);
+  };
 
   useEffect(() => {
     if (postId) {
@@ -56,12 +64,21 @@ export default function PostDetailsPage() {
             icon={<SwapOutlined />}
             size="large"
             style={{ marginTop: 16 }}
+            onClick={openTradeRequestModal}
           >
             Enviar proposta de troca
           </Button>
         )
       }
     >
+      {isTradeRequestModalOpen && postData && (
+        <TradeRequestModal
+          isOpen={isTradeRequestModalOpen}
+          setIsOpen={setIsTradeRequestModalOpen}
+          targetProduct={postData}
+        />
+      )}
+
       {postData && !isLoadingGetPost && !getPostError && (
         <Flex gap={32} align="flex-start" wrap="wrap">
           <Image
