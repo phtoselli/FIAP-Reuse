@@ -14,7 +14,7 @@ import {
 } from "antd";
 import { SearchOutlined, EditOutlined } from "@ant-design/icons";
 import { useMemo, useState } from "react";
-import getStatusColor from "@/lib/utils/getStatusColor";
+import getStatusColor from "@/utils/getStatusColor";
 import { TradeStatus } from "@/types/status";
 import { useRouter } from "next/navigation";
 import { StringMap } from "@/types";

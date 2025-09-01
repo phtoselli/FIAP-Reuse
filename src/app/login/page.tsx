@@ -52,7 +52,7 @@ export default function Login() {
           style={{ height: "100%" }}
         >
           <Flex vertical style={{ width: "320px" }}>
-            <Flex vertical style={{ marginBottom: "24px" }}>
+            <Flex vertical style={{ marginBottom: "8px" }}>
               <Title level={2}>Login</Title>
               <Paragraph>
                 Acesse a plataforma agora e experimente a melhor maneira trocar

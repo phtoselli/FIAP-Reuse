@@ -12,7 +12,7 @@ import {
   Tooltip,
 } from "antd";
 import { ArrowRightOutlined } from "@ant-design/icons";
-import getStatusColor from "@/lib/utils/getStatusColor";
+import getStatusColor from "@/utils/getStatusColor";
 import { TradeStatus } from "@/types/status";
 
 const { Title } = Typography;

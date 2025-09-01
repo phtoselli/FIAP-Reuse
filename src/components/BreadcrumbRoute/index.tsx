@@ -1,6 +1,6 @@
 "use client";
 
-import formatSegment from "@/lib/utils/formatSegment";
+import formatSegment from "@/utils/formatSegment";
 import { Breadcrumb } from "antd";
 import { usePathname, useRouter } from "next/navigation";
 import React from "react";
