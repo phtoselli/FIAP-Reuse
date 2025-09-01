@@ -9,6 +9,7 @@ import {
   Form,
   Image,
   Input,
+  message,
   Row,
   theme,
 } from "antd";
@@ -27,8 +28,28 @@ export default function Login() {
     router.push(route);
   };
 
-  const doLogin = () => {
-    changeRoute(Routes.POSTS);
+  const doLogin = async () => {
+    try {
+      const values = await form.validateFields();
+
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        message.error(data.message || "Erro ao realizar login");
+        return;
+      }
+
+      message.success("Login realizado com sucesso!");
+      router.push(Routes.POSTS);
+    } catch (error) {
+      console.error(error);
+      message.error("Erro inesperado");
+    }
   };
 
   return (

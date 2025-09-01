@@ -15,7 +15,7 @@ if (!process.env.JWT_SECRET) {
 
 const JWT_SECRET: string = process.env.JWT_SECRET;
 
-export async function POST(req: NextRequest) {
+export async function DoLogin(req: NextRequest) {
   try {
     const { email, password } = await req.json();
 
