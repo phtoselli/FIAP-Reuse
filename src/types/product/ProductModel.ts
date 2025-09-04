@@ -38,7 +38,7 @@ export interface ProductCreateModel {
   imagemUrl?: string;
   categoriaId: string;
   subcategoriaId: string;
-  condicaoId?: string;
+  condicaoId: string | null;
   usuarioId: string;
   avaliacao?: number;
 }

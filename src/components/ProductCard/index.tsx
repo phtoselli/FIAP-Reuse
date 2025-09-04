@@ -14,8 +14,8 @@ export default function ProductCard({ product }: Props) {
       hoverable
       cover={
         <Image
-          alt={product.title}
-          src={product.imageUrl || undefined}
+          alt={product.nome}
+          src={product.imagem || undefined}
           height={130}
           preview={false}
           fallback="https://via.placeholder.com/400x400?text=No+Image"
@@ -30,12 +30,12 @@ export default function ProductCard({ product }: Props) {
       styles={{ body: { padding: "8px 4px 16px 4px" } }}
     >
       <Card.Meta
-        title={product.title}
+        title={product.nome}
         description={
           <Flex align="center" justify="space-between">
-            <Rate disabled value={product.rate} />
+            <Rate disabled value={product.avaliacao} />
             <Text type="secondary" style={{ fontSize: token.fontSizeSM }}>
-              ({product.rateNumber} avaliações)
+              ({product.avaliacao} avaliações)
             </Text>
           </Flex>
         }

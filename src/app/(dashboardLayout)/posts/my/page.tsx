@@ -2,8 +2,6 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-
-import useTypeService from "@/hooks/useTypeService";
 import {
   LoadingOutlined,
   PlusOutlined,
@@ -12,25 +10,29 @@ import {
 import { Button, Card, Flex, Form, Input, Select, Spin } from "antd";
 
 import useService from "@/hooks/useService";
-import ProductCard from "@/components/ProductCard";
-import ContentLayout from "@/components/ContentLayout";
-
-import { Types } from "@/types/type";
-import { GenericTypesMap } from "@/types";
-import { Product } from "@/types/product";
-import { QueryParamsKey } from "@/types/queryParams";
+import useTypeService from "@/hooks/useTypeService";
 import useSearchParamsHelper from "@/hooks/useSearchParamsHelper";
-import productService from "@/service/products";
 import {
   URLControlledModalKeys,
   useURLControlledModal,
 } from "@/hooks/useURLControlledModal";
+
+import ProductCard from "@/components/ProductCard";
+import ContentLayout from "@/components/ContentLayout";
+
+import { Types } from "@/types/type";
+import { Product } from "@/types/product";
+import { QueryParamsKey } from "@/types/queryParams";
+import { GenericTypesMap } from "@/types";
+
+import { productService } from "@/service/products";
 
 export default function MYPosts() {
   const [form] = Form.useForm();
 
   const { getParam, routerAddParam, routerRemoveParam } =
     useSearchParamsHelper();
+
   const { open: openModal } = useURLControlledModal(
     URLControlledModalKeys.CREATE_POST_MODAL
   );
@@ -39,42 +41,39 @@ export default function MYPosts() {
   const categoryParam = getParam(QueryParamsKey.CATEGORY);
   const conditionParam = getParam(QueryParamsKey.CONDITION);
 
+  // Produtos
   const {
     data: productsData,
     execute: getAllProducts,
     isLoading: isProductsLoading,
   } = useService(productService.get);
 
+  // Categorias
   const {
     get: getCategories,
     data: categoriesData,
     isLoading: isCategoriesLoading,
   } = useTypeService();
 
+  // Condições
   const {
     get: getConditions,
     data: conditionsData,
     isLoading: isConditionsLoading,
   } = useTypeService();
 
-  const categoryOptions = useMemo(() => {
-    if (!categoriesData) return [];
+  // Options para selects
+  const categoryOptions = useMemo(
+    () => categoriesData?.map((c) => ({ value: c.code, label: c.title })) ?? [],
+    [categoriesData]
+  );
 
-    return categoriesData.map((category) => ({
-      value: category.code,
-      label: category.title,
-    }));
-  }, [categoriesData]);
+  const conditionOptions = useMemo(
+    () => conditionsData?.map((c) => ({ value: c.code, label: c.title })) ?? [],
+    [conditionsData]
+  );
 
-  const conditionOptions = useMemo(() => {
-    if (!conditionsData) return [];
-
-    return conditionsData.map((condition) => ({
-      value: condition.code,
-      label: condition.title,
-    }));
-  }, [conditionsData]);
-
+  // Filtragem
   const filteredProducts = useMemo(() => {
     if (!productsData) return [];
 
@@ -84,8 +83,8 @@ export default function MYPosts() {
         searchParam.length === 0 ||
         searchParam.some(
           (term) =>
-            product.title.toLowerCase().includes(term.toLowerCase()) ||
-            product.description?.toLowerCase().includes(term.toLowerCase())
+            product.nome.toLowerCase().includes(term.toLowerCase()) ||
+            product.descricao?.toLowerCase().includes(term.toLowerCase())
         );
 
       const matchesCategory =
@@ -102,6 +101,7 @@ export default function MYPosts() {
     });
   }, [productsData, searchParam, categoryParam, conditionParam]);
 
+  // Atualiza params da URL quando filtros mudam
   const onFormValuesChange = (changedValue: GenericTypesMap) => {
     const key = Object.keys(changedValue)[0];
     const value = changedValue[key];
@@ -113,23 +113,16 @@ export default function MYPosts() {
     }
   };
 
+  // Busca inicial
   useEffect(() => {
-    getAllProducts();
+    getAllProducts(); // chama /api/products
 
-    if (searchParam) {
-      form.setFieldValue("search", searchParam.join(","));
-    }
+    if (searchParam) form.setFieldValue("search", searchParam.join(","));
+    if (categoryParam) form.setFieldValue("category", categoryParam);
+    if (conditionParam) form.setFieldValue("condition", conditionParam);
 
-    if (categoryParam) {
-      form.setFieldValue("category", categoryParam);
-    }
-
-    if (conditionParam) {
-      form.setFieldValue("condition", conditionParam);
-    }
-
-    getCategories({ type: Types.CATEGORYTYPE });
-    getConditions({ type: Types.CONDITIONTYPE });
+    getCategories({ type: Types.CATEGORYTYPE }); // chama /api/categories
+    getConditions({ type: Types.CONDITIONTYPE }); // chama /api/conditions
   }, []);
 
   return (
@@ -147,6 +140,7 @@ export default function MYPosts() {
       }
     >
       <Flex gap={8}>
+        {/* 🔹 Filtros */}
         <Card
           title="Filtros"
           style={{ width: "250px", flexShrink: 0 }}
@@ -186,6 +180,7 @@ export default function MYPosts() {
           </Form>
         </Card>
 
+        {/* 🔹 Lista de Produtos */}
         <Spin
           size="large"
           spinning={isProductsLoading}

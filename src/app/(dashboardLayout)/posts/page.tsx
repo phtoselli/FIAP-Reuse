@@ -5,7 +5,7 @@ import ProductCard from "@/components/ProductCard";
 import useSearchParamsHelper from "@/hooks/useSearchParamsHelper";
 import useService from "@/hooks/useService";
 import useTypeService from "@/hooks/useTypeService";
-import productService from "@/service/products";
+import { productService } from "@/service/products";
 import { Product } from "@/types/product";
 import { QueryParamsKey } from "@/types/queryParams";
 import { Routes } from "@/types/routes";
