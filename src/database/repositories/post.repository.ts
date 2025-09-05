@@ -11,9 +11,6 @@ export class PostRepository {
       where: { id },
       include: {
         user: true,
-        category: true,
-        subcategory: true,
-        condition: true,
       },
     });
   }
@@ -22,9 +19,6 @@ export class PostRepository {
     return prisma.post.findMany({
       include: {
         user: true,
-        category: true,
-        subcategory: true,
-        condition: true,
       },
     });
   }
@@ -43,12 +37,9 @@ export class PostRepository {
       },
       include: {
         user: true,
-        category: true,
-        subcategory: true,
-        condition: true,
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
   }
@@ -65,7 +56,13 @@ export class PostRepository {
     limit?: number;
     offset?: number;
   }) {
-    const { categoryId, subcategoryId, activeOnly = true, limit, offset } = filters;
+    const {
+      categoryId,
+      subcategoryId,
+      activeOnly = true,
+      limit,
+      offset,
+    } = filters;
 
     return prisma.post.findMany({
       where: {
@@ -75,12 +72,9 @@ export class PostRepository {
       },
       include: {
         user: true,
-        category: true,
-        subcategory: true,
-        condition: true,
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
       ...(limit && { take: limit }),
       ...(offset && { skip: offset }),

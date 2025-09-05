@@ -290,14 +290,14 @@ export class ProductService {
         avatarUrl: post.user.avatarUrl,
       },
       categoria: {
-        id: post.category.id,
-        nome: post.category.name,
-        descricao: post.category.description,
+        id: post.categoryId,
+        nome: post.category?.name,
+        descricao: post.category?.description,
       },
       subcategoria: {
-        id: post.subcategory.id,
-        nome: post.subcategory.name,
-        descricao: post.subcategory.description,
+        id: post.subcategoryId,
+        nome: post.subcategory?.name,
+        descricao: post.subcategory?.description,
       },
       condicao: post.condition
         ? {
