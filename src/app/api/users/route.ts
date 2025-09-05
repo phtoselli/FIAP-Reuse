@@ -1,16 +1,26 @@
 import { NextResponse } from "next/server";
-import { UserRepository } from "../../../../database/repositories/user.repository";
+import { UserService } from "@/service/users/UserService"; // ajuste o path
 
-const userRepository = new UserRepository();
+const userService = new UserService();
 
-export async function GET() {
-  const newUser = await userRepository.create({
-    email: "gian",
-    avatarUrl: "",
-    city: "cidade",
-    name: "nome",
-    state: "sp",
-    passwordHash: "tst",
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+
+  const cidade = searchParams.get("cidade") || undefined;
+  const estado = searchParams.get("estado") || undefined;
+  const limit = searchParams.get("limit")
+    ? Number(searchParams.get("limit"))
+    : undefined;
+  const offset = searchParams.get("offset")
+    ? Number(searchParams.get("offset"))
+    : undefined;
+
+  const users = await userService.getUsersWithFilters({
+    cidade,
+    estado,
+    limit,
+    offset,
   });
-  return NextResponse.json(newUser, { status: 201 });
+
+  return NextResponse.json(users, { status: 200 });
 }

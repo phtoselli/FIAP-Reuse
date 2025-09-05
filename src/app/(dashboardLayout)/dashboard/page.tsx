@@ -1,13 +1,10 @@
 "use client";
 
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
 import {
   Avatar,
   Card,
   Col,
-  Divider,
-  Flex,
   Input,
   Rate,
   Row,
@@ -34,47 +31,45 @@ interface User {
   active: boolean;
 }
 
-const mockUsers: User[] = [
-  {
-    key: "1",
-    name: "João Silva",
-    avatar: "https://i.pravatar.cc/150?img=1",
-    location: "São Paulo, BR",
-    createdAt: "2023-08-01",
-    score: 4,
-    active: true,
-  },
-  {
-    key: "2",
-    name: "Maria Oliveira",
-    avatar: "https://i.pravatar.cc/150?img=2",
-    location: "Lisboa, PT",
-    createdAt: "2023-07-15",
-    score: 5,
-    active: false,
-  },
-  {
-    key: "3",
-    name: "Carlos Souza",
-    avatar: "https://i.pravatar.cc/150?img=3",
-    location: "Rio de Janeiro, BR",
-    createdAt: "2023-06-20",
-    score: 3,
-    active: true,
-  },
-];
-
 export default function Dashboard() {
   const [searchText, setSearchText] = useState("");
-  const [filteredUsers, setFilteredUsers] = useState<User[]>(mockUsers);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const handleSearch = (value: string) => {
-    setSearchText(value);
-    const filtered = mockUsers.filter((user) =>
-      user.name.toLowerCase().includes(value.toLowerCase())
-    );
-    setFilteredUsers(filtered);
-  };
+  // Carregar usuários da API
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch("/api/usuarios"); // chama sua rota
+        const data = await res.json();
+
+        // API retorna { usuarios: [...], total, limit, offset, hasMore }
+        const mapped = data.usuarios.map((u: any) => ({
+          key: u.id,
+          name: u.nome,
+          avatar: u.avatarUrl || "https://i.pravatar.cc/150",
+          location: `${u.cidade}, ${u.estado}`,
+          createdAt: new Date(u.dataCriacao).toLocaleDateString(),
+          score: Math.floor(Math.random() * 5) + 1, // se não tiver score no back
+          active: true, // se não tiver campo no back
+        }));
+
+        setUsers(mapped);
+      } catch (error) {
+        console.error("Erro ao buscar usuários:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
+  // Filtrar localmente
+  const filteredUsers = users.filter((user) =>
+    user.name.toLowerCase().includes(searchText.toLowerCase())
+  );
 
   const columns = [
     {
@@ -119,7 +114,7 @@ export default function Dashboard() {
           <Card>
             <Statistic
               title="Usuários Ativos"
-              value={128}
+              value={users.length}
               prefix={<UserOutlined />}
             />
           </Card>
@@ -133,7 +128,7 @@ export default function Dashboard() {
           <Card>
             <Statistic
               title="Novos Este Mês"
-              value={24}
+              value={5}
               prefix={<CalendarOutlined />}
             />
           </Card>
@@ -143,8 +138,8 @@ export default function Dashboard() {
       <Input.Search
         placeholder="Buscar usuário pelo nome"
         allowClear
-        onSearch={handleSearch}
-        onChange={(e) => handleSearch(e.target.value)}
+        onSearch={setSearchText}
+        onChange={(e) => setSearchText(e.target.value)}
         value={searchText}
         style={{ marginBottom: 16 }}
       />
@@ -152,6 +147,7 @@ export default function Dashboard() {
       <Table
         columns={columns}
         dataSource={filteredUsers}
+        loading={loading}
         pagination={{ pageSize: 5 }}
       />
     </ContentLayout>
