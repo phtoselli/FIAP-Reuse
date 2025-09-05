@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import { RegisterPayload } from "@/database/payloads/user.payload";
 import { Routes } from "@/types/routes";
 import {
   Button,
@@ -9,6 +11,7 @@ import {
   Form,
   Image,
   Input,
+  message,
   Row,
   theme,
 } from "antd";
@@ -26,8 +29,23 @@ export default function Register() {
     router.push(route);
   };
 
-  const doRegister = () => {
-    changeRoute(Routes.USERS);
+  const doRegister = async (payload: RegisterPayload) => {
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message);
+
+      message.success("Cadastro realizado com sucesso! Boas vindas.");
+      changeRoute(Routes.USERS);
+    } catch (error: any) {
+      message.error(error.message || "Erro no cadastro");
+    }
   };
 
   return (
@@ -51,7 +69,7 @@ export default function Register() {
           style={{ height: "100%" }}
         >
           <Flex vertical style={{ width: "320px" }}>
-            <Flex vertical style={{ marginBottom: "24px" }}>
+            <Flex vertical style={{ marginBottom: "8px" }}>
               <Title level={2}>Cadastre-se</Title>
               <Paragraph>
                 Preencha os dados abaixo e comece a trocar seus itens agora
@@ -59,23 +77,26 @@ export default function Register() {
               </Paragraph>
             </Flex>
 
-            <Form form={form} layout="vertical">
+            <Form form={form} layout="vertical" onFinish={doRegister}>
               <Row>
                 <Col span={24}>
+                  <Form.Item name="name" label="Nome">
+                    <Input placeholder="Digite seu nome." />
+                  </Form.Item>
+                </Col>
+
+                <Col span={24}>
                   <Form.Item name="email" label="E-mail">
-                    <Input placeholder="Digite seu e-mail..." />
+                    <Input placeholder="Digite seu e-mail." />
                   </Form.Item>
                 </Col>
 
                 <Col span={24}>
                   <Form.Item name="password" label="Senha">
-                    <Input.Password placeholder="Digite sua senha..." />
-                  </Form.Item>
-                </Col>
-
-                <Col span={24}>
-                  <Form.Item name="confirmPassword" label="Confirmar Senha">
-                    <Input.Password placeholder="Confirme sua senha..." />
+                    <Input.Password
+                      visibilityToggle
+                      placeholder="Digite sua senha."
+                    />
                   </Form.Item>
                 </Col>
 
@@ -83,8 +104,8 @@ export default function Register() {
                   <Button
                     color="primary"
                     variant="solid"
+                    htmlType="submit"
                     style={{ width: "100%" }}
-                    onClick={() => doRegister()}
                   >
                     Cadastrar-se
                   </Button>

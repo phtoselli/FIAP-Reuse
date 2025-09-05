@@ -1,4 +1,4 @@
-import { prisma } from "../lib/prisma";
+import { prisma } from "../../src/lib/prisma/prisma";
 import { Trade } from "@prisma/client";
 
 export class TradeRepository {

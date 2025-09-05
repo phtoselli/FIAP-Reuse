@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { prisma } from "@/lib/prisma";
+=======
+import { prisma } from "../../src/lib/prisma/prisma";
+>>>>>>> 864a5468cf34c0ade672fbdb3bf39ca09be1bddb
 import { Post } from "@prisma/client";
 
 export class PostRepository {
@@ -29,6 +33,7 @@ export class PostRepository {
     });
   }
 
+<<<<<<< HEAD
   /**
    * Busca produtos por categoria
    * @param categoryId - ID da categoria
@@ -108,6 +113,8 @@ export class PostRepository {
     });
   }
 
+=======
+>>>>>>> 864a5468cf34c0ade672fbdb3bf39ca09be1bddb
   async update(id: string, data: Partial<Post>) {
     return prisma.post.update({ where: { id }, data });
   }

@@ -1,13 +1,24 @@
+<<<<<<< HEAD
 generator client {
   provider = "prisma-client-js"
   output   = "../node_modules/.prisma/client"
 }
 
+=======
+>>>>>>> 864a5468cf34c0ade672fbdb3bf39ca09be1bddb
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+<<<<<<< HEAD
+=======
+generator client {
+  provider = "prisma-client-js"
+  output   = "/app/generated/prisma-client"
+}
+
+>>>>>>> 864a5468cf34c0ade672fbdb3bf39ca09be1bddb
 model User {
   id                 String      @id @default(uuid())
   email              String      @unique
