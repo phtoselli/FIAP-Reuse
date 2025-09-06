@@ -1,20 +1,19 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
+import { useEffect, useState } from "react";
 import ProductCard from "@/components/ProductCard";
 import useSearchParamsHelper from "@/hooks/useSearchParamsHelper";
 import useService from "@/hooks/useService";
-import useTypeService from "@/hooks/useTypeService";
 import { productService } from "@/service/products";
 import { Product } from "@/types/product";
 import { QueryParamsKey } from "@/types/queryParams";
 import { Routes } from "@/types/routes";
-import { Type, Types } from "@/types/type";
 import { CategoryCode } from "@/types/type/category";
 import { LoadingOutlined } from "@ant-design/icons";
 import {
   Button,
-  Carousel,
+  Checkbox,
   Divider,
   Flex,
   Image,
@@ -22,13 +21,20 @@ import {
   theme,
   Spin,
 } from "antd";
-import { useEffect } from "react";
 
 const { Title, Paragraph } = Typography;
 
+const categories = [
+  { label: "Roupas", value: "ROUPAS" },
+  { label: "Casa", value: "CASA" },
+  { label: "Calçados", value: "CALÇADOS" },
+  { label: "Acessórios", value: "ACESSÓRIOS" },
+  { label: "Cosméticos", value: "COSMÉTICOS" },
+  { label: "Outros", value: "OUTROS" },
+];
+
 export default function Posts() {
   const { token } = theme.useToken();
-
   const { redirect } = useSearchParamsHelper();
 
   const {
@@ -36,6 +42,8 @@ export default function Posts() {
     execute: getAllProducts,
     isLoading: isProductsLoading,
   } = useService(productService.get);
+
+  const [activeFilters, setActiveFilters] = useState<string[]>([]);
 
   const handleCategoryClick = (category: CategoryCode) => {
     redirect(Routes.CATEGORIES, [{ [QueryParamsKey.CATEGORY]: category }]);
@@ -45,8 +53,15 @@ export default function Posts() {
     getAllProducts({ limit: 20, offset: 0, active: true });
   }, []);
 
+  // Se não houver filtros, mostramos todas as categorias
+  const categoriesToShow =
+    activeFilters.length > 0
+      ? categories.filter((cat) => activeFilters.includes(cat.value))
+      : categories;
+
   return (
     <div>
+      {/* Hero */}
       <Flex
         wrap
         align="center"
@@ -76,8 +91,38 @@ export default function Posts() {
         </Flex>
       </Flex>
 
+      {/* Filtros */}
+      <div
+        style={{
+          background: "#fff",
+          padding: 16,
+          borderRadius: 8,
+          marginBottom: 24,
+          boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+        }}
+      >
+        <Title level={4}>Filtros</Title>
+        <Checkbox.Group
+          options={categories}
+          value={activeFilters}
+          onChange={(values) => setActiveFilters(values as string[])}
+          style={{ display: "flex", gap: 16, flexWrap: "wrap" }}
+        />
+        <Divider />
+        <Flex gap={8}>
+          <Button
+            type="primary"
+            onClick={() => setActiveFilters(activeFilters)}
+          >
+            Aplicar
+          </Button>
+          <Button onClick={() => setActiveFilters([])}>Limpar</Button>
+        </Flex>
+      </div>
+
       <Divider />
 
+      {/* Produtos */}
       <Spin
         size="large"
         spinning={isProductsLoading}
@@ -85,125 +130,26 @@ export default function Posts() {
         tip="Carregando produtos..."
         style={{ width: "100%", height: "100%" }}
       >
-        <div style={{ minHeight: 200 }}>
-          <Title level={1} style={{ color: "#2A4BA0" }}>
-            Roupas
-          </Title>
-          <Carousel
-            arrows
-            draggable
-            dots={false}
-            slidesToShow={5}
-            style={{ padding: "0px" }}
-          >
-            {productsData
-              ?.filter((product: Product) => product.categoria?.id === "ROUPAS")
-              .map((product: Product) => (
-                <ProductCard key={`posts${product.id}`} product={product} />
-              ))}
-          </Carousel>
-        </div>
+        {categoriesToShow.map((category) => {
+          const categoryProducts = productsData?.filter(
+            (product: Product) => product.categoria?.id === category.value
+          );
 
-        <div style={{ minHeight: 200 }}>
-          <Title level={1} style={{ color: "#2A4BA0" }}>
-            Casa
-          </Title>
-          <Carousel
-            arrows
-            draggable
-            dots={false}
-            slidesToShow={5}
-            style={{ padding: "0px" }}
-          >
-            {productsData
-              ?.filter((product: Product) => product.categoria?.id === " CASA")
-              .map((product: Product) => (
-                <ProductCard key={`posts${product.id}`} product={product} />
-              ))}
-          </Carousel>
-        </div>
+          if (!categoryProducts || categoryProducts.length === 0) return null;
 
-        <div style={{ minHeight: 200 }}>
-          <Title level={1} style={{ color: "#2A4BA0" }}>
-            Cosméticos
-          </Title>
-          <Carousel
-            arrows
-            draggable
-            dots={false}
-            slidesToShow={5}
-            style={{ padding: "0px" }}
-          >
-            {productsData
-              ?.filter(
-                (product: Product) => product.categoria?.id === "COSMÉTICOS"
-              )
-              .map((product: Product) => (
-                <ProductCard key={`posts${product.id}`} product={product} />
-              ))}
-          </Carousel>
-        </div>
-
-        <div style={{ minHeight: 200 }}>
-          <Title level={1} style={{ color: "#2A4BA0" }}>
-            Calçados
-          </Title>
-          <Carousel
-            arrows
-            draggable
-            dots={false}
-            slidesToShow={5}
-            style={{ padding: "0px" }}
-          >
-            {productsData
-              ?.filter(
-                (product: Product) => product.categoria?.id === " CALÇADOS"
-              )
-              .map((product: Product) => (
-                <ProductCard key={`posts${product.id}`} product={product} />
-              ))}
-          </Carousel>
-        </div>
-
-        <div style={{ minHeight: 200 }}>
-          <Title level={1} style={{ color: "#2A4BA0" }}>
-            Acessórios
-          </Title>
-          <Carousel
-            arrows
-            draggable
-            dots={false}
-            slidesToShow={5}
-            style={{ padding: "0px" }}
-          >
-            {productsData
-              ?.filter(
-                (product: Product) => product.categoria?.id === " ACESSÓRIOS"
-              )
-              .map((product: Product) => (
-                <ProductCard key={`posts${product.id}`} product={product} />
-              ))}
-          </Carousel>
-        </div>
-
-        <div style={{ minHeight: 200 }}>
-          <Title level={1} style={{ color: "#2A4BA0" }}>
-            Outros
-          </Title>
-          <Carousel
-            arrows
-            draggable
-            dots={false}
-            slidesToShow={5}
-            style={{ padding: "0px" }}
-          >
-            {productsData
-              ?.filter((product: Product) => product.categoria?.id === "OUTROS")
-              .map((product: Product) => (
-                <ProductCard key={`posts${product.id}`} product={product} />
-              ))}
-          </Carousel>
-        </div>
+          return (
+            <div key={category.value} style={{ marginBottom: 48 }}>
+              <Title level={2} style={{ color: "#2A4BA0" }}>
+                {category.label}
+              </Title>
+              <Flex wrap gap={16}>
+                {categoryProducts.map((product: Product) => (
+                  <ProductCard key={`posts${product.id}`} product={product} />
+                ))}
+              </Flex>
+            </div>
+          );
+        })}
       </Spin>
     </div>
   );
