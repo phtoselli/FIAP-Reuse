@@ -6,6 +6,7 @@ import {
   Card,
   Col,
   Input,
+  message,
   Rate,
   Row,
   Space,
@@ -18,6 +19,7 @@ import {
   UserOutlined,
   CalendarOutlined,
   SwapOutlined,
+  DeleteTwoTone,
 } from "@ant-design/icons";
 import ContentLayout from "@/components/ContentLayout";
 import axios from "axios";
@@ -30,6 +32,7 @@ interface User {
   createdAt: string;
   score: number;
   active: boolean;
+  id: string;
 }
 
 export default function Dashboard() {
@@ -46,13 +49,12 @@ export default function Dashboard() {
         const data = res.data;
 
         const mapped = data.usuarios.map((u: any) => ({
-          key: u.id,
+          id: u.id,
           name: u.nome,
           avatar: u.avatarUrl || "https://i.pravatar.cc/150",
           location: `${u.cidade}, ${u.estado}`,
           createdAt: new Date(u.dataCriacao).toLocaleDateString(),
-          score: Math.floor(Math.random() * 5) + 1, // se não tiver score no back
-          active: true, // se não tiver campo no back
+          email: u.email,
         }));
 
         setUsers(mapped);
@@ -70,6 +72,27 @@ export default function Dashboard() {
   const filteredUsers = users.filter((user) =>
     user.name.toLowerCase().includes(searchText.toLowerCase())
   );
+
+  async function handleDelete(id: string): Promise<void> {
+    try {
+      const response = await fetch(`/api/usuarios/${id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        message.success(data.message || "Usuário deletado com sucesso");
+        // Atualize a tabela, se necessário
+        setUsers((prev) => prev.filter((u) => u.id !== id));
+      } else {
+        const errorData = await response.json();
+        message.error(errorData.error || "Erro ao deletar usuário");
+      }
+    } catch (error) {
+      console.error(error);
+      message.error("Erro inesperado ao deletar usuário");
+    }
+  }
 
   const columns = [
     {
@@ -94,16 +117,25 @@ export default function Dashboard() {
       key: "createdAt",
     },
     {
-      title: "Score",
-      dataIndex: "score",
-      key: "score",
-      render: (score: number) => <Rate disabled defaultValue={score} />,
+      title: "E-mail",
+      dataIndex: "email",
+      key: "email",
     },
+
     {
-      title: "Ativo",
-      dataIndex: "active",
-      key: "active",
-      render: (active: boolean) => <Switch defaultChecked={active} />,
+      title: (
+        <Space>
+          <span>Excluir Usuário?</span>
+        </Space>
+      ),
+      key: "action",
+      render: (_: any, record: User) => (
+        <DeleteTwoTone
+          twoToneColor="#ff4d4f"
+          onClick={() => handleDelete(record.id)}
+          style={{ cursor: "pointer" }}
+        />
+      ),
     },
   ];
 

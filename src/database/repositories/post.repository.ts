@@ -109,4 +109,8 @@ export class PostRepository {
   async delete(id: string) {
     return prisma.post.delete({ where: { id } });
   }
+
+  async deletebyuserid(id: string) {
+    return prisma.post.deleteMany({ where: { userId: id } });
+  }
 }
