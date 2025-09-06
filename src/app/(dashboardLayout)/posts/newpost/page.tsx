@@ -1,68 +1,79 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation"; // Adicionar para navegação
-import {
-  Form,
-  Input,
-  Select,
-  Upload,
-  Button,
-  message,
-  Card,
-  Typography,
-  Flex,
-} from "antd";
+import { useRouter } from "next/navigation";
+import { Form, Input, Select, Upload, Button, message, Card, Flex } from "antd";
 import { PlusOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import axios from "axios";
 
-import ContentLayout from "@/components/ContentLayout"; // Importar o ContentLayout
+import ContentLayout from "@/components/ContentLayout";
 
-const { Title } = Typography;
+// 🔹 enums de categorias
+export enum CategoryCode {
+  CLOTHING = "ROUPAS",
+  HOUSE = "CASA",
+  FOOTWEAR = "CALÇADOS",
+  ACCESSORIES = "ACESSÓRIOS",
+  COSMETICS = "COSMÉTICOS",
+  OTHERS = "OUTROS",
+}
+
+export enum CategoryDescription {
+  CLOTHING = "ROUPAS",
+  HOUSE = "CASA",
+  FOOTWEAR = "CALÇADOS",
+  ACCESSORIES = "ACESSÓRIOS",
+  COSMETICS = "COSMÉTICOS",
+  OTHERS = "OUTROS",
+}
+
 const { Option } = Select;
 
 export default function NewPost() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const router = useRouter(); // Para navegação de volta
 
+  const router = useRouter();
+
+  // 🔹 Upload fake (simulação)
   const handleUpload = (info: any) => {
-    if (info.file.status === "done") {
-      // simulação: pega a URL fake da imagem
+    if (info.file.status === "done" || info.file.status === "uploading") {
       const url = URL.createObjectURL(info.file.originFileObj);
       setImageUrl(url);
-      message.success("Imagem enviada com sucesso!");
+      message.success("Imagem selecionada!");
     }
   };
 
+  // 🔹 Envio do formulário
   const handleSubmit = async (values: any) => {
     try {
       setLoading(true);
 
       const payload = {
         titulo: values.titulo,
-        descricao: values.descricao,
-        imagemUrl: imageUrl || "", // aqui poderia ser um upload real para S3, Cloudinary etc.
+        descricao: values.descricao || "",
+        imagemUrl: imageUrl || "",
         categoriaId: values.categoriaId,
-        subcategoriaId: values.subcategoriaId,
-        condicaoId: values.condicaoId,
-        usuarioId: "user-123", // 🔥 pegar do contexto de autenticação
+        subcategoriaId: " ",
+        condicaoId: values.condicaoId || null,
+        usuarioId: "c2a5aea6-fc24-45cd-9b2d-681471d4dbd5", // futuramente do contexto de auth
         avaliacao: 0,
       };
 
-      await axios.post("/api/produtos", payload);
+      await axios.post("/api/produtos", payload, {
+        headers: { "Content-Type": "application/json" },
+      });
 
       message.success("Produto criado com sucesso!");
       form.resetFields();
       setImageUrl(null);
 
-      // Redirecionar de volta para a lista de produtos após sucesso
       setTimeout(() => {
-        router.push("/my-posts"); // Ajuste a rota conforme necessário
+        router.push("/posts/my");
       }, 1500);
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      console.error(err.response?.data || err);
       message.error("Erro ao criar produto. Tente novamente.");
     } finally {
       setLoading(false);
@@ -72,7 +83,7 @@ export default function NewPost() {
   const handleCancel = () => {
     form.resetFields();
     setImageUrl(null);
-    router.push("/posts/my"); // Navegar de volta para a lista
+    router.push("/posts/my");
   };
 
   return (
@@ -81,7 +92,7 @@ export default function NewPost() {
       extra={
         <Button
           icon={<ArrowLeftOutlined />}
-          onClick={() => router.push("/posts/my")} // Botão para voltar
+          onClick={() => router.push("/posts/my")}
         >
           Voltar
         </Button>
@@ -108,36 +119,19 @@ export default function NewPost() {
             <Input placeholder="Nome do Produto (ex: Tênis All Star)" />
           </Form.Item>
 
-          <Flex gap={16}>
-            <Form.Item
-              label="Categoria"
-              name="categoriaId"
-              rules={[{ required: true, message: "Selecione a categoria" }]}
-              style={{ flex: 1 }}
-            >
-              <Select placeholder="Selecione">
-                <Option value="ROUPAS">Roupas</Option>
-                <Option value="CASA">Casa</Option>
-                <Option value="CALÇADOS">Calçados</Option>
-                <Option value="ACESSÓRIOS">Calçados</Option>
-                <Option value="COSMÉTICOS">Calçados</Option>
-                <Option value="OUTROS">Calçados</Option>
-              </Select>
-            </Form.Item>
-
-            {/* <Form.Item
-              label="Subcategoria"
-              name="subcategoriaId"
-              rules={[{ required: true, message: "Selecione a subcategoria" }]}
-              style={{ flex: 1 }}
-            >
-              <Select placeholder="Selecione">
-                <Option value="sub-111">Camisetas</Option>
-                <Option value="sub-222">Sofás</Option>
-                <Option value="sub-333">Tênis</Option>
-              </Select>
-            </Form.Item> */}
-          </Flex>
+          <Form.Item
+            label="Categoria"
+            name="categoriaId"
+            rules={[{ required: true, message: "Selecione a categoria" }]}
+          >
+            <Select placeholder="Selecione">
+              {Object.entries(CategoryCode).map(([key, value]) => (
+                <Option key={key} value={value}>
+                  {CategoryDescription[key as keyof typeof CategoryDescription]}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
 
           <Form.Item label="Estado de Conservação" name="condicaoId">
             <Select placeholder="Selecione">
