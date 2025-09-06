@@ -20,6 +20,7 @@ import {
   SwapOutlined,
 } from "@ant-design/icons";
 import ContentLayout from "@/components/ContentLayout";
+import axios from "axios";
 
 interface User {
   key: string;
@@ -41,10 +42,9 @@ export default function Dashboard() {
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        const res = await fetch("/api/usuarios"); // chama sua rota
-        const data = await res.json();
+        const res = await axios.get("/api/usuarios");
+        const data = res.data;
 
-        // API retorna { usuarios: [...], total, limit, offset, hasMore }
         const mapped = data.usuarios.map((u: any) => ({
           key: u.id,
           name: u.nome,
