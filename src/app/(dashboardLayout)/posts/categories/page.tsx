@@ -17,7 +17,7 @@ import { GenericTypesMap } from "@/types";
 import { Product } from "@/types/product";
 import { QueryParamsKey } from "@/types/queryParams";
 import useSearchParamsHelper from "@/hooks/useSearchParamsHelper";
-import productService from "@/service/products";
+import { productService } from "@/service/products";
 import { CategoryDescription } from "@/types/type/category";
 
 export default function Categories() {
@@ -74,24 +74,18 @@ export default function Categories() {
     if (!productsData) return [];
 
     return productsData.filter((product: Product) => {
-      const matchesSearch =
-        !searchParam ||
-        searchParam.length === 0 ||
-        searchParam.some(
-          (term) =>
-            product.title.toLowerCase().includes(term.toLowerCase()) ||
-            product.description?.toLowerCase().includes(term.toLowerCase())
-        );
+      const matchesSearch = !searchParam || searchParam.length === 0;
+      // searchParam.some(
+      //   (term) =>
+      //     product.title.toLowerCase().includes(term.toLowerCase()) ||
+      //     product.description?.toLowerCase().includes(term.toLowerCase())
+      // );
 
-      const matchesCategory =
-        !categoryParam ||
-        categoryParam.length === 0 ||
-        categoryParam.includes(product.categoryCode);
+      const matchesCategory = !categoryParam || categoryParam.length === 0;
+      // categoryParam.includes(product.categoryCode);
 
-      const matchesCondition =
-        !conditionParam ||
-        conditionParam.length === 0 ||
-        conditionParam.includes(product.conditionCode);
+      const matchesCondition = !conditionParam || conditionParam.length === 0;
+      // conditionParam.includes(product.conditionCode);
 
       return matchesSearch && matchesCategory && matchesCondition;
     });

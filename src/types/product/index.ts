@@ -8,35 +8,29 @@ export interface Product {
   imagem: string;
   avaliacao: number;
   ativo: boolean;
-  dataCriacao: string; // Date vindo como ISO string
-  dataAtualizacao: string; // idem
-
+  dataCriacao: string;
+  dataAtualizacao: string;
   usuario: {
     id: string;
     nome: string;
     cidade: string;
     estado: string;
-    avatarUrl: string | null;
+    avatarUrl: string;
   };
-
   categoria: {
     id: string;
     nome: string;
-    descricao: string | null;
+    descricao: string;
   };
-
-  subcategoria: {
+  subcategoria?: {
     id: string;
     nome: string;
-    descricao: string | null;
+    descricao: string;
   };
-
-  condicao: {
+  condicao?: {
     id: string;
     codigo: string;
     tipo: string;
-    descricao: string | null;
-  } | null;
-  categoryCode: CategoryCode;
-  conditionCode: ConditionCode;
+    descricao: string;
+  };
 }

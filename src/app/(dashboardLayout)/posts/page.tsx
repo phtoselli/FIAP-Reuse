@@ -32,12 +32,6 @@ export default function Posts() {
   const { redirect } = useSearchParamsHelper();
 
   const {
-    get: getCategories,
-    data: categoriesData,
-    isLoading: isCategoriesLoading,
-  } = useTypeService();
-
-  const {
     data: productsData,
     execute: getAllProducts,
     isLoading: isProductsLoading,
@@ -48,9 +42,7 @@ export default function Posts() {
   };
 
   useEffect(() => {
-    getAllProducts();
-
-    getCategories({ type: Types.CATEGORYTYPE });
+    getAllProducts({ limit: 20, offset: 0, active: true });
   }, []);
 
   return (
@@ -60,7 +52,7 @@ export default function Posts() {
         align="center"
         justify="space-between"
         style={{
-          background: token.colorPrimary,
+          background: "#2A4BA0",
           borderRadius: 8,
           marginBottom: 48,
         }}
@@ -94,41 +86,123 @@ export default function Posts() {
         style={{ width: "100%", height: "100%" }}
       >
         <div style={{ minHeight: 200 }}>
-          {categoriesData?.map((category: Type) => (
-            <div key={category.id} style={{ marginBottom: 64 }}>
-              <Flex
-                justify="space-between"
-                align="center"
-                style={{ marginBottom: 16 }}
-              >
-                <Title level={4}>{category.title}</Title>
-                <Button
-                  type="link"
-                  onClick={() =>
-                    handleCategoryClick(category.code as CategoryCode)
-                  }
-                >
-                  Ver mais
-                </Button>
-              </Flex>
+          <Title level={1} style={{ color: "#2A4BA0" }}>
+            Roupas
+          </Title>
+          <Carousel
+            arrows
+            draggable
+            dots={false}
+            slidesToShow={5}
+            style={{ padding: "0px" }}
+          >
+            {productsData
+              ?.filter((product: Product) => product.categoria?.id === "ROUPAS")
+              .map((product: Product) => (
+                <ProductCard key={`posts${product.id}`} product={product} />
+              ))}
+          </Carousel>
+        </div>
 
-              <Carousel
-                arrows
-                draggable
-                dots={false}
-                slidesToShow={5}
-                style={{ padding: "0px" }}
-              >
-                {productsData
-                  ?.filter(
-                    (product: Product) => product.categoryCode === category.code
-                  )
-                  .map((product: Product) => (
-                    <ProductCard key={`posts${product.id}`} product={product} />
-                  ))}
-              </Carousel>
-            </div>
-          ))}
+        <div style={{ minHeight: 200 }}>
+          <Title level={1} style={{ color: "#2A4BA0" }}>
+            Casa
+          </Title>
+          <Carousel
+            arrows
+            draggable
+            dots={false}
+            slidesToShow={5}
+            style={{ padding: "0px" }}
+          >
+            {productsData
+              ?.filter((product: Product) => product.categoria?.id === " CASA")
+              .map((product: Product) => (
+                <ProductCard key={`posts${product.id}`} product={product} />
+              ))}
+          </Carousel>
+        </div>
+
+        <div style={{ minHeight: 200 }}>
+          <Title level={1} style={{ color: "#2A4BA0" }}>
+            Cosméticos
+          </Title>
+          <Carousel
+            arrows
+            draggable
+            dots={false}
+            slidesToShow={5}
+            style={{ padding: "0px" }}
+          >
+            {productsData
+              ?.filter(
+                (product: Product) => product.categoria?.id === "COSMÉTICOS"
+              )
+              .map((product: Product) => (
+                <ProductCard key={`posts${product.id}`} product={product} />
+              ))}
+          </Carousel>
+        </div>
+
+        <div style={{ minHeight: 200 }}>
+          <Title level={1} style={{ color: "#2A4BA0" }}>
+            Calçados
+          </Title>
+          <Carousel
+            arrows
+            draggable
+            dots={false}
+            slidesToShow={5}
+            style={{ padding: "0px" }}
+          >
+            {productsData
+              ?.filter(
+                (product: Product) => product.categoria?.id === " CALÇADOS"
+              )
+              .map((product: Product) => (
+                <ProductCard key={`posts${product.id}`} product={product} />
+              ))}
+          </Carousel>
+        </div>
+
+        <div style={{ minHeight: 200 }}>
+          <Title level={1} style={{ color: "#2A4BA0" }}>
+            Acessórios
+          </Title>
+          <Carousel
+            arrows
+            draggable
+            dots={false}
+            slidesToShow={5}
+            style={{ padding: "0px" }}
+          >
+            {productsData
+              ?.filter(
+                (product: Product) => product.categoria?.id === " ACESSÓRIOS"
+              )
+              .map((product: Product) => (
+                <ProductCard key={`posts${product.id}`} product={product} />
+              ))}
+          </Carousel>
+        </div>
+
+        <div style={{ minHeight: 200 }}>
+          <Title level={1} style={{ color: "#2A4BA0" }}>
+            Outros
+          </Title>
+          <Carousel
+            arrows
+            draggable
+            dots={false}
+            slidesToShow={5}
+            style={{ padding: "0px" }}
+          >
+            {productsData
+              ?.filter((product: Product) => product.categoria?.id === "OUTROS")
+              .map((product: Product) => (
+                <ProductCard key={`posts${product.id}`} product={product} />
+              ))}
+          </Carousel>
         </div>
       </Spin>
     </div>
