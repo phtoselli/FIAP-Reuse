@@ -1,13 +1,17 @@
 export enum CategoryCode {
-  CLOTHING = "CLOTHING",
-  APPLIANCES = "APPLIANCES",
-  ELECTRONICS = "ELECTRONICS",
-  FURNITURE = "FURNITURE",
+  CLOTHING = "ROUPAS",
+  HOUSE = "CASA",
+  FOOTWEAR = "CALÇADOS",
+  ACCESSORIES = "ACESSÓRIOS",
+  COSMETICS = "COSMÉTICOS",
+  OTHERS = "OUTROS",
 }
 
 export enum CategoryDescription {
-  CLOTHING = "Roupas",
-  APPLIANCES = "Eletrodomésticos",
-  ELECTRONICS = "Eletrônicos",
-  FURNITURE = "Móveis",
+  CLOTHING = "ROUPAS",
+  HOUSE = "CASA",
+  FOOTWEAR = "CALÇADOS",
+  ACCESSORIES = "ACESSÓRIOS",
+  COSMETICS = "COSMÉTICOS",
+  OTHERS = "OUTROS",
 }

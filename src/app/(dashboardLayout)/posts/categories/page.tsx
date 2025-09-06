@@ -2,7 +2,6 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-
 import useTypeService from "@/hooks/useTypeService";
 import { LoadingOutlined, SearchOutlined } from "@ant-design/icons";
 import { Card, Flex, Form, Input, Select, Spin } from "antd";
@@ -74,20 +73,26 @@ export default function Categories() {
     if (!productsData) return [];
 
     return productsData.filter((product: Product) => {
-      const matchesSearch = !searchParam || searchParam.length === 0;
-      // searchParam.some(
-      //   (term) =>
-      //     product.title.toLowerCase().includes(term.toLowerCase()) ||
-      //     product.description?.toLowerCase().includes(term.toLowerCase())
-      // );
+      const matchesSearch =
+        !searchParam ||
+        searchParam.length === 0 ||
+        searchParam.some(
+          (term) =>
+            product.nome.toLowerCase().includes(term.toLowerCase()) ||
+            product.descricao?.toLowerCase().includes(term.toLowerCase())
+        );
 
-      const matchesCategory = !categoryParam || categoryParam.length === 0;
-      // categoryParam.includes(product.categoryCode);
+      const matchesCategory =
+        !categoryParam ||
+        categoryParam.length === 0 ||
+        categoryParam.includes(product.categoria?.id);
 
-      const matchesCondition = !conditionParam || conditionParam.length === 0;
-      // conditionParam.includes(product.conditionCode);
+      // const matchesCondition =
+      //   !conditionParam ||
+      //   conditionParam.length === 0 ||
+      //   conditionParam.includes(product.condicao?.tipo); // 🔥 ajustei também
 
-      return matchesSearch && matchesCategory && matchesCondition;
+      return matchesSearch && matchesCategory;
     });
   }, [productsData, searchParam, categoryParam, conditionParam]);
 
@@ -163,6 +168,7 @@ export default function Categories() {
           </Form>
         </Card>
 
+        {/* Lista de produtos */}
         <Spin
           size="large"
           spinning={isProductsLoading}

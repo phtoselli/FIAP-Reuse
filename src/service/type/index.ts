@@ -17,22 +17,36 @@ export const TypeService = {
             },
             {
               id: 2,
-              code: CategoryCode.ELECTRONICS,
-              title: "Eletrônicos",
+              code: CategoryCode.HOUSE,
+              title: "Casa",
               description:
                 "Aparelhos e dispositivos eletrônicos, como celulares, computadores, tablets, fones de ouvido e TVs.",
             },
             {
               id: 3,
-              code: CategoryCode.APPLIANCES,
-              title: "Eletrodomésticos",
+              code: CategoryCode.FOOTWEAR,
+              title: "Calçados",
               description:
                 "Itens para facilitar o dia a dia em casa, como geladeiras, fogões, micro-ondas, liquidificadores e máquinas de lavar.",
             },
             {
               id: 4,
-              code: CategoryCode.FURNITURE,
-              title: "Móveis",
+              code: CategoryCode.ACCESSORIES,
+              title: "Acessórios",
+              description:
+                "Mobílias e peças de decoração, como sofás, mesas, cadeiras, estantes, camas e armários.",
+            },
+            {
+              id: 5,
+              code: CategoryCode.COSMETICS,
+              title: "Cosméticos",
+              description:
+                "Mobílias e peças de decoração, como sofás, mesas, cadeiras, estantes, camas e armários.",
+            },
+            {
+              id: 6,
+              code: CategoryCode.OTHERS,
+              title: "Outros",
               description:
                 "Mobílias e peças de decoração, como sofás, mesas, cadeiras, estantes, camas e armários.",
             },

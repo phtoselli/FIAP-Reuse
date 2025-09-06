@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
+import { redirect, useRouter } from "next/navigation"; // Adicionar esta importação
 import {
   LoadingOutlined,
   PlusOutlined,
@@ -26,9 +27,11 @@ import { QueryParamsKey } from "@/types/queryParams";
 import { GenericTypesMap } from "@/types";
 
 import { productService } from "@/service/products";
+import { Routes } from "@/types/routes";
 
 export default function MYPosts() {
   const [form] = Form.useForm();
+  const router = useRouter(); // Adicionar esta linha
 
   const { getParam, routerAddParam, routerRemoveParam } =
     useSearchParamsHelper();
@@ -90,12 +93,10 @@ export default function MYPosts() {
       const matchesCategory =
         !categoryParam ||
         categoryParam.length === 0 ||
-        categoryParam.includes(product.categoryCode);
+        categoryParam.includes(product.categoria.nome);
 
-      const matchesCondition =
-        !conditionParam ||
-        conditionParam.length === 0 ||
-        conditionParam.includes(product.conditionCode);
+      const matchesCondition = !conditionParam || conditionParam.length === 0;
+      // conditionParam.includes(product.condicao?.tipo);
 
       return matchesSearch && matchesCategory && matchesCondition;
     });
@@ -112,6 +113,8 @@ export default function MYPosts() {
       routerRemoveParam(key);
     }
   };
+
+  // Função para navegar para a página de criar produto
 
   // Busca inicial
   useEffect(() => {
@@ -133,7 +136,7 @@ export default function MYPosts() {
           color="primary"
           variant="filled"
           icon={<PlusOutlined />}
-          onClick={() => openModal()}
+          onClick={() => redirect(Routes.NEWPOST)}
         >
           Novo produto
         </Button>

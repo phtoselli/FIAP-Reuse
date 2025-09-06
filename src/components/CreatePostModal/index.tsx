@@ -63,12 +63,7 @@ export default function CreatePostModal() {
           name="subcategoria"
           label="Sub-Categoria"
           rules={[{ required: true, message: "Selecione a subcategoria" }]}
-        >
-          <Select placeholder="Selecione uma subcategoria">
-            <Option value="sub1">Subcategoria 1</Option>
-            <Option value="sub2">Subcategoria 2</Option>
-          </Select>
-        </Form.Item>
+        ></Form.Item>
 
         <Form.Item
           name="estado"

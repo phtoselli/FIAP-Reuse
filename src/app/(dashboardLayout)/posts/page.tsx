@@ -110,12 +110,6 @@ export default function Posts() {
         />
         <Divider />
         <Flex gap={8}>
-          <Button
-            type="primary"
-            onClick={() => setActiveFilters(activeFilters)}
-          >
-            Aplicar
-          </Button>
           <Button onClick={() => setActiveFilters([])}>Limpar</Button>
         </Flex>
       </div>
@@ -139,11 +133,24 @@ export default function Posts() {
 
           return (
             <div key={category.value} style={{ marginBottom: 48 }}>
-              <Title level={2} style={{ color: "#2A4BA0" }}>
-                {category.label}
-              </Title>
+              <Flex justify="space-between" align="center">
+                <Title level={2} style={{ color: "#2A4BA0" }}>
+                  {category.label}
+                </Title>
+                <Button
+                  type="link"
+                  onClick={() =>
+                    redirect(Routes.CATEGORIES, [
+                      { [QueryParamsKey.CATEGORY]: category.value },
+                    ])
+                  }
+                >
+                  Ver mais
+                </Button>
+              </Flex>
+
               <Flex wrap gap={16}>
-                {categoryProducts.map((product: Product) => (
+                {categoryProducts.slice(0, 4).map((product: Product) => (
                   <ProductCard key={`posts${product.id}`} product={product} />
                 ))}
               </Flex>
