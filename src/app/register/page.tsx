@@ -25,6 +25,8 @@ export default function Register() {
   const router = useRouter();
   const { token } = theme.useToken();
 
+  const [messageApi, contextHolder] = message.useMessage();
+
   const changeRoute = (route: string) => {
     router.push(route);
   };
@@ -41,15 +43,16 @@ export default function Register() {
 
       if (!res.ok) throw new Error(data.message);
 
-      message.success("Cadastro realizado com sucesso! Boas vindas.");
-      changeRoute(Routes.USERS);
+      messageApi.success("Cadastro realizado com sucesso! Boas vindas.");
+      changeRoute(Routes.POSTS);
     } catch (error: any) {
-      message.error(error.message || "Erro no cadastro");
+      messageApi.error(error.message || "Erro no cadastro");
     }
   };
 
   return (
     <Row style={{ height: "100vh" }}>
+      {contextHolder}
       <Col span={12} style={{ backgroundColor: token.colorPrimary }}>
         <Flex align="center" justify="center" style={{ height: "100%" }}>
           <Image

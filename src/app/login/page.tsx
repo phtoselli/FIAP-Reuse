@@ -9,6 +9,7 @@ import {
   Form,
   Image,
   Input,
+  message,
   Row,
   theme,
 } from "antd";
@@ -23,16 +24,43 @@ export default function Login() {
   const [form] = useForm();
   const { token } = theme.useToken();
 
+  const [messageApi, contextHolder] = message.useMessage();
+
   const changeRoute = (route: string) => {
     router.push(route);
   };
 
-  const doLogin = () => {
-    changeRoute(Routes.POSTS);
+  const doLogin = async () => {
+    try {
+      const values = await form.validateFields();
+
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: values.email,
+          senha: values.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Erro no login");
+      }
+
+      changeRoute(Routes.POSTS);
+      messageApi.success("Login realizado com sucesso!");
+    } catch (error: any) {
+      messageApi.error(error.message || "Erro inesperado no login");
+    }
   };
 
   return (
     <Row style={{ height: "100vh" }}>
+      {contextHolder}
       <Col span={12} style={{ backgroundColor: token.colorPrimary }}>
         <Flex align="center" justify="center" style={{ height: "100%" }}>
           <Image
@@ -63,7 +91,14 @@ export default function Login() {
             <Form form={form} layout="vertical">
               <Row>
                 <Col span={24}>
-                  <Form.Item name="email" label="E-mail">
+                  <Form.Item
+                    name="email"
+                    label="E-mail"
+                    rules={[
+                      { required: true, message: "O e-mail é obrigatório" },
+                      { type: "email", message: "Digite um e-mail válido" },
+                    ]}
+                  >
                     <Input placeholder="Digite seu e-mail..." />
                   </Form.Item>
                 </Col>
@@ -73,6 +108,9 @@ export default function Login() {
                     name="password"
                     label="Senha"
                     style={{ marginBottom: "4px" }}
+                    rules={[
+                      { required: true, message: "A senha é obrigatória" },
+                    ]}
                   >
                     <Input.Password placeholder="Digite sua senha..." />
                   </Form.Item>
