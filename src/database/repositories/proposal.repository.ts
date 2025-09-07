@@ -17,8 +17,8 @@ export class ProposalRepository {
       include: {
         requester: true,
         responder: true,
-        items: true
-      }
+        items: true,
+      },
     });
 
     if (!proposal) {
@@ -31,22 +31,24 @@ export class ProposalRepository {
         const post = await prisma.post.findUnique({
           where: { id: item.postId },
           include: {
-            category: true,
+            categoryRel: true,
             subcategory: true,
-            condition: true
-          }
+            condition: true,
+            user: true,
+            tradeItems: true,
+          },
         });
 
         return {
           ...item,
-          post
+          post,
         };
       })
     );
 
     return {
       ...proposal,
-      items: itemsWithPosts
+      items: itemsWithPosts,
     };
   }
 
@@ -58,10 +60,10 @@ export class ProposalRepository {
       include: {
         requester: true,
         responder: true,
-        items: true
+        items: true,
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
 
@@ -73,22 +75,24 @@ export class ProposalRepository {
             const post = await prisma.post.findUnique({
               where: { id: item.postId },
               include: {
-                category: true,
+                categoryRel: true,
                 subcategory: true,
-                condition: true
-              }
+                condition: true,
+                user: true,
+                tradeItems: true,
+              },
             });
 
             return {
               ...item,
-              post
+              post,
             };
           })
         );
 
         return {
           ...proposal,
-          items: itemsWithPosts
+          items: itemsWithPosts,
         };
       })
     );
@@ -99,20 +103,22 @@ export class ProposalRepository {
   /**
    * Busca propostas por usuário (requester ou responder)
    */
-  async findByUserId(userId: string, role: 'requester' | 'responder' = 'requester') {
-    const where = role === 'requester' 
-      ? { requesterId: userId }
-      : { responderId: userId };
+  async findByUserId(
+    userId: string,
+    role: "requester" | "responder" = "requester"
+  ) {
+    const where =
+      role === "requester" ? { requesterId: userId } : { responderId: userId };
 
     const proposals = await prisma.proposal.findMany({
       where,
       include: {
         requester: true,
         responder: true,
-        items: true
+        items: true,
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
 
@@ -124,22 +130,24 @@ export class ProposalRepository {
             const post = await prisma.post.findUnique({
               where: { id: item.postId },
               include: {
-                category: true,
+                categoryRel: true,
                 subcategory: true,
-                condition: true
-              }
+                condition: true,
+                user: true,
+                tradeItems: true,
+              },
             });
 
             return {
               ...item,
-              post
+              post,
             };
           })
         );
 
         return {
           ...proposal,
-          items: itemsWithPosts
+          items: itemsWithPosts,
         };
       })
     );
@@ -156,10 +164,10 @@ export class ProposalRepository {
       include: {
         requester: true,
         responder: true,
-        items: true
+        items: true,
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
 
@@ -171,22 +179,24 @@ export class ProposalRepository {
             const post = await prisma.post.findUnique({
               where: { id: item.postId },
               include: {
-                category: true,
+                categoryRel: true,
                 subcategory: true,
-                condition: true
-              }
+                condition: true,
+                user: true,
+                tradeItems: true,
+              },
             });
 
             return {
               ...item,
-              post
+              post,
             };
           })
         );
 
         return {
           ...proposal,
-          items: itemsWithPosts
+          items: itemsWithPosts,
         };
       })
     );
@@ -215,19 +225,22 @@ export class ProposalRepository {
     await prisma.proposalItem.createMany({
       data: items,
     });
-    
+
     // Retorna os itens criados
     return prisma.proposalItem.findMany({
       where: {
         proposalId: items[0].proposalId,
-      }
+      },
     });
   }
 
   /**
    * Atualiza o status de uma proposta
    */
-  async updateStatus(id: string, status: 'pending' | 'accepted' | 'rejected'): Promise<any> {
+  async updateStatus(
+    id: string,
+    status: "pending" | "accepted" | "rejected"
+  ): Promise<any> {
     return prisma.proposal.update({
       where: { id },
       data: { status },
@@ -245,11 +258,13 @@ export class ProposalRepository {
   /**
    * Conta propostas por usuário
    */
-  async countByUserId(userId: string, role: 'requester' | 'responder' = 'requester'): Promise<number> {
-    const where = role === 'requester' 
-      ? { requesterId: userId }
-      : { responderId: userId };
-    
+  async countByUserId(
+    userId: string,
+    role: "requester" | "responder" = "requester"
+  ): Promise<number> {
+    const where =
+      role === "requester" ? { requesterId: userId } : { responderId: userId };
+
     return prisma.proposal.count({ where });
   }
 }

@@ -1,15 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { useEffect, useState } from "react";
 import ProductCard from "@/components/ProductCard";
 import useSearchParamsHelper from "@/hooks/useSearchParamsHelper";
-import useService from "@/hooks/useService";
-import { productService } from "@/service/products";
 import { Product } from "@/types/product";
 import { QueryParamsKey } from "@/types/queryParams";
 import { Routes } from "@/types/routes";
-import { CategoryCode } from "@/types/type/category";
+import { CategoryCode, CategoryId } from "@/types/type/category";
 import { LoadingOutlined } from "@ant-design/icons";
 import {
   Button,
@@ -20,39 +19,55 @@ import {
   Typography,
   theme,
   Spin,
+  message,
 } from "antd";
 import { getUser } from "@/utils/auth";
 
 const { Title, Paragraph } = Typography;
 
 const categories = [
-  { label: "Roupas", value: "ROUPAS" },
-  { label: "Casa", value: "CASA" },
-  { label: "Calçados", value: "CALÇADOS" },
-  { label: "Acessórios", value: "ACESSÓRIOS" },
-  { label: "Cosméticos", value: "COSMÉTICOS" },
-  { label: "Outros", value: "OUTROS" },
+  { label: CategoryCode.CLOTHING, value: CategoryCode.CLOTHING },
+  { label: CategoryCode.HOUSE, value: CategoryCode.HOUSE },
+  { label: CategoryCode.FOOTWEAR, value: CategoryCode.FOOTWEAR },
+  { label: CategoryCode.ACCESSORIES, value: CategoryCode.ACCESSORIES },
+  { label: CategoryCode.COSMETICS, value: CategoryCode.COSMETICS },
+  { label: CategoryCode.OTHERS, value: CategoryCode.OTHERS },
 ];
 
 export default function Posts() {
   const { token } = theme.useToken();
   const { redirect } = useSearchParamsHelper();
 
-  const {
-    data: productsData,
-    execute: getAllProducts,
-    isLoading: isProductsLoading,
-  } = useService(productService.get);
-
+  const [productsData, setProductsData] = useState<Product[] | null>(null);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [isProductsLoading, setIsProductsLoading] = useState(false);
+  const [messageApi, contextHolder] = message.useMessage();
 
-  const handleCategoryClick = (category: CategoryCode) => {
-    redirect(Routes.CATEGORIES, [{ [QueryParamsKey.CATEGORY]: category }]);
+  const getAllProducts = async (payload: {
+    limit: number;
+    offset?: number;
+    active: boolean;
+  }) => {
+    try {
+      setIsProductsLoading(true);
+
+      const res = await fetch(
+        `/api/produtos?active=${payload?.active}&limit=${payload?.limit}`
+      );
+      const data = await res.json();
+
+      setProductsData(data.produtos || []);
+    } catch (error: any) {
+      messageApi.error(error.message || "Erro ao buscar produtos");
+    } finally {
+      setIsProductsLoading(false);
+    }
   };
 
   useEffect(() => {
     if (!getUser()) {
       redirect(Routes.LOGIN);
+      return;
     }
 
     getAllProducts({ limit: 20, offset: 0, active: true });
@@ -65,15 +80,13 @@ export default function Posts() {
 
   return (
     <div>
+      {contextHolder}
+
       <Flex
         wrap
         align="center"
         justify="space-between"
-        style={{
-          background: "#2A4BA0",
-          borderRadius: 8,
-          marginBottom: 48,
-        }}
+        style={{ background: "#2A4BA0", borderRadius: 8, marginBottom: 48 }}
       >
         <div style={{ width: "500px", padding: "40px" }}>
           <Title level={1} style={{ color: token["yellow-6"] }}>
@@ -110,10 +123,6 @@ export default function Posts() {
           onChange={(values) => setActiveFilters(values as string[])}
           style={{ display: "flex", gap: 16, flexWrap: "wrap" }}
         />
-        <Divider />
-        <Flex gap={8}>
-          <Button onClick={() => setActiveFilters([])}>Limpar</Button>
-        </Flex>
       </div>
 
       <Divider />
@@ -126,11 +135,13 @@ export default function Posts() {
         style={{ width: "100%", height: "100%" }}
       >
         {categoriesToShow.map((category) => {
+          const categoryId =
+            CategoryId[category.value as keyof typeof CategoryId];
           const categoryProducts = productsData?.filter(
-            (product: Product) => product.categoria?.id === category.value
+            (product: Product) => product.categoria?.id === categoryId
           );
 
-          if (!categoryProducts || categoryProducts.length === 0) return null;
+          if (!categoryProducts?.length) return null;
 
           return (
             <div key={category.value} style={{ marginBottom: 48 }}>
@@ -152,7 +163,7 @@ export default function Posts() {
 
               <Flex wrap gap={16}>
                 {categoryProducts.slice(0, 4).map((product: Product) => (
-                  <ProductCard key={`posts${product.id}`} product={product} />
+                  <ProductCard key={product.id} product={product} />
                 ))}
               </Flex>
             </div>

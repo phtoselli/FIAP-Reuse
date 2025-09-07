@@ -1,5 +1,10 @@
-import { ProposalRepository } from '@/database/repositories/proposal.repository';
-import { ProposalModel, ProposalCreateModel, ProposalUpdateModel, ProposalResponseModel } from '@/types/proposal/ProposalModel';
+import { ProposalRepository } from "@/database/repositories/proposal.repository";
+import {
+  ProposalModel,
+  ProposalCreateModel,
+  ProposalUpdateModel,
+  ProposalResponseModel,
+} from "@/types/proposal/ProposalModel";
 
 export class ProposalService {
   private proposalRepository: ProposalRepository;
@@ -14,26 +19,32 @@ export class ProposalService {
    * @param requesterId - ID do usuário que está criando a proposta
    * @returns Proposta criada
    */
-  async createProposal(proposalData: ProposalCreateModel, requesterId: string): Promise<ProposalResponseModel> {
+  async createProposal(
+    proposalData: ProposalCreateModel,
+    requesterId: string
+  ): Promise<ProposalResponseModel> {
     try {
       // Validar se há itens na proposta
       if (!proposalData.items || proposalData.items.length === 0) {
-        throw new Error('A proposta deve conter pelo menos um item');
+        throw new Error("A proposta deve conter pelo menos um item");
       }
 
       // Validar se a proposta tem apenas um item
       if (proposalData.items.length > 1) {
-        throw new Error('A proposta pode conter apenas um item');
+        throw new Error("A proposta pode conter apenas um item");
       }
 
       // Validar se os IDs são strings válidas
-      if (typeof requesterId !== 'string' || typeof proposalData.responderId !== 'string') {
-        throw new Error('IDs de usuário devem ser strings válidas');
+      if (
+        typeof requesterId !== "string" ||
+        typeof proposalData.responderId !== "string"
+      ) {
+        throw new Error("IDs de usuário devem ser strings válidas");
       }
 
       // Validar se o postId é uma string válida
-      if (typeof proposalData.items[0].postId !== 'string') {
-        throw new Error('ID do post deve ser uma string válida');
+      if (typeof proposalData.items[0].postId !== "string") {
+        throw new Error("ID do post deve ser uma string válida");
       }
 
       // Criar a proposta
@@ -41,11 +52,11 @@ export class ProposalService {
         message: proposalData.message,
         requesterId: requesterId,
         responderId: proposalData.responderId,
-        status: 'pending',
+        status: "pending",
       });
 
       // Criar os itens da proposta
-      const proposalItems = proposalData.items.map(item => ({
+      const proposalItems = proposalData.items.map((item) => ({
         proposalId: proposal.id,
         postId: item.postId,
       }));
@@ -53,17 +64,18 @@ export class ProposalService {
       await this.proposalRepository.createItems(proposalItems);
 
       // Buscar a proposta criada com todos os relacionamentos
-      const createdProposal = await this.proposalRepository.findById(proposal.id);
-      
+      const createdProposal = await this.proposalRepository.findById(
+        proposal.id
+      );
+
       if (!createdProposal) {
-        throw new Error('Erro ao criar proposta');
+        throw new Error("Erro ao criar proposta");
       }
 
       return this.mapProposalToResponseModel(createdProposal);
-
     } catch (error) {
-      console.error('Erro ao criar proposta:', error);
-      throw new Error('Erro interno ao criar proposta');
+      console.error("Erro ao criar proposta:", error);
+      throw new Error("Erro interno ao criar proposta");
     }
   }
 
@@ -75,15 +87,15 @@ export class ProposalService {
   async getProposalById(id: string): Promise<ProposalResponseModel | null> {
     try {
       const proposal = await this.proposalRepository.findById(id);
-      
+
       if (!proposal) {
         return null;
       }
 
       return this.mapProposalToResponseModel(proposal);
     } catch (error) {
-      console.error('Erro ao buscar proposta por ID:', error);
-      throw new Error('Erro interno ao buscar proposta');
+      console.error("Erro ao buscar proposta por ID:", error);
+      throw new Error("Erro interno ao buscar proposta");
     }
   }
 
@@ -94,10 +106,12 @@ export class ProposalService {
   async getAllProposals(): Promise<ProposalResponseModel[]> {
     try {
       const proposals = await this.proposalRepository.findAll();
-      return proposals.map((proposal: any) => this.mapProposalToResponseModel(proposal));
+      return proposals.map((proposal: any) =>
+        this.mapProposalToResponseModel(proposal)
+      );
     } catch (error) {
-      console.error('Erro ao listar propostas:', error);
-      throw new Error('Erro interno ao listar propostas');
+      console.error("Erro ao listar propostas:", error);
+      throw new Error("Erro interno ao listar propostas");
     }
   }
 
@@ -107,13 +121,21 @@ export class ProposalService {
    * @param role - Papel do usuário (requester ou responder)
    * @returns Lista de propostas do usuário
    */
-  async getProposalsByUserId(userId: string, role: 'requester' | 'responder' = 'requester'): Promise<ProposalResponseModel[]> {
+  async getProposalsByUserId(
+    userId: string,
+    role: "requester" | "responder" = "requester"
+  ): Promise<ProposalResponseModel[]> {
     try {
-      const proposals = await this.proposalRepository.findByUserId(userId, role);
-      return proposals.map((proposal: any) => this.mapProposalToResponseModel(proposal));
+      const proposals = await this.proposalRepository.findByUserId(
+        userId,
+        role
+      );
+      return proposals.map((proposal: any) =>
+        this.mapProposalToResponseModel(proposal)
+      );
     } catch (error) {
-      console.error('Erro ao listar propostas do usuário:', error);
-      throw new Error('Erro interno ao listar propostas do usuário');
+      console.error("Erro ao listar propostas do usuário:", error);
+      throw new Error("Erro interno ao listar propostas do usuário");
     }
   }
 
@@ -125,10 +147,12 @@ export class ProposalService {
   async getProposalsByStatus(status: string): Promise<ProposalResponseModel[]> {
     try {
       const proposals = await this.proposalRepository.findByStatus(status);
-      return proposals.map((proposal: any) => this.mapProposalToResponseModel(proposal));
+      return proposals.map((proposal: any) =>
+        this.mapProposalToResponseModel(proposal)
+      );
     } catch (error) {
-      console.error('Erro ao listar propostas por status:', error);
-      throw new Error('Erro interno ao listar propostas por status');
+      console.error("Erro ao listar propostas por status:", error);
+      throw new Error("Erro interno ao listar propostas por status");
     }
   }
 
@@ -138,39 +162,41 @@ export class ProposalService {
    * @param responderId - ID do usuário que está aceitando (deve ser o responder)
    * @returns Proposta aceita
    */
-  async acceptProposal(id: string, responderId: string): Promise<ProposalResponseModel> {
+  async acceptProposal(
+    id: string,
+    responderId: string
+  ): Promise<ProposalResponseModel> {
     try {
       // Verificar se a proposta existe
       const existingProposal = await this.proposalRepository.findById(id);
       if (!existingProposal) {
-        throw new Error('Proposta não encontrada');
+        throw new Error("Proposta não encontrada");
       }
 
       // Verificar se o usuário é o responder da proposta
       if (existingProposal.responderId !== responderId) {
-        throw new Error('Apenas o destinatário da proposta pode aceitá-la');
+        throw new Error("Apenas o destinatário da proposta pode aceitá-la");
       }
 
       // Verificar se a proposta ainda está pendente
-      if (existingProposal.status !== 'pending') {
-        throw new Error('Apenas propostas pendentes podem ser aceitas');
+      if (existingProposal.status !== "pending") {
+        throw new Error("Apenas propostas pendentes podem ser aceitas");
       }
 
       // Aceitar a proposta
-      await this.proposalRepository.updateStatus(id, 'accepted');
+      await this.proposalRepository.updateStatus(id, "accepted");
 
       // Buscar a proposta atualizada
       const updatedProposal = await this.proposalRepository.findById(id);
-      
+
       if (!updatedProposal) {
-        throw new Error('Erro ao atualizar proposta');
+        throw new Error("Erro ao atualizar proposta");
       }
 
       return this.mapProposalToResponseModel(updatedProposal);
-
     } catch (error) {
-      console.error('Erro ao aceitar proposta:', error);
-      throw new Error('Erro interno ao aceitar proposta');
+      console.error("Erro ao aceitar proposta:", error);
+      throw new Error("Erro interno ao aceitar proposta");
     }
   }
 
@@ -180,39 +206,41 @@ export class ProposalService {
    * @param responderId - ID do usuário que está recusando (deve ser o responder)
    * @returns Proposta recusada
    */
-  async rejectProposal(id: string, responderId: string): Promise<ProposalResponseModel> {
+  async rejectProposal(
+    id: string,
+    responderId: string
+  ): Promise<ProposalResponseModel> {
     try {
       // Verificar se a proposta existe
       const existingProposal = await this.proposalRepository.findById(id);
       if (!existingProposal) {
-        throw new Error('Proposta não encontrada');
+        throw new Error("Proposta não encontrada");
       }
 
       // Verificar se o usuário é o responder da proposta
       if (existingProposal.responderId !== responderId) {
-        throw new Error('Apenas o destinatário da proposta pode recusá-la');
+        throw new Error("Apenas o destinatário da proposta pode recusá-la");
       }
 
       // Verificar se a proposta ainda está pendente
-      if (existingProposal.status !== 'pending') {
-        throw new Error('Apenas propostas pendentes podem ser recusadas');
+      if (existingProposal.status !== "pending") {
+        throw new Error("Apenas propostas pendentes podem ser recusadas");
       }
 
       // Recusar a proposta
-      await this.proposalRepository.updateStatus(id, 'rejected');
+      await this.proposalRepository.updateStatus(id, "rejected");
 
       // Buscar a proposta atualizada
       const updatedProposal = await this.proposalRepository.findById(id);
-      
+
       if (!updatedProposal) {
-        throw new Error('Erro ao atualizar proposta');
+        throw new Error("Erro ao atualizar proposta");
       }
 
       return this.mapProposalToResponseModel(updatedProposal);
-
     } catch (error) {
-      console.error('Erro ao recusar proposta:', error);
-      throw new Error('Erro interno ao recusar proposta');
+      console.error("Erro ao recusar proposta:", error);
+      throw new Error("Erro interno ao recusar proposta");
     }
   }
 
@@ -223,22 +251,26 @@ export class ProposalService {
    * @param requesterId - ID do usuário que está atualizando (deve ser o requester)
    * @returns Proposta atualizada
    */
-  async updateProposal(id: string, proposalData: ProposalUpdateModel, requesterId: string): Promise<ProposalResponseModel> {
+  async updateProposal(
+    id: string,
+    proposalData: ProposalUpdateModel,
+    requesterId: string
+  ): Promise<ProposalResponseModel> {
     try {
       // Verificar se a proposta existe
       const existingProposal = await this.proposalRepository.findById(id);
       if (!existingProposal) {
-        throw new Error('Proposta não encontrada');
+        throw new Error("Proposta não encontrada");
       }
 
       // Verificar se o usuário é o requester da proposta
       if (existingProposal.requesterId !== requesterId) {
-        throw new Error('Apenas o criador da proposta pode editá-la');
+        throw new Error("Apenas o criador da proposta pode editá-la");
       }
 
       // Verificar se a proposta ainda está pendente
-      if (existingProposal.status !== 'pending') {
-        throw new Error('Apenas propostas pendentes podem ser editadas');
+      if (existingProposal.status !== "pending") {
+        throw new Error("Apenas propostas pendentes podem ser editadas");
       }
 
       // Atualizar a proposta
@@ -246,16 +278,15 @@ export class ProposalService {
 
       // Buscar a proposta atualizada
       const updatedProposal = await this.proposalRepository.findById(id);
-      
+
       if (!updatedProposal) {
-        throw new Error('Erro ao atualizar proposta');
+        throw new Error("Erro ao atualizar proposta");
       }
 
       return this.mapProposalToResponseModel(updatedProposal);
-
     } catch (error) {
-      console.error('Erro ao atualizar proposta:', error);
-      throw new Error('Erro interno ao atualizar proposta');
+      console.error("Erro ao atualizar proposta:", error);
+      throw new Error("Erro interno ao atualizar proposta");
     }
   }
 
@@ -270,26 +301,25 @@ export class ProposalService {
       // Verificar se a proposta existe
       const existingProposal = await this.proposalRepository.findById(id);
       if (!existingProposal) {
-        throw new Error('Proposta não encontrada');
+        throw new Error("Proposta não encontrada");
       }
 
       // Verificar se o usuário é o requester da proposta
       if (existingProposal.requesterId !== requesterId) {
-        throw new Error('Apenas o criador da proposta pode deletá-la');
+        throw new Error("Apenas o criador da proposta pode deletá-la");
       }
 
       // Verificar se a proposta ainda está pendente
-      if (existingProposal.status !== 'pending') {
-        throw new Error('Apenas propostas pendentes podem ser deletadas');
+      if (existingProposal.status !== "pending") {
+        throw new Error("Apenas propostas pendentes podem ser deletadas");
       }
 
       // Deletar a proposta
       await this.proposalRepository.delete(id);
       return true;
-
     } catch (error) {
-      console.error('Erro ao deletar proposta:', error);
-      throw new Error('Erro interno ao deletar proposta');
+      console.error("Erro ao deletar proposta:", error);
+      throw new Error("Erro interno ao deletar proposta");
     }
   }
 
@@ -330,21 +360,23 @@ export class ProposalService {
           rating: item.post.rating,
           isActive: item.post.isActive,
           category: {
-            id: item.post.category.id,
-            name: item.post.category.name,
-            description: item.post.category.description,
+            id: item.post.categoryRel?.id,
+            name: item.post.categoryRel?.name,
+            description: item.post.categoryRel?.description,
           },
           subcategory: {
             id: item.post.subcategory.id,
             name: item.post.subcategory.name,
             description: item.post.subcategory.description,
           },
-          condition: item.post.condition ? {
-            id: item.post.condition.id,
-            code: item.post.condition.code,
-            type: item.post.condition.type,
-            description: item.post.condition.description,
-          } : null,
+          condition: item.post.condition
+            ? {
+                id: item.post.condition.id,
+                code: item.post.condition.code,
+                type: item.post.condition.type,
+                description: item.post.condition.description,
+              }
+            : null,
         },
       })),
       totalItems: proposal.items.length,
