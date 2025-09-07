@@ -7,8 +7,6 @@ const products: Product[] = [];
 
 const productService = {
   get: async (): Promise<Product[]> => {
-    console.log("Teste");
-
     return await axios
       .get(`http://localhost:3000/api/produtos`)
       .then((response) => {
