@@ -154,7 +154,7 @@ export default function NewPost() {
               listType="picture-card"
               maxCount={3}
               onChange={handleUpload}
-              beforeUpload={() => false} // não envia automaticamente
+              beforeUpload={() => false}
             >
               <div>
                 <PlusOutlined />

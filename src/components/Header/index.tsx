@@ -56,10 +56,11 @@ export default function Header() {
   };
 
   const menuItems: MenuProps["items"] = [
-    { key: Routes.DASHBOARD, label: "Dashboard" },
-    { key: Routes.POSTS, label: "Publicações" },
+    { key: Routes.POSTS, label: "Home" },
+
     { key: Routes.MY_POSTS, label: "Minhas Publicações" },
-    { key: Routes.TRADES, label: "Minhas Trocas" },
+    { key: Routes.TRADES, label: "Propostas" },
+    { key: Routes.DASHBOARD, label: "Usuários" },
   ];
 
   const settings: MenuProps["items"] = [
