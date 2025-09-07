@@ -1,168 +1,177 @@
 "use client";
 
+import { useState } from "react";
 import {
   Card,
-  Descriptions,
-  Divider,
   Flex,
   Image,
-  Tag,
   Typography,
   Button,
-  Tooltip,
+  message,
+  Spin,
+  Rate,
 } from "antd";
-import { ArrowRightOutlined } from "@ant-design/icons";
-import getStatusColor from "@/utils/getStatusColor";
-import { TradeStatus } from "@/types/status";
+import axios from "axios";
 
-const { Title } = Typography;
+const { Title, Text, Link } = Typography;
 
-export default function TradeInfo({ tradeId }: { tradeId: string | string[] }) {
-  const trade = {
+interface TradeInfoProps {
+  tradeId: string | string[];
+  responderId: string;
+}
+
+export default function TradeInfo({ tradeId, responderId }: TradeInfoProps) {
+  const [loading, setLoading] = useState(false);
+  const [trade, setTrade] = useState<any>({
     id: tradeId,
     status: "pendente",
-    data: "2025-08-01",
     requester: {
-      name: "João",
-      avatar: "https://randomuser.me/api/portraits/men/32.jpg",
+      name: "Maria de Alcântara",
+      username: "@mariaalc",
+      avatar: "https://randomuser.me/api/portraits/women/45.jpg",
       items: [
         {
-          id: 1,
-          title: "Camisa",
-          image: "https://picsum.photos/200?random=1",
+          id: 101,
+          title: "Sofá de 3 lugares",
+          image: "https://picsum.photos/200?random=10",
+          rating: 4.5,
         },
       ],
     },
     responder: {
-      name: "Maria",
-      avatar: "https://randomuser.me/api/portraits/women/45.jpg",
+      name: "Você",
       items: [
         {
-          id: 2,
-          title: "Tênis",
-          image: "https://picsum.photos/200?random=2",
+          id: 201,
+          title: "Gradient Graphic T-shirt",
+          image: "https://picsum.photos/300?random=1",
+          rating: 4.5,
+        },
+        {
+          id: 202,
+          title: "Gradient Graphic T-shirt",
+          image: "https://picsum.photos/300?random=2",
+          rating: 4.5,
         },
       ],
     },
+  });
+
+  // Função para aceitar ou recusar proposta
+  const handleAction = async (action: "aceitar" | "recusar") => {
+    try {
+      setLoading(true);
+      const res = await axios.post(`/api/propostas/${trade.id}/${action}`, {
+        responderId,
+      });
+
+      message.success(res.data.message);
+      setTrade((prev: any) => ({
+        ...prev,
+        status: res.data.proposta.status,
+      }));
+    } catch (err: any) {
+      message.error(err.response?.data?.message || "Erro ao processar ação");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <>
-      <Flex align="center" justify="space-between">
-        <Title level={3}>Detalhes da Troca</Title>
-        <Tag color={getStatusColor(trade.status as TradeStatus)}>
-          {trade.status.toUpperCase()}
-        </Tag>
-      </Flex>
+    <Spin spinning={loading}>
+      <Flex gap={48} align="flex-start">
+        {/* Coluna esquerda - Proponente + Item Interesse */}
+        <Flex vertical gap={24} style={{ width: "30%" }}>
+          <Card style={{ borderRadius: 12 }}>
+            <Text type="secondary">Proponente</Text>
+            <Flex align="center" gap={12} style={{ marginTop: 8 }}>
+              <Image
+                src={trade.requester.avatar}
+                width={50}
+                height={50}
+                style={{ borderRadius: "50%", objectFit: "cover" }}
+              />
+              <Flex vertical>
+                <Link strong>{trade.requester.name}</Link>
+                <Text type="secondary">{trade.requester.username}</Text>
+              </Flex>
+            </Flex>
+          </Card>
 
-      <Divider />
-
-      <Descriptions
-        bordered
-        column={1}
-        labelStyle={{ fontWeight: "bold", width: 180 }}
-      >
-        <Descriptions.Item label="Código da Troca">
-          #{trade.id}
-        </Descriptions.Item>
-        <Descriptions.Item label="Data">
-          {new Date(trade.data).toLocaleDateString()}
-        </Descriptions.Item>
-        <Descriptions.Item label="Status">
-          <Tag color={getStatusColor(trade.status as TradeStatus)}>
-            {trade.status.toUpperCase()}
-          </Tag>
-        </Descriptions.Item>
-      </Descriptions>
-
-      <Divider />
-
-      <Flex align="center" justify="space-between" style={{ marginBottom: 32 }}>
-        <Flex vertical align="center" gap={16}>
-          <Image
-            src={trade.requester.avatar}
-            width={100}
-            height={100}
-            style={{ borderRadius: "50%" }}
-          />
-          <Title level={5}>{trade.requester.name}</Title>
+          <Card style={{ borderRadius: 12 }}>
+            <Text type="secondary">Item de Interesse</Text>
+            {trade.requester.items.map((item: any) => (
+              <Flex vertical key={item.id} style={{ marginTop: 16 }}>
+                <Image
+                  src={item.image}
+                  width="100%"
+                  height={160}
+                  style={{
+                    borderRadius: 12,
+                    objectFit: "cover",
+                    marginBottom: 8,
+                  }}
+                />
+                <Rate disabled allowHalf defaultValue={item.rating} />
+                <Text strong>{item.title}</Text>
+              </Flex>
+            ))}
+          </Card>
         </Flex>
 
-        <ArrowRightOutlined style={{ fontSize: 32 }} />
+        {/* Coluna direita - Itens oferecidos */}
+        <Flex vertical gap={16} style={{ flex: 1 }}>
+          <Title level={4}>Qual produto está sendo ofertado em troca?</Title>
+          <Text type="secondary" style={{ marginBottom: 16 }}>
+            Lista de produtos que estão sendo ofertados em troca do seu item
+          </Text>
 
-        <Flex vertical align="center" gap={16}>
-          <Image
-            src={trade.responder.avatar}
-            width={100}
-            height={100}
-            style={{ borderRadius: "50%" }}
-          />
-          <Title level={5}>{trade.responder.name}</Title>
+          <Flex wrap gap={24}>
+            {trade.responder.items.map((item: any) => (
+              <Card
+                key={item.id}
+                hoverable
+                style={{ width: 200, borderRadius: 12 }}
+                cover={
+                  <Image
+                    src={item.image}
+                    height={180}
+                    style={{
+                      borderRadius: "12px 12px 0 0",
+                      objectFit: "cover",
+                    }}
+                  />
+                }
+              >
+                <Rate disabled allowHalf defaultValue={item.rating} />
+                <Text strong>{item.title}</Text>
+              </Card>
+            ))}
+          </Flex>
+
+          {/* Botões */}
+          <Flex gap={16} justify="flex-end" style={{ marginTop: 24 }}>
+            <Button
+              danger
+              shape="round"
+              style={{ width: 140 }}
+              disabled={trade.status !== "pendente"}
+              onClick={() => handleAction("recusar")}
+            >
+              Recusar
+            </Button>
+            <Button
+              type="primary"
+              shape="round"
+              style={{ width: 140 }}
+              disabled={trade.status !== "pendente"}
+              onClick={() => handleAction("aceitar")}
+            >
+              Aceitar
+            </Button>
+          </Flex>
         </Flex>
       </Flex>
-
-      <Flex gap={32}>
-        <Card
-          title={`Itens de ${trade.requester.name}`}
-          style={{ flex: 1 }}
-          bordered
-        >
-          {trade.requester.items.map((item) => (
-            <Flex
-              key={item.id}
-              align="center"
-              gap={16}
-              style={{ marginBottom: 16 }}
-            >
-              <Image
-                src={item.image}
-                width={80}
-                height={80}
-                style={{ objectFit: "cover", borderRadius: 4 }}
-              />
-              <div>{item.title}</div>
-            </Flex>
-          ))}
-        </Card>
-
-        <Card
-          title={`Itens de ${trade.responder.name}`}
-          style={{ flex: 1 }}
-          bordered
-        >
-          {trade.responder.items.map((item) => (
-            <Flex
-              key={item.id}
-              align="center"
-              gap={16}
-              style={{ marginBottom: 16 }}
-            >
-              <Image
-                src={item.image}
-                width={80}
-                height={80}
-                style={{ objectFit: "cover", borderRadius: 4 }}
-              />
-              <div>{item.title}</div>
-            </Flex>
-          ))}
-        </Card>
-      </Flex>
-
-      <Divider />
-
-      <Flex gap={16} style={{ marginTop: 24 }}>
-        <Tooltip title="Aceitar esta troca">
-          <Button type="primary" disabled={trade.status !== "pendente"}>
-            Aceitar
-          </Button>
-        </Tooltip>
-        <Tooltip title="Recusar esta troca">
-          <Button danger disabled={trade.status !== "pendente"}>
-            Recusar
-          </Button>
-        </Tooltip>
-      </Flex>
-    </>
+    </Spin>
   );
 }
