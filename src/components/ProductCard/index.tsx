@@ -1,10 +1,13 @@
 import { Product } from "@/types/product";
-import { Card, Flex, Image, Rate, theme, Button } from "antd";
+import { Card, Flex, Image, Rate, theme } from "antd";
 import Text from "antd/es/typography/Text";
 import {
   URLControlledModalKeys,
   useURLControlledModal,
 } from "@/hooks/useURLControlledModal";
+import { InfoCircleOutlined, SwapOutlined } from "@ant-design/icons";
+import useSearchParamsHelper from "@/hooks/useSearchParamsHelper";
+import { Routes } from "@/types/routes";
 
 interface Props {
   product: Product;
@@ -13,7 +16,8 @@ interface Props {
 export default function ProductCard({ product }: Props) {
   const { token } = theme.useToken();
 
-  const { open } = useURLControlledModal(
+  const { redirect } = useSearchParamsHelper();
+  const { open: openTradeRequestModal } = useURLControlledModal(
     URLControlledModalKeys.TRADE_REQUEST_MODAL
   );
 
@@ -37,6 +41,18 @@ export default function ProductCard({ product }: Props) {
           border: "2px solid white",
         }}
         styles={{ body: { padding: "8px 4px 16px 4px" } }}
+        actions={[
+          <InfoCircleOutlined
+            key="product-info-button"
+            onClick={() => redirect(`${Routes.POSTS}/${product?.id}`)}
+            title="Informações do produto"
+          />,
+          <SwapOutlined
+            key="trade-card-button"
+            onClick={() => openTradeRequestModal(product?.id)}
+            title="Propor troca"
+          />,
+        ]}
       >
         <Card.Meta
           title={product.nome}
@@ -48,15 +64,6 @@ export default function ProductCard({ product }: Props) {
                   ({product.avaliacao} avaliações)
                 </Text>
               </Flex>
-
-              <Button
-                type="primary"
-                block
-                size="small"
-                onClick={() => open(product?.id)}
-              >
-                Propor Troca
-              </Button>
             </Flex>
           }
         />
