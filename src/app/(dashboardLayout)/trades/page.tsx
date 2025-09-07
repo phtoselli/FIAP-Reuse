@@ -11,220 +11,199 @@ import {
   Tooltip,
   Button,
   Image,
+  Segmented,
+  Spin,
 } from "antd";
-import { SearchOutlined, EditOutlined } from "@ant-design/icons";
-import { useMemo, useState } from "react";
+import { SearchOutlined, EditOutlined, EyeOutlined } from "@ant-design/icons";
+import { useEffect, useMemo, useState } from "react";
 import getStatusColor from "@/utils/getStatusColor";
 import { TradeStatus } from "@/types/status";
 import { useRouter } from "next/navigation";
 import { StringMap } from "@/types";
 import ContentLayout from "@/components/ContentLayout";
+import axios from "axios";
 
 const { Option } = Select;
-
-const mockTrades = [
-  {
-    id: 1,
-    titulo: "Troca com João",
-    descricao: "Camisa por tênis",
-    status: "pendente",
-    data: "2025-08-01",
-    imagem: "https://picsum.photos/seed/1/120/120",
-  },
-  {
-    id: 2,
-    titulo: "Troca com Maria",
-    descricao: "Livro por mochila",
-    status: "aceita",
-    data: "2025-07-28",
-    imagem: "https://picsum.photos/seed/2/120/120",
-  },
-  {
-    id: 3,
-    titulo: "Troca com Lucas",
-    descricao: "Boné por óculos",
-    status: "recusada",
-    data: "2025-07-20",
-    imagem: "https://picsum.photos/seed/3/120/120",
-  },
-  {
-    id: 3,
-    titulo: "Troca com Lucas",
-    descricao: "Boné por óculos",
-    status: "recusada",
-    data: "2025-07-20",
-    imagem: "https://picsum.photos/seed/3/120/120",
-  },
-  {
-    id: 3,
-    titulo: "Troca com Lucas",
-    descricao: "Boné por óculos",
-    status: "recusada",
-    data: "2025-07-20",
-    imagem: "https://picsum.photos/seed/3/120/120",
-  },
-  {
-    id: 3,
-    titulo: "Troca com Lucas",
-    descricao: "Boné por óculos",
-    status: "recusada",
-    data: "2025-07-20",
-    imagem: "https://picsum.photos/seed/3/120/120",
-  },
-  {
-    id: 3,
-    titulo: "Troca com Lucas",
-    descricao: "Boné por óculos",
-    status: "recusada",
-    data: "2025-07-20",
-    imagem: "https://picsum.photos/seed/3/120/120",
-  },
-  {
-    id: 3,
-    titulo: "Troca com Lucas",
-    descricao: "Boné por óculos",
-    status: "recusada",
-    data: "2025-07-20",
-    imagem: "https://picsum.photos/seed/3/120/120",
-  },
-  {
-    id: 3,
-    titulo: "Troca com Lucas",
-    descricao: "Boné por óculos",
-    status: "recusada",
-    data: "2025-07-20",
-    imagem: "https://picsum.photos/seed/3/120/120",
-  },
-  {
-    id: 3,
-    titulo: "Troca com Lucas",
-    descricao: "Boné por óculos",
-    status: "recusada",
-    data: "2025-07-20",
-    imagem: "https://picsum.photos/seed/3/120/120",
-  },
-  {
-    id: 3,
-    titulo: "Troca com Lucas",
-    descricao: "Boné por óculos",
-    status: "recusada",
-    data: "2025-07-20",
-    imagem: "https://picsum.photos/seed/3/120/120",
-  },
-];
 
 export default function Trades() {
   const [form] = Form.useForm();
   const [filters, setFilters] = useState<StringMap>({});
+  const [role, setRole] = useState<"requester" | "responder">("requester"); // propostas feitas ou recebidas
+  const [loading, setLoading] = useState(false);
+  const [propostas, setPropostas] = useState<any[]>([]);
   const router = useRouter();
 
-  const filteredTrades = useMemo(() => {
-    return mockTrades
-      .filter((trade) => {
-        const search = (filters.search || "").toLowerCase();
-        const status = filters.status;
+  const userId = "c2a5aea6-fc24-45cd-9b2d-681471d4dbd5"; // 🔹 Trocar pelo ID do usuário logado
 
+  const fetchPropostas = async () => {
+    try {
+      setLoading(true);
+      const { data } = await axios.get("/api/propostas", {
+        params: {
+          userId,
+          role,
+          status: filters.status,
+        },
+      });
+      setPropostas(data.propostas || []);
+    } catch (err) {
+      console.error("Erro ao buscar propostas:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPropostas();
+  }, [role, filters]);
+
+  const filteredTrades = useMemo(() => {
+    const search = (filters.search || "").toLowerCase();
+
+    return propostas
+      .filter((trade) => {
         return (
-          (!search ||
-            trade.titulo.toLowerCase().includes(search) ||
-            trade.descricao.toLowerCase().includes(search)) &&
-          (!status || trade.status === status)
+          !search ||
+          trade.message.toLowerCase().includes(search) ||
+          trade.requester?.name?.toLowerCase().includes(search) ||
+          trade.responder?.name?.toLowerCase().includes(search)
         );
       })
       .sort((a, b) => {
         if (filters.ordem === "maisRecentes") {
-          return new Date(b.data).getTime() - new Date(a.data).getTime();
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
         } else if (filters.ordem === "maisAntigos") {
-          return new Date(a.data).getTime() - new Date(b.data).getTime();
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
         }
         return 0;
       });
-  }, [filters]);
+  }, [filters, propostas]);
 
   return (
     <ContentLayout
-      title="Minhas Trocas"
+      title="Propostas"
       extra={[
         <Form
-          key="myTradesForm"
+          key="propostasForm"
           layout="vertical"
           form={form}
           onValuesChange={(_, allValues) => setFilters(allValues)}
         >
           <Flex gap={8} wrap>
+            {/* Filtro de pesquisa */}
             <Form.Item name="search" style={{ margin: 0 }}>
               <Input
-                placeholder="Buscar por título ou descrição"
+                placeholder="Buscar proposta"
                 prefix={<SearchOutlined />}
                 allowClear
               />
             </Form.Item>
 
+            {/* Filtro por status */}
             <Form.Item name="status" style={{ margin: 0 }}>
               <Select placeholder="Todos" allowClear style={{ width: 200 }}>
-                <Option value="pendente">Pendente</Option>
-                <Option value="aceita">Aceita</Option>
-                <Option value="recusada">Recusada</Option>
-                <Option value="finalizada">Finalizada</Option>
+                <Option value="pending">Pendente</Option>
+                <Option value="accepted">Aceita</Option>
+                <Option value="rejected">Recusada</Option>
+                <Option value="finished">Finalizada</Option>
               </Select>
             </Form.Item>
 
+            {/* Ordenação */}
             <Form.Item name="ordem" style={{ margin: 0 }}>
               <Select defaultValue="maisRecentes" style={{ width: 200 }}>
                 <Option value="maisRecentes">Mais recentes</Option>
                 <Option value="maisAntigos">Mais antigos</Option>
               </Select>
             </Form.Item>
+
+            {/* Toggle entre feitas e recebidas */}
+            <Segmented
+              options={[
+                { label: "Feitas", value: "requester" },
+                { label: "Recebidas", value: "responder" },
+              ]}
+              value={role}
+              onChange={(val) => setRole(val as "requester" | "responder")}
+            />
           </Flex>
         </Form>,
       ]}
     >
-      <List
-        style={{ height: "calc(100vh - 170px)" }}
-        grid={{ gutter: 16, column: 4 }}
-        dataSource={filteredTrades}
-        locale={{ emptyText: "Nenhuma troca encontrada." }}
-        renderItem={(trade) => (
-          <List.Item key={trade.id}>
-            <Card
-              size="small"
-              title={trade.titulo}
-              extra={
-                <Tooltip title="Ver detalhes da troca">
-                  <Button
-                    color="primary"
-                    variant="filled"
-                    icon={<EditOutlined />}
-                    onClick={() => router.push(`/trades/details/${trade.id}`)}
-                    style={{ width: "30px", height: "20px" }}
+      <Spin spinning={loading}>
+        <List
+          style={{ height: "calc(100vh - 170px)" }}
+          grid={{ gutter: 16, column: 4 }}
+          dataSource={filteredTrades}
+          locale={{ emptyText: "Nenhuma proposta encontrada." }}
+          renderItem={(trade) => (
+            <List.Item key={trade.id}>
+              <Card
+                size="small"
+                title={`Proposta ${role === "requester" ? "para" : "de"} ${
+                  role === "requester"
+                    ? trade.responder?.name
+                    : trade.requester?.name
+                }`}
+                extra={
+                  <Tooltip
+                    title={
+                      role === "requester"
+                        ? "Editar proposta"
+                        : "Ver detalhes da proposta"
+                    }
+                  >
+                    <Button
+                      color="primary"
+                      variant="filled"
+                      icon={
+                        role === "requester" ? (
+                          <EditOutlined />
+                        ) : (
+                          <EyeOutlined />
+                        )
+                      }
+                      onClick={() => router.push(`/trades/details/${trade.id}`)}
+                      style={{ width: "30px", height: "20px" }}
+                    />
+                  </Tooltip>
+                }
+              >
+                <Flex gap={16}>
+                  <Image
+                    src={
+                      trade.items?.[0]?.imageUrl ||
+                      "https://picsum.photos/seed/default/120/120"
+                    }
+                    alt="Imagem da proposta"
+                    width={100}
+                    height={100}
+                    style={{ borderRadius: 8, objectFit: "cover" }}
+                    preview={false}
                   />
-                </Tooltip>
-              }
-            >
-              <Flex gap={16}>
-                <Image
-                  src={trade.imagem}
-                  alt="Imagem da troca"
-                  width={100}
-                  height={100}
-                  style={{ borderRadius: 8, objectFit: "cover" }}
-                  preview={false}
-                />
-                <div>
-                  <p>{trade.descricao}</p>
-                  <p>
-                    Status:{" "}
-                    <Tag color={getStatusColor(trade.status as TradeStatus)}>
-                      {trade.status}
-                    </Tag>
-                  </p>
-                  <p>Data: {new Date(trade.data).toLocaleDateString()}</p>
-                </div>
-              </Flex>
-            </Card>
-          </List.Item>
-        )}
-      />
+                  <div>
+                    <p>{trade.message}</p>
+                    <p>
+                      Status:{" "}
+                      <Tag color={getStatusColor(trade.status as TradeStatus)}>
+                        {trade.status}
+                      </Tag>
+                    </p>
+                    <p>
+                      Data: {new Date(trade.createdAt).toLocaleDateString()}
+                    </p>
+                    <p>Total de itens: {trade.totalItems}</p>
+                  </div>
+                </Flex>
+              </Card>
+            </List.Item>
+          )}
+        />
+      </Spin>
     </ContentLayout>
   );
 }
