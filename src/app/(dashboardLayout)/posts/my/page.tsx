@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import { redirect, useRouter } from "next/navigation"; // Adicionar esta importação
+import { redirect } from "next/navigation";
 import {
   LoadingOutlined,
   PlusOutlined,
@@ -13,10 +13,6 @@ import { Button, Card, Flex, Form, Input, Select, Spin } from "antd";
 import useService from "@/hooks/useService";
 import useTypeService from "@/hooks/useTypeService";
 import useSearchParamsHelper from "@/hooks/useSearchParamsHelper";
-import {
-  URLControlledModalKeys,
-  useURLControlledModal,
-} from "@/hooks/useURLControlledModal";
 
 import ProductCard from "@/components/ProductCard";
 import ContentLayout from "@/components/ContentLayout";
@@ -31,41 +27,32 @@ import { Routes } from "@/types/routes";
 
 export default function MYPosts() {
   const [form] = Form.useForm();
-  const router = useRouter(); // Adicionar esta linha
 
   const { getParam, routerAddParam, routerRemoveParam } =
     useSearchParamsHelper();
-
-  const { open: openModal } = useURLControlledModal(
-    URLControlledModalKeys.CREATE_POST_MODAL
-  );
 
   const searchParam = getParam(QueryParamsKey.SEARCH);
   const categoryParam = getParam(QueryParamsKey.CATEGORY);
   const conditionParam = getParam(QueryParamsKey.CONDITION);
 
-  // Produtos
   const {
     data: productsData,
     execute: getAllProducts,
     isLoading: isProductsLoading,
   } = useService(productService.get);
 
-  // Categorias
   const {
     get: getCategories,
     data: categoriesData,
     isLoading: isCategoriesLoading,
   } = useTypeService();
 
-  // Condições
   const {
     get: getConditions,
     data: conditionsData,
     isLoading: isConditionsLoading,
   } = useTypeService();
 
-  // Options para selects
   const categoryOptions = useMemo(
     () => categoriesData?.map((c) => ({ value: c.code, label: c.title })) ?? [],
     [categoriesData]
@@ -76,7 +63,6 @@ export default function MYPosts() {
     [conditionsData]
   );
 
-  // Filtragem
   const filteredProducts = useMemo(() => {
     if (!productsData) return [];
 
@@ -96,13 +82,11 @@ export default function MYPosts() {
         categoryParam.includes(product.categoria.nome);
 
       const matchesCondition = !conditionParam || conditionParam.length === 0;
-      // conditionParam.includes(product.condicao?.tipo);
 
       return matchesSearch && matchesCategory && matchesCondition;
     });
   }, [productsData, searchParam, categoryParam, conditionParam]);
 
-  // Atualiza params da URL quando filtros mudam
   const onFormValuesChange = (changedValue: GenericTypesMap) => {
     const key = Object.keys(changedValue)[0];
     const value = changedValue[key];
@@ -114,18 +98,15 @@ export default function MYPosts() {
     }
   };
 
-  // Função para navegar para a página de criar produto
-
-  // Busca inicial
   useEffect(() => {
-    getAllProducts(); // chama /api/products
+    getAllProducts();
 
     if (searchParam) form.setFieldValue("search", searchParam.join(","));
     if (categoryParam) form.setFieldValue("category", categoryParam);
     if (conditionParam) form.setFieldValue("condition", conditionParam);
 
-    getCategories({ type: Types.CATEGORYTYPE }); // chama /api/categories
-    getConditions({ type: Types.CONDITIONTYPE }); // chama /api/conditions
+    getCategories({ type: Types.CATEGORYTYPE });
+    getConditions({ type: Types.CONDITIONTYPE });
   }, []);
 
   return (
@@ -143,7 +124,6 @@ export default function MYPosts() {
       }
     >
       <Flex gap={8}>
-        {/* 🔹 Filtros */}
         <Card
           title="Filtros"
           style={{ width: "250px", flexShrink: 0 }}
@@ -183,7 +163,6 @@ export default function MYPosts() {
           </Form>
         </Card>
 
-        {/* 🔹 Lista de Produtos */}
         <Spin
           size="large"
           spinning={isProductsLoading}

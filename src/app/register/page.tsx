@@ -3,6 +3,7 @@
 
 import { RegisterPayload } from "@/database/payloads/user.payload";
 import { Routes } from "@/types/routes";
+import { setUser } from "@/utils/auth";
 import {
   Button,
   Col,
@@ -42,6 +43,8 @@ export default function Register() {
       const data = await res.json();
 
       if (!res.ok) throw new Error(data.message);
+
+      setUser(data.user);
 
       messageApi.success("Cadastro realizado com sucesso! Boas vindas.");
       changeRoute(Routes.POSTS);

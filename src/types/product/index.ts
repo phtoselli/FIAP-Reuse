@@ -1,6 +1,3 @@
-import { CategoryCode } from "../type/category";
-import { ConditionCode } from "../type/condition";
-
 export interface Product {
   id: string;
   nome: string;

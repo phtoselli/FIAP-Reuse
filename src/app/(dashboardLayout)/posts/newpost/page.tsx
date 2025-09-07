@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -8,7 +9,6 @@ import axios from "axios";
 
 import ContentLayout from "@/components/ContentLayout";
 
-// 🔹 enums de categorias
 export enum CategoryCode {
   CLOTHING = "ROUPAS",
   HOUSE = "CASA",
@@ -36,7 +36,6 @@ export default function NewPost() {
 
   const router = useRouter();
 
-  // 🔹 Upload fake (simulação)
   const handleUpload = (info: any) => {
     if (info.file.status === "done" || info.file.status === "uploading") {
       const url = URL.createObjectURL(info.file.originFileObj);
@@ -45,7 +44,6 @@ export default function NewPost() {
     }
   };
 
-  // 🔹 Envio do formulário
   const handleSubmit = async (values: any) => {
     try {
       setLoading(true);

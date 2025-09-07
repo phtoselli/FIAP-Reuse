@@ -14,75 +14,54 @@ import {
   Tooltip,
 } from "antd";
 import {
-  CameraOutlined,
-  EditOutlined,
-  LockOutlined,
   LogoutOutlined,
   NotificationOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Routes } from "@/types/routes";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { clearUser, getUser } from "@/utils/auth";
+import useSearchParamsHelper from "@/hooks/useSearchParamsHelper";
+import { User } from "@prisma/client";
 
 export default function Header() {
   const pathname = usePathname();
-  const router = useRouter();
+  const { redirect } = useSearchParamsHelper();
 
   const [notifications, setNotifications] = useState<[]>([]);
+  const [user, setUser] = useState<User | null>(null);
 
-  const user = {
-    id: "123",
-    name: "João Silva",
-    avatar: "https://i.pravatar.cc/150?img=3",
-  };
+  useEffect(() => {
+    const storedUser = getUser();
+    if (storedUser) {
+      setUser(storedUser);
+    }
+  }, []);
 
   const logout = () => {
-    router.push(Routes.LOGIN);
+    clearUser();
+    redirect(Routes.LOGIN);
   };
 
   const goToProfile = () => {
-    router.push(`${Routes.USERS}/${user.id}`);
+    if (user?.id) {
+      redirect(`${Routes.USERS}/${user.id}`);
+    }
   };
 
-  const changeName = () => {};
-
-  const changePicture = () => {};
-
-  const changePassword = () => {};
-
   const handleMenuClick = (e: { key: string }) => {
-    router.push(e.key);
+    redirect(e.key);
   };
 
   const menuItems: MenuProps["items"] = [
-    { key: Routes.POSTS, label: "Home" },
-
+    { key: Routes.POSTS, label: "Publicações" },
     { key: Routes.MY_POSTS, label: "Minhas Publicações" },
     { key: Routes.TRADES, label: "Propostas" },
     { key: Routes.DASHBOARD, label: "Usuários" },
   ];
 
   const settings: MenuProps["items"] = [
-    {
-      key: "changeName",
-      label: "Alterar nome",
-      icon: <EditOutlined />,
-      onClick: changeName,
-    },
-    {
-      key: "changePicture",
-      label: "Alterar foto",
-      icon: <CameraOutlined />,
-      onClick: changePicture,
-    },
-    {
-      key: "changePassword",
-      label: "Alterar senha",
-      icon: <LockOutlined />,
-      onClick: changePassword,
-    },
-    { type: "divider" },
     {
       key: "profile",
       label: "Meu perfil",
@@ -154,8 +133,8 @@ export default function Header() {
                 trigger={["click"]}
               >
                 <Avatar
-                  src={user.avatar}
-                  icon={!user.avatar && <UserOutlined />}
+                  src={user?.avatarUrl}
+                  icon={!user?.avatarUrl && <UserOutlined />}
                   style={{ cursor: "pointer" }}
                 />
               </Dropdown>

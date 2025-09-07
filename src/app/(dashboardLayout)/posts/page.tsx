@@ -21,6 +21,7 @@ import {
   theme,
   Spin,
 } from "antd";
+import { getUser } from "@/utils/auth";
 
 const { Title, Paragraph } = Typography;
 
@@ -50,10 +51,13 @@ export default function Posts() {
   };
 
   useEffect(() => {
+    if (!getUser()) {
+      redirect(Routes.LOGIN);
+    }
+
     getAllProducts({ limit: 20, offset: 0, active: true });
   }, []);
 
-  // Se não houver filtros, mostramos todas as categorias
   const categoriesToShow =
     activeFilters.length > 0
       ? categories.filter((cat) => activeFilters.includes(cat.value))
@@ -61,7 +65,6 @@ export default function Posts() {
 
   return (
     <div>
-      {/* Hero */}
       <Flex
         wrap
         align="center"
@@ -91,7 +94,6 @@ export default function Posts() {
         </Flex>
       </Flex>
 
-      {/* Filtros */}
       <div
         style={{
           background: "#fff",
@@ -116,7 +118,6 @@ export default function Posts() {
 
       <Divider />
 
-      {/* Produtos */}
       <Spin
         size="large"
         spinning={isProductsLoading}

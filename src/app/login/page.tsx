@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { Routes } from "@/types/routes";
@@ -18,6 +19,7 @@ import { useRouter } from "next/navigation";
 
 import Title from "antd/es/typography/Title";
 import Paragraph from "antd/es/typography/Paragraph";
+import { setUser } from "@/utils/auth";
 
 export default function Login() {
   const router = useRouter();
@@ -50,6 +52,8 @@ export default function Login() {
       if (!response.ok) {
         throw new Error(data.error || "Erro no login");
       }
+
+      setUser(data.user);
 
       changeRoute(Routes.POSTS);
       messageApi.success("Login realizado com sucesso!");

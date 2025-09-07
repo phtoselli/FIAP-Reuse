@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { PostRepository } from "@/database/repositories/post.repository";
 import {
   ProductModel,

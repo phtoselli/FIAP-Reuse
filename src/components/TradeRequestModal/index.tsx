@@ -1,95 +1,187 @@
-import { Modal, Select, Form, Button, Typography, Image } from "antd";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
+
+import {
+  URLControlledModalKeys,
+  useURLControlledModal,
+} from "@/hooks/useURLControlledModal";
 import { Product } from "@/types/product";
-import { useState } from "react";
-import useService from "@/hooks/useService";
-import productService from "@/service/products";
+import { getUser } from "@/utils/auth";
+import {
+  Modal,
+  Select,
+  Form,
+  Button,
+  Typography,
+  Image,
+  Spin,
+  Divider,
+  message,
+} from "antd";
+import { useState, useEffect } from "react";
 
-const { Text } = Typography;
+const { Text, Title, Paragraph } = Typography;
 
-interface TradeRequestModalProps {
-  isOpen: boolean;
-  setIsOpen: (param: boolean) => void;
-  targetProduct: Product;
-}
+export default function TradeRequestModal() {
+  const [loading, setLoading] = useState(false);
+  const [userProducts, setUserProducts] = useState<Product[] | null>(null);
+  const [targetProduct, setTargetProduct] = useState<Product | null>(null);
+  const [selectedProducts, setSelectedProducts] = useState<number[] | null>(
+    null
+  );
 
-export default function TradeRequestModal({
-  isOpen,
-  setIsOpen,
-  targetProduct,
-}: TradeRequestModalProps) {
-  const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
+  const { isOpen, close, paramValue } = useURLControlledModal(
+    URLControlledModalKeys.TRADE_REQUEST_MODAL
+  );
 
-  const handleOk = () => {
-    if (selectedProducts.length === 0) return;
-    setSelectedProducts([]);
-    setIsOpen(false);
+  const selectedProductsOptions = userProducts?.map((p) => ({
+    label: p.nome,
+    value: p.id,
+    key: p.id,
+  }));
+
+  const handleOk = async () => {
+    if (selectedProducts?.length === 0 || !targetProduct) return;
+
+    setLoading(true);
+
+    try {
+      const user = getUser();
+      if (!user) throw new Error("Usuário não está logado");
+
+      const items = selectedProducts?.map((productId) => ({
+        postId: productId.toString(),
+      }));
+
+      const res = await fetch("/api/propostas", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          requesterId: user.id,
+          responderId: targetProduct.usuario.id,
+          message: `Gostaria de trocar meu(s) produto(s) pelo ${targetProduct.nome}`,
+          items,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Erro ao criar proposta");
+      }
+
+      message.success("Proposta enviada com sucesso!");
+      setSelectedProducts([]);
+      close();
+    } catch (error: any) {
+      message.error(error.message || "Erro ao enviar proposta");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const onCancel = () => {
-    setIsOpen(false);
+    setSelectedProducts(null);
+    close();
   };
 
-  const {
-    execute: getProductsData,
-    data: productsData,
-    isLoading: productsDataLoading,
-    error: getProductsDataError,
-  } = useService(productService.get);
+  useEffect(() => {
+    if (!isOpen || !paramValue) return;
+
+    const fetchData = async () => {
+      setLoading(true);
+
+      try {
+        const res = await fetch(`/api/produtos/${paramValue}`);
+        if (!res.ok) throw new Error("Produto não encontrado");
+        const data: Product = await res.json();
+        setTargetProduct(data);
+
+        const user = getUser();
+        if (!user) throw new Error("Usuário não está logado");
+
+        const userRes = await fetch(`/api/produtos?userId=${user.id}`);
+        if (!userRes.ok)
+          throw new Error("Não foi possível carregar seus produtos");
+        const userData = await userRes.json();
+        setUserProducts(userData.produtos || []);
+      } catch (error: any) {
+        message.error(error.message || "Erro ao carregar dados");
+        close();
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [isOpen, paramValue, close]);
 
   return (
     <Modal
       centered
-      destroyOnHidden
-      title={`Propor troca por: ${targetProduct.title}`}
+      title="Proposta de troca"
       open={isOpen}
       onCancel={onCancel}
       footer={null}
+      width={600}
     >
-      <Form layout="vertical">
-        <Form.Item label="Selecione os produtos que deseja oferecer" required>
-          <Select
-            mode="multiple"
-            style={{ width: "100%" }}
-            placeholder="Escolha seus produtos"
-            value={selectedProducts}
-            onChange={(values) => setSelectedProducts(values)}
-            optionLabelProp="label"
-          >
-            {productsData?.map((product) => (
-              <Select.Option
-                key={product.id}
-                value={product.id}
-                label={product.title}
+      {loading || !targetProduct ? (
+        <Spin tip="Carregando produto..." />
+      ) : (
+        <>
+          <div style={{ display: "flex", gap: 16, marginBottom: 24 }}>
+            <Image
+              src={targetProduct.imagem}
+              alt={targetProduct.nome}
+              width={120}
+              height={120}
+              style={{ objectFit: "cover", borderRadius: 8 }}
+              preview={false}
+            />
+            <div>
+              <Title level={4}>{targetProduct.nome}</Title>
+              <Text type="secondary">{targetProduct.categoria?.nome}</Text>
+              <Paragraph
+                ellipsis={{ rows: 3, expandable: true, symbol: "mais" }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <Image
-                    src={product.imageUrl}
-                    alt={product.title}
-                    style={{
-                      width: 40,
-                      height: 40,
-                      objectFit: "cover",
-                      borderRadius: 4,
-                    }}
-                  />
-                  <Text>{product.title}</Text>
-                </div>
-              </Select.Option>
-            ))}
-          </Select>
-        </Form.Item>
+                {targetProduct.descricao}
+              </Paragraph>
+            </div>
+          </div>
 
-        <Form.Item>
-          <Button
-            type="primary"
-            block
-            disabled={selectedProducts.length === 0}
-            onClick={handleOk}
-          >
-            Confirmar Proposta
-          </Button>
-        </Form.Item>
-      </Form>
+          <Divider />
+
+          <Form layout="vertical">
+            <Form.Item
+              label="Selecione os produtos que deseja oferecer"
+              required
+            >
+              <Select
+                mode="multiple"
+                style={{ width: "100%" }}
+                placeholder="Escolha seus produtos"
+                value={selectedProducts}
+                options={selectedProductsOptions}
+                onChange={setSelectedProducts}
+                optionLabelProp="label"
+              />
+            </Form.Item>
+
+            <Form.Item>
+              <Button
+                type="primary"
+                block
+                disabled={selectedProducts?.length === 0}
+                onClick={handleOk}
+              >
+                Confirmar Proposta
+              </Button>
+            </Form.Item>
+          </Form>
+        </>
+      )}
     </Modal>
   );
 }

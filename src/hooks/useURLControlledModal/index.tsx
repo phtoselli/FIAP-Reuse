@@ -4,7 +4,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useMemo } from "react";
 
 export enum URLControlledModalKeys {
-  CREATE_POST_MODAL = "create-post",
+  TRADE_REQUEST_MODAL = "trade-request",
 }
 
 /**
