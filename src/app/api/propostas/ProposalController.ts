@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { ProposalService } from '@/service/proposals/ProposalService';
+import { NextRequest, NextResponse } from "next/server";
+import { ProposalService } from "@/service/proposals/ProposalService";
 
 export class ProposalController {
   private proposalService: ProposalService;
@@ -17,61 +17,75 @@ export class ProposalController {
       const { requesterId, ...proposalData } = body;
 
       // Validações básicas
-      if (!requesterId || typeof requesterId !== 'string') {
+      if (!requesterId || typeof requesterId !== "string") {
         return NextResponse.json(
-          { error: 'ID do usuário solicitante é obrigatório e deve ser uma string' },
+          {
+            error:
+              "ID do usuário solicitante é obrigatório e deve ser uma string",
+          },
           { status: 400 }
         );
       }
 
-      if (!proposalData.responderId || typeof proposalData.responderId !== 'string') {
+      if (
+        !proposalData.responderId ||
+        typeof proposalData.responderId !== "string"
+      ) {
         return NextResponse.json(
-          { error: 'ID do usuário destinatário é obrigatório e deve ser uma string' },
+          {
+            error:
+              "ID do usuário destinatário é obrigatório e deve ser uma string",
+          },
           { status: 400 }
         );
       }
 
-      if (!proposalData.items || !Array.isArray(proposalData.items) || proposalData.items.length === 0) {
+      if (
+        !proposalData.items ||
+        !Array.isArray(proposalData.items) ||
+        proposalData.items.length === 0
+      ) {
         return NextResponse.json(
-          { error: 'A proposta deve conter pelo menos um item' },
+          { error: "A proposta deve conter pelo menos um item" },
           { status: 400 }
         );
       }
 
       if (proposalData.items.length > 1) {
         return NextResponse.json(
-          { error: 'A proposta pode conter apenas um item' },
+          { error: "A proposta pode conter apenas um item" },
           { status: 400 }
         );
       }
 
       // Validar se o item tem postId válido
       const item = proposalData.items[0];
-      if (!item.postId || typeof item.postId !== 'string') {
+      if (!item.postId || typeof item.postId !== "string") {
         return NextResponse.json(
-          { error: 'ID do post é obrigatório e deve ser uma string' },
+          { error: "ID do post é obrigatório e deve ser uma string" },
           { status: 400 }
         );
       }
 
-      const novaProposta = await this.proposalService.createProposal(proposalData, requesterId);
+      const novaProposta = await this.proposalService.createProposal(
+        proposalData,
+        requesterId
+      );
 
       return NextResponse.json(novaProposta, { status: 201 });
-
     } catch (error) {
-      console.error('Erro no controller ao criar proposta:', error);
+      console.error("Erro no controller ao criar proposta:", error);
       if (error instanceof Error) {
-        if (error.message.includes('deve conter') || 
-            error.message.includes('pode conter apenas') ||
-            error.message.includes('deve ser uma string')) {
-          return NextResponse.json(
-            { error: error.message },
-            { status: 400 }
-          );
+        if (
+          error.message.includes("deve conter") ||
+          error.message.includes("pode conter apenas") ||
+          error.message.includes("deve ser uma string")
+        ) {
+          return NextResponse.json({ error: error.message }, { status: 400 });
         }
       }
       return NextResponse.json(
-        { error: 'Erro interno do servidor' },
+        { error: "Erro interno do servidor" },
         { status: 500 }
       );
     }
@@ -83,15 +97,21 @@ export class ProposalController {
   async getProposals(request: NextRequest) {
     try {
       const { searchParams } = new URL(request.url);
-      const userId = searchParams.get('userId');
-      const role = searchParams.get('role') as 'requester' | 'responder' | undefined;
-      const status = searchParams.get('status');
+      const userId = searchParams.get("userId");
+      const role = searchParams.get("role") as
+        | "requester"
+        | "responder"
+        | undefined;
+      const status = searchParams.get("status");
 
       let proposals;
 
       if (userId) {
         // Listar propostas de um usuário específico
-        proposals = await this.proposalService.getProposalsByUserId(userId, role || 'requester');
+        proposals = await this.proposalService.getProposalsByUserId(
+          userId,
+          role || "requester"
+        );
       } else if (status) {
         // Listar propostas por status
         proposals = await this.proposalService.getProposalsByStatus(status);
@@ -102,13 +122,12 @@ export class ProposalController {
 
       return NextResponse.json({
         propostas: proposals,
-        total: proposals.length
+        total: proposals.length,
       });
-
     } catch (error) {
-      console.error('Erro no controller ao listar propostas:', error);
+      console.error("Erro no controller ao listar propostas:", error);
       return NextResponse.json(
-        { error: 'Erro interno do servidor' },
+        { error: "Erro interno do servidor" },
         { status: 500 }
       );
     }
@@ -117,13 +136,16 @@ export class ProposalController {
   /**
    * GET /api/propostas/:id - Buscar proposta por ID
    */
-  async getProposalById(request: NextRequest, { params }: { params: { id: string } }) {
+  async getProposalById(
+    request: NextRequest,
+    { params }: { params: { id: string } }
+  ) {
     try {
       const { id } = params;
 
-      if (!id || typeof id !== 'string') {
+      if (!id || typeof id !== "string") {
         return NextResponse.json(
-          { error: 'ID da proposta é obrigatório' },
+          { error: "ID da proposta é obrigatório" },
           { status: 400 }
         );
       }
@@ -132,25 +154,21 @@ export class ProposalController {
 
       if (!proposta) {
         return NextResponse.json(
-          { error: 'Proposta não encontrada' },
+          { error: "Proposta não encontrada" },
           { status: 404 }
         );
       }
 
       return NextResponse.json(proposta);
-
     } catch (error) {
-      console.error('Erro no controller ao buscar proposta:', error);
+      console.error("Erro no controller ao buscar proposta:", error);
       if (error instanceof Error) {
-        if (error.message.includes('não encontrada')) {
-          return NextResponse.json(
-            { error: error.message },
-            { status: 404 }
-            );
+        if (error.message.includes("não encontrada")) {
+          return NextResponse.json({ error: error.message }, { status: 404 });
         }
       }
       return NextResponse.json(
-        { error: 'Erro interno do servidor' },
+        { error: "Erro interno do servidor" },
         { status: 500 }
       );
     }
@@ -159,54 +177,51 @@ export class ProposalController {
   /**
    * PUT /api/propostas/:id - Atualizar proposta
    */
-  async updateProposal(request: NextRequest, { params }: { params: { id: string } }) {
+  async updateProposal(
+    request: NextRequest,
+    { params }: { params: { id: string } }
+  ) {
     try {
       const { id } = params;
       const body = await request.json();
       const { requesterId, ...updateData } = body;
 
-      if (!id || typeof id !== 'string') {
+      if (!id || typeof id !== "string") {
         return NextResponse.json(
-          { error: 'ID da proposta é obrigatório' },
+          { error: "ID da proposta é obrigatório" },
           { status: 400 }
         );
       }
 
       if (!requesterId) {
         return NextResponse.json(
-          { error: 'ID do usuário solicitante é obrigatório' },
+          { error: "ID do usuário solicitante é obrigatório" },
           { status: 400 }
         );
       }
 
-      const propostaAtualizada = await this.proposalService.updateProposal(id, updateData, requesterId);
+      const propostaAtualizada = await this.proposalService.updateProposal(
+        id,
+        updateData,
+        requesterId
+      );
 
       return NextResponse.json(propostaAtualizada);
-
     } catch (error) {
-      console.error('Erro no controller ao atualizar proposta:', error);
+      console.error("Erro no controller ao atualizar proposta:", error);
       if (error instanceof Error) {
-        if (error.message.includes('não encontrada')) {
-          return NextResponse.json(
-            { error: error.message },
-            { status: 404 }
-          );
+        if (error.message.includes("não encontrada")) {
+          return NextResponse.json({ error: error.message }, { status: 404 });
         }
-        if (error.message.includes('pode editá-la')) {
-          return NextResponse.json(
-            { error: error.message },
-            { status: 403 }
-          );
+        if (error.message.includes("pode editá-la")) {
+          return NextResponse.json({ error: error.message }, { status: 403 });
         }
-        if (error.message.includes('pendentes')) {
-          return NextResponse.json(
-            { error: error.message },
-            { status: 400 }
-          );
+        if (error.message.includes("pendentes")) {
+          return NextResponse.json({ error: error.message }, { status: 400 });
         }
       }
       return NextResponse.json(
-        { error: 'Erro interno do servidor' },
+        { error: "Erro interno do servidor" },
         { status: 500 }
       );
     }
@@ -215,56 +230,47 @@ export class ProposalController {
   /**
    * DELETE /api/propostas/:id - Deletar proposta
    */
-  async deleteProposal(request: NextRequest, { params }: { params: { id: string } }) {
+  async deleteProposal(
+    request: NextRequest,
+    { params }: { params: { id: string } }
+  ) {
     try {
       const { id } = params;
       const { searchParams } = new URL(request.url);
-      const requesterId = searchParams.get('requesterId');
+      const requesterId = searchParams.get("requesterId");
 
-      if (!id || typeof id !== 'string') {
+      if (!id || typeof id !== "string") {
         return NextResponse.json(
-          { error: 'ID da proposta é obrigatório' },
+          { error: "ID da proposta é obrigatório" },
           { status: 400 }
         );
       }
 
       if (!requesterId) {
         return NextResponse.json(
-          { error: 'ID do usuário solicitante é obrigatório' },
+          { error: "ID do usuário solicitante é obrigatório" },
           { status: 400 }
         );
       }
 
       await this.proposalService.deleteProposal(id, requesterId);
 
-      return NextResponse.json(
-        { message: 'Proposta deletada com sucesso' }
-      );
-
+      return NextResponse.json({ message: "Proposta deletada com sucesso" });
     } catch (error) {
-      console.error('Erro no controller ao deletar proposta:', error);
+      console.error("Erro no controller ao deletar proposta:", error);
       if (error instanceof Error) {
-        if (error.message.includes('não encontrada')) {
-          return NextResponse.json(
-            { error: error.message },
-            { status: 404 }
-          );
+        if (error.message.includes("não encontrada")) {
+          return NextResponse.json({ error: error.message }, { status: 404 });
         }
-        if (error.message.includes('pode deletá-la')) {
-          return NextResponse.json(
-            { error: error.message },
-            { status: 403 }
-          );
+        if (error.message.includes("pode deletá-la")) {
+          return NextResponse.json({ error: error.message }, { status: 403 });
         }
-        if (error.message.includes('pendentes')) {
-          return NextResponse.json(
-            { error: error.message },
-            { status: 400 }
-          );
+        if (error.message.includes("pendentes")) {
+          return NextResponse.json({ error: error.message }, { status: 400 });
         }
       }
       return NextResponse.json(
-        { error: 'Erro interno do servidor' },
+        { error: "Erro interno do servidor" },
         { status: 500 }
       );
     }
@@ -273,57 +279,53 @@ export class ProposalController {
   /**
    * POST /api/propostas/:id/aceitar - Aceitar proposta
    */
-  async acceptProposal(request: NextRequest, { params }: { params: { id: string } }) {
+  async acceptProposal(
+    request: NextRequest,
+    { params }: { params: { id: string } }
+  ) {
     try {
       const { id } = params;
       const body = await request.json();
       const { responderId } = body;
 
-      if (!id || typeof id !== 'string') {
+      if (!id || typeof id !== "string") {
         return NextResponse.json(
-          { error: 'ID da proposta é obrigatório' },
+          { error: "ID da proposta é obrigatório" },
           { status: 400 }
         );
       }
 
       if (!responderId) {
         return NextResponse.json(
-          { error: 'ID do usuário destinatário é obrigatório' },
+          { error: "ID do usuário destinatário é obrigatório" },
           { status: 400 }
         );
       }
 
-      const propostaAceita = await this.proposalService.acceptProposal(id, responderId);
+      const propostaAceita = await this.proposalService.acceptProposal(
+        id,
+        responderId
+      );
 
       return NextResponse.json({
-        message: 'Proposta aceita com sucesso',
-        proposta: propostaAceita
+        message: "Proposta aceita com sucesso",
+        proposta: propostaAceita,
       });
-
     } catch (error) {
-      console.error('Erro no controller ao aceitar proposta:', error);
+      console.error("Erro no controller ao aceitar proposta:", error);
       if (error instanceof Error) {
-        if (error.message.includes('não encontrada')) {
-          return NextResponse.json(
-            { error: error.message },
-            { status: 404 }
-          );
+        if (error.message.includes("não encontrada")) {
+          return NextResponse.json({ error: error.message }, { status: 404 });
         }
-        if (error.message.includes('pode aceitá-la')) {
-          return NextResponse.json(
-            { error: error.message },
-            { status: 403 }
-          );
+        if (error.message.includes("pode aceitá-la")) {
+          return NextResponse.json({ error: error.message }, { status: 403 });
         }
-        if (error.message.includes('pendentes')) {
-          return NextResponse.json(
-            { error: error.message },
-            { status: 400 }
-          );
+        if (error.message.includes("pendentes")) {
+          return NextResponse.json({ error: error.message }, { status: 400 });
         }
       }
       return NextResponse.json(
-        { error: 'Erro interno do servidor' },
+        { error: "Erro interno do servidor" },
         { status: 500 }
       );
     }
@@ -332,57 +334,53 @@ export class ProposalController {
   /**
    * POST /api/propostas/:id/recusar - Recusar proposta
    */
-  async rejectProposal(request: NextRequest, { params }: { params: { id: string } }) {
+  async rejectProposal(
+    request: NextRequest,
+    { params }: { params: { id: string } }
+  ) {
     try {
       const { id } = params;
       const body = await request.json();
       const { responderId } = body;
 
-      if (!id || typeof id !== 'string') {
+      if (!id || typeof id !== "string") {
         return NextResponse.json(
-          { error: 'ID da proposta é obrigatório' },
+          { error: "ID da proposta é obrigatório" },
           { status: 400 }
         );
       }
 
       if (!responderId) {
         return NextResponse.json(
-          { error: 'ID do usuário destinatário é obrigatório' },
+          { error: "ID do usuário destinatário é obrigatório" },
           { status: 400 }
         );
       }
 
-      const propostaRecusada = await this.proposalService.rejectProposal(id, responderId);
+      const propostaRecusada = await this.proposalService.rejectProposal(
+        id,
+        responderId
+      );
 
       return NextResponse.json({
-        message: 'Proposta recusada com sucesso',
-        proposta: propostaRecusada
+        message: "Proposta recusada com sucesso",
+        proposta: propostaRecusada,
       });
-
     } catch (error) {
-      console.error('Erro no controller ao recusar proposta:', error);
+      console.error("Erro no controller ao recusar proposta:", error);
       if (error instanceof Error) {
-        if (error.message.includes('não encontrada')) {
-          return NextResponse.json(
-            { error: error.message },
-            { status: 404 }
-          );
+        if (error.message.includes("não encontrada")) {
+          return NextResponse.json({ error: error.message }, { status: 404 });
         }
-        if (error.message.includes('pode recusá-la')) {
-          return NextResponse.json(
-            { error: error.message },
-            { status: 403 }
-          );
+        if (error.message.includes("pode recusá-la")) {
+          return NextResponse.json({ error: error.message }, { status: 403 });
         }
-        if (error.message.includes('pendentes')) {
-          return NextResponse.json(
-            { error: error.message },
-            { status: 400 }
-          );
+        if (error.message.includes("pendentes")) {
+          return NextResponse.json({ error: error.message }, { status: 400 });
         }
       }
       return NextResponse.json(
-        { error: 'Erro interno do servidor' },
+        { error: "Erro interno do servidor" },
         { status: 500 }
       );
     }

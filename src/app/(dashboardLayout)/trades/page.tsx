@@ -30,7 +30,7 @@ const user = getUser();
 export default function Trades() {
   const [form] = Form.useForm();
   const [filters, setFilters] = useState<StringMap>({});
-  const [role, setRole] = useState<"requester" | "responder">("requester"); // propostas feitas ou recebidas
+  const [role, setRole] = useState<"requester" | "responder">("requester");
   const [loading, setLoading] = useState(false);
   const [propostas, setPropostas] = useState<any[]>([]);
   const router = useRouter();
@@ -96,7 +96,6 @@ export default function Trades() {
           onValuesChange={(_, allValues) => setFilters(allValues)}
         >
           <Flex gap={8} wrap>
-            {/* Filtro de pesquisa */}
             <Form.Item name="search" style={{ margin: 0 }}>
               <Input
                 placeholder="Buscar proposta"
@@ -105,7 +104,6 @@ export default function Trades() {
               />
             </Form.Item>
 
-            {/* Filtro por status */}
             <Form.Item name="status" style={{ margin: 0 }}>
               <Select placeholder="Todos" allowClear style={{ width: 200 }}>
                 <Option value="pending">Pendente</Option>
@@ -115,7 +113,6 @@ export default function Trades() {
               </Select>
             </Form.Item>
 
-            {/* Ordenação */}
             <Form.Item name="ordem" style={{ margin: 0 }}>
               <Select defaultValue="maisRecentes" style={{ width: 200 }}>
                 <Option value="maisRecentes">Mais recentes</Option>
@@ -123,7 +120,6 @@ export default function Trades() {
               </Select>
             </Form.Item>
 
-            {/* Toggle entre feitas e recebidas */}
             <Segmented
               options={[
                 { label: "Feitas", value: "requester" },

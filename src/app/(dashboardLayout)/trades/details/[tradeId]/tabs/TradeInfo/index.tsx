@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   Flex,
@@ -12,70 +12,55 @@ import {
   Rate,
 } from "antd";
 import axios from "axios";
+import { useParams, useSearchParams } from "next/navigation";
+import { getUser } from "@/utils/auth";
 
 const { Title, Text, Link } = Typography;
 
-interface TradeInfoProps {
-  tradeId: string | string[];
-  responderId: string;
-}
+export default function TradeInfo() {
+  const user = getUser();
+  const params = useParams();
+  const searchParams = useSearchParams();
+  const tradeId = params.tradeId as string;
+  const responderId = user.id;
 
-export default function TradeInfo({ tradeId, responderId }: TradeInfoProps) {
   const [loading, setLoading] = useState(false);
-  const [trade, setTrade] = useState<any>({
-    id: tradeId,
-    status: "pendente",
-    requester: {
-      name: "Maria de Alcântara",
-      username: "@mariaalc",
-      avatar: "https://randomuser.me/api/portraits/women/45.jpg",
-      items: [
-        {
-          id: 101,
-          title: "Sofá de 3 lugares",
-          image: "https://picsum.photos/200?random=10",
-          rating: 4.5,
-        },
-      ],
-    },
-    responder: {
-      name: "Você",
-      items: [
-        {
-          id: 201,
-          title: "Gradient Graphic T-shirt",
-          image: "https://picsum.photos/300?random=1",
-          rating: 4.5,
-        },
-        {
-          id: 202,
-          title: "Gradient Graphic T-shirt",
-          image: "https://picsum.photos/300?random=2",
-          rating: 4.5,
-        },
-      ],
-    },
-  });
+  const [trade, setTrade] = useState<any>(null);
 
-  // Função para aceitar ou recusar proposta
+  // Buscar detalhes da proposta pelo novo endpoint GET /api/propostas/:id
+  const fetchTrade = async () => {
+    try {
+      setLoading(true);
+      const { data } = await axios.get(`/api/propostas/${tradeId}`);
+      setTrade(data);
+    } catch (err: any) {
+      message.error(err.response?.data?.error || "Erro ao carregar proposta");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTrade();
+  }, [tradeId]);
+
+  // Aceitar ou recusar proposta
   const handleAction = async (action: "aceitar" | "recusar") => {
     try {
       setLoading(true);
-      const res = await axios.post(`/api/propostas/${trade.id}/${action}`, {
+      const { data } = await axios.post(`/api/propostas/${tradeId}/${action}`, {
         responderId,
       });
-
-      message.success(res.data.message);
-      setTrade((prev: any) => ({
-        ...prev,
-        status: res.data.proposta.status,
-      }));
+      message.success(data.message);
+      setTrade((prev: any) => ({ ...prev, status: data.proposta.status }));
     } catch (err: any) {
       message.error(err.response?.data?.message || "Erro ao processar ação");
     } finally {
       setLoading(false);
     }
   };
+
+  if (!trade) return <Spin spinning={true} />;
 
   return (
     <Spin spinning={loading}>
@@ -86,21 +71,21 @@ export default function TradeInfo({ tradeId, responderId }: TradeInfoProps) {
             <Text type="secondary">Proponente</Text>
             <Flex align="center" gap={12} style={{ marginTop: 8 }}>
               <Image
-                src={trade.requester.avatar}
+                src={trade.requester?.avatar}
                 width={50}
                 height={50}
                 style={{ borderRadius: "50%", objectFit: "cover" }}
               />
               <Flex vertical>
-                <Link strong>{trade.requester.name}</Link>
-                <Text type="secondary">{trade.requester.username}</Text>
+                <Link strong>{trade.requester?.name}</Link>
+                <Text type="secondary">{trade.requester?.username}</Text>
               </Flex>
             </Flex>
           </Card>
 
           <Card style={{ borderRadius: 12 }}>
             <Text type="secondary">Item de Interesse</Text>
-            {trade.requester.items.map((item: any) => (
+            {trade.requester?.items?.map((item: any) => (
               <Flex vertical key={item.id} style={{ marginTop: 16 }}>
                 <Image
                   src={item.image}
@@ -127,7 +112,7 @@ export default function TradeInfo({ tradeId, responderId }: TradeInfoProps) {
           </Text>
 
           <Flex wrap gap={24}>
-            {trade.responder.items.map((item: any) => (
+            {trade.responder?.items?.map((item: any) => (
               <Card
                 key={item.id}
                 hoverable
@@ -155,7 +140,7 @@ export default function TradeInfo({ tradeId, responderId }: TradeInfoProps) {
               danger
               shape="round"
               style={{ width: 140 }}
-              disabled={trade.status !== "pendente"}
+              disabled={trade.status !== "pending"}
               onClick={() => handleAction("recusar")}
             >
               Recusar
@@ -164,7 +149,7 @@ export default function TradeInfo({ tradeId, responderId }: TradeInfoProps) {
               type="primary"
               shape="round"
               style={{ width: 140 }}
-              disabled={trade.status !== "pendente"}
+              disabled={trade.status !== "pending"}
               onClick={() => handleAction("aceitar")}
             >
               Aceitar

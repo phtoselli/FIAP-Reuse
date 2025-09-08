@@ -88,6 +88,8 @@ export class ProposalService {
     try {
       const proposal = await this.proposalRepository.findById(id);
 
+      console.log(proposal);
+
       if (!proposal) {
         return null;
       }
