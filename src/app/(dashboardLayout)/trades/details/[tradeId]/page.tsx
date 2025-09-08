@@ -19,7 +19,7 @@ export default function TradeDetailsPage() {
         return <TradeChat tradeId={tradeId} />;
       case "details":
       default:
-        return <TradeInfo tradeId={tradeId} responderId="user-456" />;
+        return <TradeInfo tradeId={tradeId} />;
     }
   };
 

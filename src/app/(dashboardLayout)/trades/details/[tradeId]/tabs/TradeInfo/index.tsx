@@ -12,7 +12,7 @@ import {
   Rate,
 } from "antd";
 import axios from "axios";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { getUser } from "@/utils/auth";
 
 const { Title, Text, Link } = Typography;
@@ -20,14 +20,12 @@ const { Title, Text, Link } = Typography;
 export default function TradeInfo() {
   const user = getUser();
   const params = useParams();
-  const searchParams = useSearchParams();
   const tradeId = params.tradeId as string;
   const responderId = user.id;
 
   const [loading, setLoading] = useState(false);
   const [trade, setTrade] = useState<any>(null);
 
-  // Buscar detalhes da proposta pelo novo endpoint GET /api/propostas/:id
   const fetchTrade = async () => {
     try {
       setLoading(true);
@@ -44,7 +42,6 @@ export default function TradeInfo() {
     fetchTrade();
   }, [tradeId]);
 
-  // Aceitar ou recusar proposta
   const handleAction = async (action: "aceitar" | "recusar") => {
     try {
       setLoading(true);
@@ -62,33 +59,44 @@ export default function TradeInfo() {
 
   if (!trade) return <Spin spinning={true} />;
 
+  // Itens oferecidos = requester
+  const offeredItems = trade.items?.filter(
+    (i: any) => trade.requester?.id === trade.requester?.id // todos os itens do requester
+  );
+
+  // Item de interesse = responder
+  const interestItems = trade.items?.filter(
+    (i: any) => trade.responder?.id === trade.responder?.id // todos do responder
+  );
+
   return (
     <Spin spinning={loading}>
       <Flex gap={48} align="flex-start">
-        {/* Coluna esquerda - Proponente + Item Interesse */}
+        {/* Coluna esquerda - Proponente + Item de Interesse */}
         <Flex vertical gap={24} style={{ width: "30%" }}>
           <Card style={{ borderRadius: 12 }}>
             <Text type="secondary">Proponente</Text>
             <Flex align="center" gap={12} style={{ marginTop: 8 }}>
               <Image
-                src={trade.requester?.avatar}
+                src={trade.requester?.avatarUrl || "https://picsum.photos/50"}
                 width={50}
                 height={50}
                 style={{ borderRadius: "50%", objectFit: "cover" }}
+                preview={false}
               />
               <Flex vertical>
                 <Link strong>{trade.requester?.name}</Link>
-                <Text type="secondary">{trade.requester?.username}</Text>
+                <Text type="secondary">{trade.requester?.email}</Text>
               </Flex>
             </Flex>
           </Card>
 
           <Card style={{ borderRadius: 12 }}>
             <Text type="secondary">Item de Interesse</Text>
-            {trade.requester?.items?.map((item: any) => (
+            {interestItems?.map((item: any) => (
               <Flex vertical key={item.id} style={{ marginTop: 16 }}>
                 <Image
-                  src={item.image}
+                  src={item.post?.imageUrl || "https://picsum.photos/200"}
                   width="100%"
                   height={160}
                   style={{
@@ -96,9 +104,14 @@ export default function TradeInfo() {
                     objectFit: "cover",
                     marginBottom: 8,
                   }}
+                  preview={false}
                 />
-                <Rate disabled allowHalf defaultValue={item.rating} />
-                <Text strong>{item.title}</Text>
+                <Rate disabled allowHalf defaultValue={item.post?.rating} />
+                <Text strong>{item.post?.title}</Text>
+                <Text>{item.post?.description}</Text>
+                <Text type="secondary">
+                  Categoria: {item.post?.subcategory?.name || "Sem categoria"}
+                </Text>
               </Flex>
             ))}
           </Card>
@@ -112,24 +125,29 @@ export default function TradeInfo() {
           </Text>
 
           <Flex wrap gap={24}>
-            {trade.responder?.items?.map((item: any) => (
+            {offeredItems?.map((item: any) => (
               <Card
                 key={item.id}
                 hoverable
-                style={{ width: 200, borderRadius: 12 }}
+                style={{ width: 220, borderRadius: 12 }}
                 cover={
                   <Image
-                    src={item.image}
+                    src={item.post?.imageUrl || "https://picsum.photos/220"}
                     height={180}
                     style={{
                       borderRadius: "12px 12px 0 0",
                       objectFit: "cover",
                     }}
+                    preview={false}
                   />
                 }
               >
-                <Rate disabled allowHalf defaultValue={item.rating} />
-                <Text strong>{item.title}</Text>
+                <Rate disabled allowHalf defaultValue={item.post?.rating} />
+                <Text strong>{item.post?.title}</Text>
+                <Text>{item.post?.description}</Text>
+                <Text type="secondary">
+                  Categoria: {item.post?.subcategory?.name || "Sem categoria"}
+                </Text>
               </Card>
             ))}
           </Flex>
