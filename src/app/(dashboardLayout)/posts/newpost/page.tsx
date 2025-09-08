@@ -57,7 +57,7 @@ export default function NewPost() {
         categoriaId: values.categoriaId,
         subcategoriaId: " ",
         condicaoId: values.condicaoId || null,
-        usuarioId: user.id, // futuramente do contexto de auth
+        usuarioId: user.id,
         avaliacao: 0,
       };
 

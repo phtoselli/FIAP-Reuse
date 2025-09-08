@@ -135,13 +135,11 @@ export default function Posts() {
         style={{ width: "100%", height: "100%" }}
       >
         {categoriesToShow.map((category) => {
-          const categoryId =
-            CategoryId[category.value as keyof typeof CategoryId];
           const categoryProducts = productsData?.filter(
-            (product: Product) => product.categoria?.id === categoryId
+            (product: Product) => product.categoria?.id === category.value
           );
 
-          if (!categoryProducts?.length) return null;
+          if (!categoryProducts || categoryProducts.length === 0) return null;
 
           return (
             <div key={category.value} style={{ marginBottom: 48 }}>
