@@ -31,9 +31,6 @@ export class ProposalRepository {
         const post = await prisma.post.findUnique({
           where: { id: item.postId },
           include: {
-            categoryRel: true,
-            subcategory: true,
-            condition: true,
             user: true,
             tradeItems: true,
           },
@@ -75,9 +72,6 @@ export class ProposalRepository {
             const post = await prisma.post.findUnique({
               where: { id: item.postId },
               include: {
-                categoryRel: true,
-                subcategory: true,
-                condition: true,
                 user: true,
                 tradeItems: true,
               },
@@ -130,9 +124,6 @@ export class ProposalRepository {
             const post = await prisma.post.findUnique({
               where: { id: item.postId },
               include: {
-                categoryRel: true,
-                subcategory: true,
-                condition: true,
                 user: true,
                 tradeItems: true,
               },
@@ -179,9 +170,6 @@ export class ProposalRepository {
             const post = await prisma.post.findUnique({
               where: { id: item.postId },
               include: {
-                categoryRel: true,
-                subcategory: true,
-                condition: true,
                 user: true,
                 tradeItems: true,
               },

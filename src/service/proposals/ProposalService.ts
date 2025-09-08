@@ -367,9 +367,9 @@ export class ProposalService {
             description: item.post.categoryRel?.description,
           },
           subcategory: {
-            id: item.post.subcategory.id,
-            name: item.post.subcategory.name,
-            description: item.post.subcategory.description,
+            id: item.post.subcategoryId,
+            name: item.post.subcategoryId,
+            description: item.post.subcategoryId,
           },
           condition: item.post.condition
             ? {
