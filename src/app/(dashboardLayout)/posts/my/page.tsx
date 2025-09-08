@@ -24,6 +24,7 @@ import { GenericTypesMap } from "@/types";
 
 import { productService } from "@/service/products";
 import { Routes } from "@/types/routes";
+import { getUser } from "@/utils/auth";
 
 export default function MYPosts() {
   const [form] = Form.useForm();
@@ -34,6 +35,8 @@ export default function MYPosts() {
   const searchParam = getParam(QueryParamsKey.SEARCH);
   const categoryParam = getParam(QueryParamsKey.CATEGORY);
   const conditionParam = getParam(QueryParamsKey.CONDITION);
+
+  const user = getUser();
 
   const {
     data: productsData,
@@ -64,9 +67,11 @@ export default function MYPosts() {
   );
 
   const filteredProducts = useMemo(() => {
-    if (!productsData) return [];
+    if (!productsData || !user) return [];
 
     return productsData.filter((product: Product) => {
+      const isOwner = product.usuario?.id === user.id;
+
       const matchesSearch =
         !searchParam ||
         searchParam.length === 0 ||
@@ -83,9 +88,9 @@ export default function MYPosts() {
 
       const matchesCondition = !conditionParam || conditionParam.length === 0;
 
-      return matchesSearch && matchesCategory && matchesCondition;
+      return isOwner && matchesSearch && matchesCategory && matchesCondition;
     });
-  }, [productsData, searchParam, categoryParam, conditionParam]);
+  }, [productsData, user, searchParam, categoryParam, conditionParam]);
 
   const onFormValuesChange = (changedValue: GenericTypesMap) => {
     const key = Object.keys(changedValue)[0];

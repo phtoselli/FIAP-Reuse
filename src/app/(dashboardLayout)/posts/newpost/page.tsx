@@ -8,6 +8,7 @@ import { PlusOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import axios from "axios";
 
 import ContentLayout from "@/components/ContentLayout";
+import { getUser } from "@/utils/auth";
 
 export enum CategoryCode {
   CLOTHING = "ROUPAS",
@@ -28,6 +29,7 @@ export enum CategoryDescription {
 }
 
 const { Option } = Select;
+const user = getUser();
 
 export default function NewPost() {
   const [form] = Form.useForm();
@@ -55,7 +57,7 @@ export default function NewPost() {
         categoriaId: values.categoriaId,
         subcategoriaId: " ",
         condicaoId: values.condicaoId || null,
-        usuarioId: "c2a5aea6-fc24-45cd-9b2d-681471d4dbd5", // futuramente do contexto de auth
+        usuarioId: user.id, // futuramente do contexto de auth
         avaliacao: 0,
       };
 
