@@ -22,8 +22,10 @@ import { useRouter } from "next/navigation";
 import { StringMap } from "@/types";
 import ContentLayout from "@/components/ContentLayout";
 import axios from "axios";
+import { getUser } from "@/utils/auth";
 
 const { Option } = Select;
+const user = getUser();
 
 export default function Trades() {
   const [form] = Form.useForm();
@@ -33,7 +35,7 @@ export default function Trades() {
   const [propostas, setPropostas] = useState<any[]>([]);
   const router = useRouter();
 
-  const userId = "c2a5aea6-fc24-45cd-9b2d-681471d4dbd5"; // 🔹 Trocar pelo ID do usuário logado
+  const userId = user.id;
 
   const fetchPropostas = async () => {
     try {
