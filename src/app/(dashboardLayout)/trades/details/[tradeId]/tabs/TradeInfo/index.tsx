@@ -12,7 +12,7 @@ import {
   Rate,
 } from "antd";
 import axios from "axios";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation"; // Adicionado useRouter aqui
 import { getUser } from "@/utils/auth";
 
 const { Title, Text, Link } = Typography;
@@ -20,6 +20,7 @@ const { Title, Text, Link } = Typography;
 export default function TradeInfo() {
   const user = getUser();
   const params = useParams();
+  const router = useRouter(); // Usando o hook useRouter
   const tradeId = params.tradeId as string;
   const responderId = user.id;
 
@@ -163,12 +164,15 @@ export default function TradeInfo() {
             >
               Recusar
             </Button>
+
             <Button
               type="primary"
               shape="round"
               style={{ width: 140 }}
               disabled={trade.status !== "pending"}
-              onClick={() => handleAction("aceitar")}
+              onClick={() => {
+                router.push(`/trades/finalize_exchange?tradeId=${tradeId}`);
+              }}
             >
               Aceitar
             </Button>

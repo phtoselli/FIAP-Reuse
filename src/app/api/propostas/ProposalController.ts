@@ -138,10 +138,10 @@ export class ProposalController {
    */
   async getProposalById(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> } // Mudança 1: params agora é Promise
   ) {
     try {
-      const { id } = params;
+      const { id } = await params; // Mudança 2: await params antes de usar
 
       if (!id || typeof id !== "string") {
         return NextResponse.json(
