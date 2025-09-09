@@ -47,7 +47,7 @@ export default function Register() {
       setUser(data.user);
 
       messageApi.success("Cadastro realizado com sucesso! Boas vindas.");
-      changeRoute(Routes.POSTS);
+      changeRoute(Routes.LOGIN);
     } catch (error: any) {
       messageApi.error(error.message || "Erro no cadastro");
     }

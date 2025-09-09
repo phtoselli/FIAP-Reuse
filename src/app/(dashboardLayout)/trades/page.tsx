@@ -85,6 +85,21 @@ export default function Trades() {
       });
   }, [filters, propostas]);
 
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "pending":
+        return "Pendente de Aprovação";
+      case "accepted":
+        return "Proposta Aceita";
+      case "rejected":
+        return "Proposta Rejeitada";
+      case "finished":
+        return "Proposta Finalizada";
+      default:
+        return status; // fallback caso venha um status inesperado
+    }
+  };
+
   return (
     <ContentLayout
       title="Propostas"
@@ -188,7 +203,7 @@ export default function Trades() {
                     <p>
                       Status:{" "}
                       <Tag color={getStatusColor(trade.status as TradeStatus)}>
-                        {trade.status}
+                        {getStatusLabel(trade.status)}
                       </Tag>
                     </p>
                     <p>

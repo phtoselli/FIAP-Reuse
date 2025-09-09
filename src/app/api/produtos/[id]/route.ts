@@ -1,14 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { ProductController } from './ProductController';
+import { NextRequest, NextResponse } from "next/server";
+import { ProductController } from "./ProductController";
 
 const productController = new ProductController();
 
 // GET /api/produtos/:id - Buscar produto por ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
-  return productController.getProductById(request, { params });
+  return productController.getProductById(request, context);
 }
 
 // PUT /api/produtos/:id - Atualizar produto
