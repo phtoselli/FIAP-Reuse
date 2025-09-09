@@ -21,10 +21,15 @@ import {
   SwapOutlined,
 } from "@ant-design/icons";
 import ContentLayout from "@/components/ContentLayout";
-import TradeRequestModal from "@/components/TradeRequestModal";
 import { Product } from "@/types/product";
 import { CategoryDescription } from "@/types/type/category";
 import { ConditionDescription } from "@/types/type/condition";
+
+// 🔑 import do hook para abrir o modal via URL
+import {
+  URLControlledModalKeys,
+  useURLControlledModal,
+} from "@/hooks/useURLControlledModal";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -35,7 +40,11 @@ export default function PostDetailsPage() {
   const [postData, setPostData] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
+
+  // 🔑 mesmo hook da página 1
+  const { open: openTradeRequestModal } = useURLControlledModal(
+    URLControlledModalKeys.TRADE_REQUEST_MODAL
+  );
 
   useEffect(() => {
     async function fetchProduct() {
@@ -87,15 +96,14 @@ export default function PostDetailsPage() {
             type="primary"
             icon={<SwapOutlined />}
             size="large"
-            onClick={() => setIsTradeModalOpen(true)}
+            // 🔑 agora abre o mesmo modal da Página 1
+            onClick={() => openTradeRequestModal(postData.id)}
           >
             Enviar proposta de troca
           </Button>
         )
       }
     >
-      {isTradeModalOpen && postData && <TradeRequestModal />}
-
       {isLoading && !postData && !error && (
         <Result
           icon={<LoadingOutlined style={{ fontSize: 80 }} />}
@@ -157,7 +165,7 @@ export default function PostDetailsPage() {
                 {getCategoryDescription()}
               </Descriptions.Item>
               <Descriptions.Item label="Subcategoria">
-                {postData.subcategoria?.nome || "-"}
+                {postData.categoria?.nome || "-"}
               </Descriptions.Item>
               <Descriptions.Item label="Estado de Conservação">
                 {getConditionDescription()}
