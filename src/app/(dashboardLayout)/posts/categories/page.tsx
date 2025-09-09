@@ -17,7 +17,6 @@ import { Product } from "@/types/product";
 import { QueryParamsKey } from "@/types/queryParams";
 import useSearchParamsHelper from "@/hooks/useSearchParamsHelper";
 import { productService } from "@/service/products";
-import { CategoryDescription } from "@/types/type/category";
 
 export default function Categories() {
   const [form] = Form.useForm();
@@ -28,10 +27,6 @@ export default function Categories() {
   const searchParam = getParam(QueryParamsKey.SEARCH);
   const categoryParam = getParam(QueryParamsKey.CATEGORY);
   const conditionParam = getParam(QueryParamsKey.CONDITION);
-
-  const title = categoryParam
-    ? CategoryDescription[categoryParam[0] as keyof typeof CategoryDescription]
-    : "Produtos";
 
   const {
     data: productsData,
@@ -50,6 +45,17 @@ export default function Categories() {
     data: conditionsData,
     isLoading: isConditionsLoading,
   } = useTypeService();
+
+  // 🔑 título dinâmico
+  const title = useMemo(() => {
+    if (categoryParam?.length && categoriesData) {
+      const selectedCategory = categoriesData.find(
+        (c) => c.code === categoryParam[0]
+      );
+      return selectedCategory?.title || "Produtos";
+    }
+    return "Produtos";
+  }, [categoryParam, categoriesData]);
 
   const categoryOptions = useMemo(() => {
     if (!categoriesData) return [];
@@ -86,11 +92,6 @@ export default function Categories() {
         !categoryParam ||
         categoryParam.length === 0 ||
         categoryParam.includes(product.categoria?.id);
-
-      // const matchesCondition =
-      //   !conditionParam ||
-      //   conditionParam.length === 0 ||
-      //   conditionParam.includes(product.condicao?.tipo); // 🔥 ajustei também
 
       return matchesSearch && matchesCategory;
     });
@@ -129,6 +130,7 @@ export default function Categories() {
   return (
     <ContentLayout title={title} extra={<BreadcrumbRoute />}>
       <Flex gap={8}>
+        {/* Filtros */}
         <Card
           title="Filtros"
           style={{ width: "250px", flexShrink: 0 }}
@@ -177,7 +179,7 @@ export default function Categories() {
           style={{ width: "100%", height: "100%" }}
         >
           <Card
-            title="Produtos"
+            title={title}
             style={{
               flex: 1,
               display: "flex",
