@@ -22,6 +22,7 @@ import {
   message,
 } from "antd";
 import { getUser } from "@/utils/auth";
+import VLibras from "@/components/Vlibras";
 
 const { Title, Paragraph } = Typography;
 
@@ -81,7 +82,7 @@ export default function Posts() {
   return (
     <div>
       {contextHolder}
-
+      <VLibras />
       <Flex
         wrap
         align="center"

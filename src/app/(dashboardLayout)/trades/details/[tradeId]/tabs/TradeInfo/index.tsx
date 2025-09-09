@@ -127,29 +127,25 @@ export default function TradeInfo() {
 
           <Flex wrap gap={24}>
             {offeredItems?.map((item: any) => (
-              <Card
-                key={item.id}
-                hoverable
-                style={{ width: 220, borderRadius: 12 }}
-                cover={
-                  <Image
-                    src={item.post?.imageUrl || "https://picsum.photos/220"}
-                    height={180}
-                    style={{
-                      borderRadius: "12px 12px 0 0",
-                      objectFit: "cover",
-                    }}
-                    preview={false}
-                  />
-                }
-              >
+              <Flex vertical key={item.id} style={{ marginTop: 16 }}>
+                <Image
+                  src={item.post?.imageUrl || "https://picsum.photos/200"}
+                  width="100%"
+                  height={160}
+                  style={{
+                    borderRadius: 12,
+                    objectFit: "cover",
+                    marginBottom: 8,
+                  }}
+                  preview={false}
+                />
                 <Rate disabled allowHalf defaultValue={item.post?.rating} />
                 <Text strong>{item.post?.title}</Text>
                 <Text>{item.post?.description}</Text>
                 <Text type="secondary">
                   Categoria: {item.post?.subcategory?.name || "Sem categoria"}
                 </Text>
-              </Card>
+              </Flex>
             ))}
           </Flex>
 

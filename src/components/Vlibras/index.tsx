@@ -1,35 +1,35 @@
 "use client";
 
 import { useEffect } from "react";
-import Script from "next/script";
 
-export default function Vlibras() {
+declare global {
+  interface Window {
+    VLibras: any;
+  }
+}
+
+export default function VLibras() {
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const check = () => {
-        if ((window as any).VLibras) {
-          new (window as any).VLibras.Widget("https://vlibras.gov.br/app");
-        } else {
-          setTimeout(check, 300);
-        }
-      };
-      check();
-    }
+    const script = document.createElement("script");
+    script.src = "https://vlibras.gov.br/app/vlibras-plugin.js";
+    script.async = true;
+    script.onload = () => {
+      new window.VLibras.Widget("https://vlibras.gov.br/app");
+    };
+
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
   }, []);
 
   return (
-    <>
-      <div vw className="enabled">
-        <div vw-access-button className="active"></div>
-        <div vw-plugin-wrapper>
-          <div className="vw-plugin-top-wrapper"></div>
-        </div>
+    <div>
+      <div vw-access-button className="active"></div>
+      <div vw-plugin-wrapper>
+        <div className="vw-plugin-top-wrapper"></div>
       </div>
-
-      <Script
-        src="https://vlibras.gov.br/app/vlibras-plugin.js"
-        strategy="afterInteractive"
-      />
-    </>
+    </div>
   );
 }
