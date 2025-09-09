@@ -94,27 +94,29 @@ export default function TradeInfo() {
 
           <Card style={{ borderRadius: 12 }}>
             <Text type="secondary">Item de Interesse</Text>
-            {interestItems?.map((item: any) => (
-              <Flex vertical key={item.id} style={{ marginTop: 16 }}>
-                <Image
-                  src={item.post?.imageUrl || "https://picsum.photos/200"}
-                  width="100%"
-                  height={160}
-                  style={{
-                    borderRadius: 12,
-                    objectFit: "cover",
-                    marginBottom: 8,
-                  }}
-                  preview={false}
-                />
-                <Rate disabled allowHalf defaultValue={item.post?.rating} />
-                <Text strong>{item.post?.title}</Text>
-                <Text>{item.post?.description}</Text>
-                <Text type="secondary">
-                  Categoria: {item.post?.subcategory?.name || "Sem categoria"}
-                </Text>
-              </Flex>
-            ))}
+            {interestItems
+              ?.filter((item: any) => !item.isOffered)
+              ?.map((item: any) => (
+                <Flex vertical key={item.id} style={{ marginTop: 16 }}>
+                  <Image
+                    src={item.post?.imageUrl || "https://picsum.photos/200"}
+                    width="100%"
+                    height={160}
+                    style={{
+                      borderRadius: 12,
+                      objectFit: "cover",
+                      marginBottom: 8,
+                    }}
+                    preview={false}
+                  />
+                  <Rate disabled allowHalf defaultValue={item.post?.rating} />
+                  <Text strong>{item.post?.title}</Text>
+                  <Text>{item.post?.description}</Text>
+                  <Text type="secondary">
+                    Categoria: {item.post?.subcategory?.name || "Sem categoria"}
+                  </Text>
+                </Flex>
+              ))}
           </Card>
         </Flex>
 
@@ -126,27 +128,29 @@ export default function TradeInfo() {
           </Text>
 
           <Flex wrap gap={24}>
-            {offeredItems?.map((item: any) => (
-              <Flex vertical key={item.id} style={{ marginTop: 16 }}>
-                <Image
-                  src={item.post?.imageUrl || "https://picsum.photos/200"}
-                  width="100%"
-                  height={160}
-                  style={{
-                    borderRadius: 12,
-                    objectFit: "cover",
-                    marginBottom: 8,
-                  }}
-                  preview={false}
-                />
-                <Rate disabled allowHalf defaultValue={item.post?.rating} />
-                <Text strong>{item.post?.title}</Text>
-                <Text>{item.post?.description}</Text>
-                <Text type="secondary">
-                  Categoria: {item.post?.subcategory?.name || "Sem categoria"}
-                </Text>
-              </Flex>
-            ))}
+            {offeredItems
+              ?.filter((item: any) => item.isOffered)
+              .map((item: any) => (
+                <Flex vertical key={item.id} style={{ marginTop: 16 }}>
+                  <Image
+                    src={item.post?.imageUrl || "https://picsum.photos/200"}
+                    width="100%"
+                    height={160}
+                    style={{
+                      borderRadius: 12,
+                      objectFit: "cover",
+                      marginBottom: 8,
+                    }}
+                    preview={false}
+                  />
+                  <Rate disabled allowHalf defaultValue={item.post?.rating} />
+                  <Text strong>{item.post?.title}</Text>
+                  <Text>{item.post?.description}</Text>
+                  <Text type="secondary">
+                    Categoria: {item.post?.subcategory?.name || "Sem categoria"}
+                  </Text>
+                </Flex>
+              ))}
           </Flex>
 
           {/* Botões */}

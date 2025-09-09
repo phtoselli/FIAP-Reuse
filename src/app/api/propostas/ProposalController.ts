@@ -51,14 +51,8 @@ export class ProposalController {
         );
       }
 
-      if (proposalData.items.length > 1) {
-        return NextResponse.json(
-          { error: "A proposta pode conter apenas um item" },
-          { status: 400 }
-        );
-      }
-
       // Validar se o item tem postId válido
+      console.log(proposalData?.items);
       const item = proposalData.items[0];
       if (!item.postId || typeof item.postId !== "string") {
         return NextResponse.json(

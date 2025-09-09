@@ -62,7 +62,10 @@ export default function TradeRequestModal() {
           requesterId: user.id,
           responderId: targetProduct.usuario.id,
           message: `Gostaria de trocar meu produto pelo ${targetProduct.nome}`,
-          items: [{ postId: selectedProduct }],
+          items: [
+            { postId: selectedProduct, isOffered: true },
+            { postId: targetProduct.id, isOffered: false },
+          ],
         }),
       });
 

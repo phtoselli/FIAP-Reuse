@@ -24,6 +24,7 @@ export interface ProposalModel {
 export interface ProposalItemModel {
   id: string;
   postId: string;
+  isOffered: boolean;
   post: {
     id: string;
     title: string;
@@ -55,12 +56,13 @@ export interface ProposalCreateModel {
   responderId: string;
   items: {
     postId: string;
+    isOffered: boolean;
   }[]; // Array com exatamente 1 item
 }
 
 export interface ProposalUpdateModel {
   message?: string;
-  status?: 'pending' | 'accepted' | 'rejected';
+  status?: "pending" | "accepted" | "rejected";
 }
 
 export interface ProposalResponseModel {

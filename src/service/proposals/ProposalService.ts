@@ -29,11 +29,6 @@ export class ProposalService {
         throw new Error("A proposta deve conter pelo menos um item");
       }
 
-      // Validar se a proposta tem apenas um item
-      if (proposalData.items.length > 1) {
-        throw new Error("A proposta pode conter apenas um item");
-      }
-
       // Validar se os IDs são strings válidas
       if (
         typeof requesterId !== "string" ||
@@ -59,6 +54,7 @@ export class ProposalService {
       const proposalItems = proposalData.items.map((item) => ({
         proposalId: proposal.id,
         postId: item.postId,
+        isOffered: item.isOffered,
       }));
 
       await this.proposalRepository.createItems(proposalItems);
@@ -354,6 +350,7 @@ export class ProposalService {
       items: proposal.items.map((item: any) => ({
         id: item.id,
         postId: item.postId,
+        isOffered: item.isOffered,
         post: {
           id: item.post.id,
           title: item.post.title,
@@ -381,7 +378,7 @@ export class ProposalService {
             : null,
         },
       })),
-      totalItems: proposal.items.length,
+      totalItems: proposal.items?.filter((item: any) => item.isOffered).length,
     };
   }
 }

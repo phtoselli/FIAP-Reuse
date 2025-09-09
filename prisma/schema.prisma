@@ -28,12 +28,11 @@ model User {
 }
 
 model Type {
-  id             String  @id @default(uuid())
-  code           String
-  type           String
-  description    String?
-  postsCondition Post[]  @relation("PostCondition")
-  tradesStatus   Trade[] @relation("TradeStatus")
+  id           String  @id @default(uuid())
+  code         String
+  type         String
+  description  String?
+  tradesStatus Trade[] @relation("TradeStatus")
 }
 
 model Post {
@@ -49,8 +48,6 @@ model Post {
   subcategoryId String
   conditionId   String?
   rating        Float?   @default(0)
-
-  condition Type? @relation("PostCondition", fields: [conditionId], references: [id])
 
   user       User        @relation(fields: [userId], references: [id])
   tradeItems TradeItem[]
@@ -88,6 +85,7 @@ model ProposalItem {
   proposalId String
   postId     String
   proposal   Proposal @relation(fields: [proposalId], references: [id])
+  isOffered  Boolean?
 }
 
 model TradeItem {
