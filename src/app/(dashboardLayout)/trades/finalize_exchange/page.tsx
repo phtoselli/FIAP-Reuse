@@ -27,12 +27,13 @@ export default function ShippingMethodPage() {
   const searchParams = useSearchParams();
   const tradeId = searchParams.get("tradeId");
 
-  const [selectedAddress, setSelectedAddress] = useState<string>("home");
+  const [selectedAddress, setSelectedAddress] = useState<string>("");
   const [selectedMethod, setSelectedMethod] = useState<string>("correios");
   const [loading, setLoading] = useState(false);
   const [trade, setTrade] = useState<any>(null);
+  const [addresses, setAddresses] = useState<any[]>([]);
 
-  // Buscar informações da trade
+  // Buscar informações da trade + endereços
   useEffect(() => {
     if (!tradeId) {
       message.error("ID da negociação não encontrado");
@@ -40,38 +41,32 @@ export default function ShippingMethodPage() {
       return;
     }
 
-    const fetchTrade = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const { data } = await axios.get(`/api/propostas/${tradeId}`);
-        setTrade(data);
+
+        const [tradeRes, addrRes] = await Promise.all([
+          axios.get(`/api/propostas/${tradeId}`),
+          axios.get(`/api/enderecos`), // você pode passar ?userId= se quiser só do usuário
+        ]);
+
+        setTrade(tradeRes.data);
+        setAddresses(addrRes.data.enderecos || []);
+
+        // Selecionar o primeiro endereço por padrão
+        if (addrRes.data.enderecos?.length > 0) {
+          setSelectedAddress(addrRes.data.enderecos[0].id);
+        }
       } catch (err: any) {
-        message.error(
-          err.response?.data?.error || "Erro ao carregar negociação"
-        );
+        message.error(err.response?.data?.error || "Erro ao carregar dados");
         router.push("/trades");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTrade();
+    fetchData();
   }, [tradeId, router]);
-
-  const addresses = [
-    {
-      key: "home",
-      label: "Minha Casa",
-      description: "João da Silva, Avenida dos Açores, 789",
-      icon: <HomeOutlined />,
-    },
-    {
-      key: "work",
-      label: "Meu Trabalho",
-      description: "João da Silva, Avenida dos Açores, 799",
-      icon: <EnvironmentOutlined />,
-    },
-  ];
 
   const methods = [
     {
@@ -93,20 +88,21 @@ export default function ShippingMethodPage() {
       return;
     }
 
+    if (!selectedAddress) {
+      message.error("Selecione um endereço de entrega");
+      return;
+    }
+
     try {
       setLoading(true);
 
       const finalizationData = {
-        responderId: trade?.responder?.id, // ou pegue do usuário logado
-        shippingAddress: selectedAddress,
+        responderId: trade?.responder?.id,
+        shippingAddress: selectedAddress, // agora é o id do endereço real
         shippingMethod: selectedMethod,
       };
 
-      // Aqui você já aceita a proposta + finaliza
-      const { data } = await axios.post(
-        `/api/propostas/${tradeId}/aceitar`,
-        finalizationData
-      );
+      await axios.post(`/api/propostas/${tradeId}/aceitar`, finalizationData);
 
       message.success("Negociação finalizada com sucesso!");
       router.push("/trades");
@@ -120,7 +116,6 @@ export default function ShippingMethodPage() {
     }
   };
 
-  // Mostrar loading enquanto carrega os dados da trade
   if (loading && !trade) {
     return (
       <Flex justify="center" align="center" style={{ height: 400 }}>
@@ -132,10 +127,8 @@ export default function ShippingMethodPage() {
   return (
     <Spin spinning={loading}>
       <Flex vertical gap={24} style={{ width: "100%" }}>
-        {/* Breadcrumb */}
         <BreadcrumbRoute />
 
-        {/* Título */}
         <Title level={2} style={{ color: "#2A4BA0", margin: 0 }}>
           Forma de Envio
         </Title>
@@ -143,7 +136,6 @@ export default function ShippingMethodPage() {
           Selecione a melhor forma de envio para seu produto
         </Text>
 
-        {/* Informações da negociação */}
         {trade && (
           <Card style={{ borderRadius: 12, backgroundColor: "#f8f9ff" }}>
             <Text type="secondary">Finalizando negociação:</Text>
@@ -156,7 +148,6 @@ export default function ShippingMethodPage() {
           </Card>
         )}
 
-        {/* Layout horizontal com imagem à direita */}
         <Flex gap={48} align="flex-start" style={{ marginTop: 16 }}>
           {/* Coluna esquerda - Endereços e Métodos */}
           <Flex vertical gap={32} style={{ flex: 1 }}>
@@ -170,15 +161,15 @@ export default function ShippingMethodPage() {
               >
                 {addresses.map((addr) => (
                   <Card
-                    key={addr.key}
+                    key={addr.id}
                     style={{ borderRadius: 12, marginBottom: 10 }}
                   >
                     <Flex align="center" justify="space-between">
                       <Flex gap={12}>
-                        <Radio value={addr.key} />
+                        <Radio value={addr.id} />
                         <Flex vertical>
-                          <Text strong>{addr.label}</Text>
-                          <Text type="secondary">{addr.description}</Text>
+                          <Text strong>{addr.street}</Text>
+                          <Text type="secondary">{addr.fullAddress}</Text>
                         </Flex>
                       </Flex>
                       <Button type="link" size="small" icon={<EditOutlined />}>

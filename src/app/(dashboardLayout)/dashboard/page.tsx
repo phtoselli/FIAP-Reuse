@@ -106,11 +106,7 @@ export default function Dashboard() {
         </Space>
       ),
     },
-    {
-      title: "Localização",
-      dataIndex: "location",
-      key: "location",
-    },
+
     {
       title: "Data de Cadastro",
       dataIndex: "createdAt",
@@ -153,14 +149,14 @@ export default function Dashboard() {
         </Col>
         <Col span={8}>
           <Card>
-            <Statistic title="Trocas" value={12} prefix={<SwapOutlined />} />
+            <Statistic title="Trocas" value={"-"} prefix={<SwapOutlined />} />
           </Card>
         </Col>
         <Col span={8}>
           <Card>
             <Statistic
               title="Novos Este Mês"
-              value={5}
+              value={"-"}
               prefix={<CalendarOutlined />}
             />
           </Card>
