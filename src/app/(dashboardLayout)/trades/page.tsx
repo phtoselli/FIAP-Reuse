@@ -188,10 +188,7 @@ export default function Trades() {
               >
                 <Flex gap={16}>
                   <Image
-                    src={
-                      trade.items?.[0]?.imageUrl ||
-                      "https://picsum.photos/seed/default/120/120"
-                    }
+                    src={trade.items?.[0]?.imageUrl || "/produto.png"}
                     alt="Imagem da proposta"
                     width={100}
                     height={100}

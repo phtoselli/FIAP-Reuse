@@ -28,10 +28,9 @@ export default function ProductCard({ product }: Props) {
         cover={
           <Image
             alt={product.nome}
-            src={product.imagem || undefined}
+            src={product.imagem ? product.imagem : "/produto.png"}
             height={130}
             preview={false}
-            fallback="https://via.placeholder.com/400x400?text=No+Image"
             style={{ borderRadius: 8, border: "2px solid white" }}
           />
         }
