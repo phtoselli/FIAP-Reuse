@@ -188,7 +188,11 @@ export default function Trades() {
               >
                 <Flex gap={16}>
                   <Image
-                    src={trade.items?.[0]?.imageUrl || "/produto.png"}
+                    src={
+                      trade.items?.[0]?.post.imageUrl
+                        ? `data:image/png;base64,${trade.items?.[0]?.post.imageUrl}`
+                        : "/produto.png"
+                    }
                     alt="Imagem da proposta"
                     width={100}
                     height={100}

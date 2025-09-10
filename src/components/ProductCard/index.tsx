@@ -28,7 +28,11 @@ export default function ProductCard({ product }: Props) {
         cover={
           <Image
             alt={product.nome}
-            src={product.imagem ? product.imagem : "/produto.png"}
+            src={
+              product.imagem
+                ? `data:image/png;base64,${product.imagem}`
+                : "/produto.png"
+            }
             height={130}
             preview={false}
             style={{ borderRadius: 8, border: "2px solid white" }}

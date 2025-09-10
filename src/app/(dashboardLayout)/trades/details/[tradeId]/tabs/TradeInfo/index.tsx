@@ -99,7 +99,11 @@ export default function TradeInfo() {
               ?.map((item: any) => (
                 <Flex vertical key={item.id} style={{ marginTop: 16 }}>
                   <Image
-                    src={item.post?.imageUrl || "https://picsum.photos/200"}
+                    src={
+                      item.post?.imageUrl
+                        ? `data:image/png;base64,${item.post?.imageUrl}`
+                        : "https://picsum.photos/200"
+                    }
                     width="100%"
                     height={160}
                     style={{
@@ -133,7 +137,11 @@ export default function TradeInfo() {
               .map((item: any) => (
                 <Flex vertical key={item.id} style={{ marginTop: 16 }}>
                   <Image
-                    src={item.post?.imageUrl || "https://picsum.photos/200"}
+                    src={
+                      item.post?.imageUrl
+                        ? `data:image/png;base64,${item.post?.imageUrl}`
+                        : "https://picsum.photos/200"
+                    }
                     width="100%"
                     height={160}
                     style={{

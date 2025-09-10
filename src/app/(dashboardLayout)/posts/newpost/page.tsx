@@ -34,44 +34,35 @@ const user = getUser();
 export default function NewPost() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   const router = useRouter();
-
-  const handleUpload = (info: any) => {
-    if (info.file.status === "done" || info.file.status === "uploading") {
-      const url = URL.createObjectURL(info.file.originFileObj);
-      setImageUrl(url);
-      message.success("Imagem selecionada!");
-    }
-  };
 
   const handleSubmit = async (values: any) => {
     try {
       setLoading(true);
 
-      const payload = {
-        titulo: values.titulo,
-        descricao: values.descricao || "",
-        imagemUrl: imageUrl || "",
-        categoriaId: values.categoriaId,
-        subcategoriaId: " ",
-        condicaoId: values.condicaoId || null,
-        usuarioId: user.id,
-        avaliacao: 0,
-      };
+      const formData = new FormData();
+      formData.append("titulo", values.titulo);
+      formData.append("descricao", values.descricao || "");
+      formData.append("categoriaId", values.categoriaId);
+      formData.append("subcategoriaId", " ");
+      formData.append("condicaoId", values.condicaoId || "");
+      formData.append("usuarioId", user.id);
+      formData.append("avaliacao", "0");
 
-      await axios.post("/api/produtos", payload, {
-        headers: { "Content-Type": "application/json" },
+      if (values.imagens && values.imagens.length > 0) {
+        values.imagens.forEach((file: any) => {
+          formData.append("imagens", file.originFileObj);
+        });
+      }
+
+      await axios.post("/api/produtos", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
       message.success("Produto criado com sucesso!");
       form.resetFields();
-      setImageUrl(null);
-
-      setTimeout(() => {
-        router.push("/posts/my");
-      }, 1500);
+      router.push("/posts/my");
     } catch (err: any) {
       console.error(err.response?.data || err);
       message.error("Erro ao criar produto. Tente novamente.");
@@ -82,7 +73,6 @@ export default function NewPost() {
 
   const handleCancel = () => {
     form.resetFields();
-    setImageUrl(null);
     router.push("/posts/my");
   };
 
@@ -145,16 +135,21 @@ export default function NewPost() {
           <Form.Item label="Descrição de Produto" name="descricao">
             <Input.TextArea
               rows={4}
-              placeholder="Ex: Tênis All Star número 35, em bom estado de conservação..."
+              placeholder="Ex: Tênis All Star número 35, em bom estado..."
             />
           </Form.Item>
 
-          <Form.Item label="Imagens">
+          <Form.Item
+            label="Imagens"
+            name="imagens"
+            valuePropName="fileList"
+            getValueFromEvent={(e) => e.fileList}
+            rules={[{ required: true, message: "Envie ao menos 1 imagem" }]}
+          >
             <Upload
               listType="picture-card"
               maxCount={3}
-              onChange={handleUpload}
-              beforeUpload={() => false}
+              beforeUpload={() => false} // impede upload automático
             >
               <div>
                 <PlusOutlined />

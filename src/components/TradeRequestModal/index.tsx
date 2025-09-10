@@ -147,8 +147,9 @@ export default function TradeRequestModal() {
           <div style={{ display: "flex", gap: 16, marginBottom: 24 }}>
             <Image
               src={
-                targetProduct.imagem ||
-                "https://via.placeholder.com/400x400?text=No+Image"
+                targetProduct.imagem
+                  ? `data:image/png;base64,${targetProduct.imagem}`
+                  : "https://via.placeholder.com/400x400?text=No+Image"
               }
               alt={targetProduct.nome}
               width={120}
