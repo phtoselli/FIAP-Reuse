@@ -10,6 +10,7 @@ import {
   URLControlledModalKeys,
   useURLControlledModal,
 } from "@/hooks/useURLControlledModal";
+import CreatePostModal from "@/components/CreatePostModal";
 
 export default function RootLayout({
   children,
@@ -20,12 +21,17 @@ export default function RootLayout({
     URLControlledModalKeys.TRADE_REQUEST_MODAL
   );
 
+  const { isOpen: isOpenCreatePostModal } = useURLControlledModal(
+    URLControlledModalKeys.CREATE_POST_MODAL
+  );
+
   return (
     <html lang="en">
       <body>
         <AntdStyleRegistry>
           <AntdProvider>
             {/* GLOBAL OPENED MODALS */}
+            {isOpenCreatePostModal && <CreatePostModal />}
             {isTradeRequestModalOpen && <TradeRequestModal />}
             {/* ==================== */}
 

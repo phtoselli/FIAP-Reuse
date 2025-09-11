@@ -25,12 +25,20 @@ import { GenericTypesMap } from "@/types";
 import { productService } from "@/service/products";
 import { Routes } from "@/types/routes";
 import { getUser } from "@/utils/auth";
+import {
+  URLControlledModalKeys,
+  useURLControlledModal,
+} from "@/hooks/useURLControlledModal";
 
 export default function MYPosts() {
   const [form] = Form.useForm();
 
   const { getParam, routerAddParam, routerRemoveParam } =
     useSearchParamsHelper();
+
+  const { open: openCreatePostModal } = useURLControlledModal(
+    URLControlledModalKeys.CREATE_POST_MODAL
+  );
 
   const searchParam = getParam(QueryParamsKey.SEARCH);
   const categoryParam = getParam(QueryParamsKey.CATEGORY);
@@ -57,12 +65,12 @@ export default function MYPosts() {
   } = useTypeService();
 
   const categoryOptions = useMemo(
-    () => categoriesData?.map((c) => ({ value: c.code, label: c.title })) ?? [],
+    () => categoriesData?.map((c) => ({ value: c.id, label: c.title })) ?? [],
     [categoriesData]
   );
 
   const conditionOptions = useMemo(
-    () => conditionsData?.map((c) => ({ value: c.code, label: c.title })) ?? [],
+    () => conditionsData?.map((c) => ({ value: c.id, label: c.title })) ?? [],
     [conditionsData]
   );
 
@@ -84,7 +92,7 @@ export default function MYPosts() {
       const matchesCategory =
         !categoryParam ||
         categoryParam.length === 0 ||
-        categoryParam.includes(product.categoria.nome);
+        categoryParam.includes(product.categoria.id);
 
       const matchesCondition = !conditionParam || conditionParam.length === 0;
 
@@ -122,7 +130,7 @@ export default function MYPosts() {
           color="primary"
           variant="filled"
           icon={<PlusOutlined />}
-          onClick={() => redirect(Routes.NEWPOST)}
+          onClick={() => openCreatePostModal()}
         >
           Novo produto
         </Button>

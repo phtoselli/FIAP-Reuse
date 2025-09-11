@@ -8,6 +8,7 @@ import {
 import { InfoCircleOutlined, SwapOutlined } from "@ant-design/icons";
 import useSearchParamsHelper from "@/hooks/useSearchParamsHelper";
 import { Routes } from "@/types/routes";
+import { FALLBACK_URL } from "@/utils";
 
 interface Props {
   product: Product;
@@ -36,12 +37,14 @@ export default function ProductCard({ product }: Props) {
             height={130}
             preview={false}
             style={{ borderRadius: 8, border: "2px solid white" }}
+            fallback={FALLBACK_URL}
           />
         }
         style={{
-          width: 200,
+          width: "200px",
           margin: "16px",
           border: "2px solid white",
+          height: "230px",
         }}
         styles={{ body: { padding: "8px 4px 16px 4px" } }}
         actions={[

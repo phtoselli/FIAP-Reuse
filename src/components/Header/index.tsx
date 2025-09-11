@@ -24,6 +24,7 @@ import { useState, useEffect } from "react";
 import { clearUser, getUser } from "@/utils/auth";
 import useSearchParamsHelper from "@/hooks/useSearchParamsHelper";
 import { User } from "@prisma/client";
+import { FALLBACK_URL } from "@/utils";
 
 export default function Header() {
   const pathname = usePathname();
@@ -88,6 +89,7 @@ export default function Header() {
             alt="Logo da empresa ReUse"
             width={60}
             preview={false}
+            fallback={FALLBACK_URL}
           />
         </div>
 

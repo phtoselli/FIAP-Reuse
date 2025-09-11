@@ -14,13 +14,14 @@ import {
 import axios from "axios";
 import { useParams, useRouter } from "next/navigation"; // Adicionado useRouter aqui
 import { getUser } from "@/utils/auth";
+import { FALLBACK_URL } from "@/utils";
 
 const { Title, Text, Link } = Typography;
 
 export default function TradeInfo() {
   const user = getUser();
   const params = useParams();
-  const router = useRouter(); // Usando o hook useRouter
+  const router = useRouter();
   const tradeId = params.tradeId as string;
   const responderId = user.id;
 
@@ -60,30 +61,29 @@ export default function TradeInfo() {
 
   if (!trade) return <Spin spinning={true} />;
 
-  // Itens oferecidos = requester
   const offeredItems = trade.items?.filter(
-    (i: any) => trade.requester?.id === trade.requester?.id // todos os itens do requester
+    (i: any) => trade.requester?.id === trade.requester?.id
   );
 
-  // Item de interesse = responder
   const interestItems = trade.items?.filter(
-    (i: any) => trade.responder?.id === trade.responder?.id // todos do responder
+    (i: any) => trade.responder?.id === trade.responder?.id
   );
 
   return (
     <Spin spinning={loading}>
       <Flex gap={48} align="flex-start">
-        {/* Coluna esquerda - Proponente + Item de Interesse */}
         <Flex vertical gap={24} style={{ width: "30%" }}>
           <Card style={{ borderRadius: 12 }}>
             <Text type="secondary">Proponente</Text>
             <Flex align="center" gap={12} style={{ marginTop: 8 }}>
               <Image
+                alt="img"
                 src={trade.requester?.avatarUrl || "https://picsum.photos/50"}
                 width={50}
                 height={50}
                 style={{ borderRadius: "50%", objectFit: "cover" }}
                 preview={false}
+                fallback={FALLBACK_URL}
               />
               <Flex vertical>
                 <Link strong>{trade.requester?.name}</Link>
@@ -99,6 +99,7 @@ export default function TradeInfo() {
               ?.map((item: any) => (
                 <Flex vertical key={item.id} style={{ marginTop: 16 }}>
                   <Image
+                    alt="img"
                     src={
                       item.post?.imageUrl
                         ? `data:image/png;base64,${item.post?.imageUrl}`
@@ -112,6 +113,7 @@ export default function TradeInfo() {
                       marginBottom: 8,
                     }}
                     preview={false}
+                    fallback={FALLBACK_URL}
                   />
                   <Rate disabled allowHalf defaultValue={item.post?.rating} />
                   <Text strong>{item.post?.title}</Text>
@@ -124,7 +126,6 @@ export default function TradeInfo() {
           </Card>
         </Flex>
 
-        {/* Coluna direita - Itens oferecidos */}
         <Flex vertical gap={16} style={{ flex: 1 }}>
           <Title level={4}>Qual produto está sendo ofertado em troca?</Title>
           <Text type="secondary" style={{ marginBottom: 16 }}>
@@ -137,6 +138,7 @@ export default function TradeInfo() {
               .map((item: any) => (
                 <Flex vertical key={item.id} style={{ marginTop: 16 }}>
                   <Image
+                    alt="img"
                     src={
                       item.post?.imageUrl
                         ? `data:image/png;base64,${item.post?.imageUrl}`
@@ -150,6 +152,7 @@ export default function TradeInfo() {
                       marginBottom: 8,
                     }}
                     preview={false}
+                    fallback={FALLBACK_URL}
                   />
                   <Rate disabled allowHalf defaultValue={item.post?.rating} />
                   <Text strong>{item.post?.title}</Text>
@@ -161,7 +164,6 @@ export default function TradeInfo() {
               ))}
           </Flex>
 
-          {/* Botões */}
           <Flex gap={16} justify="flex-end" style={{ marginTop: 24 }}>
             <Button
               danger

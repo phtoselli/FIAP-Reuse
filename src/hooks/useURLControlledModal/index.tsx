@@ -5,6 +5,7 @@ import { useMemo } from "react";
 
 export enum URLControlledModalKeys {
   TRADE_REQUEST_MODAL = "trade-request",
+  CREATE_POST_MODAL = "create-post",
 }
 
 /**

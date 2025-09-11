@@ -30,6 +30,7 @@ import {
   URLControlledModalKeys,
   useURLControlledModal,
 } from "@/hooks/useURLControlledModal";
+import { FALLBACK_URL } from "@/utils";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -148,6 +149,7 @@ export default function PostDetailsPage() {
             height={400}
             style={{ objectFit: "cover", borderRadius: 8 }}
             alt={postData.nome}
+            fallback={FALLBACK_URL}
           />
 
           <div style={{ flex: 1 }}>

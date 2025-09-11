@@ -20,6 +20,7 @@ import { useRouter } from "next/navigation";
 import Title from "antd/es/typography/Title";
 import Paragraph from "antd/es/typography/Paragraph";
 import { setUser } from "@/utils/auth";
+import { FALLBACK_URL } from "@/utils";
 
 export default function Login() {
   const router = useRouter();
@@ -72,6 +73,7 @@ export default function Login() {
             alt="Logo da empresa ReUse"
             width={200}
             preview={false}
+            fallback={FALLBACK_URL}
           />
         </Flex>
       </Col>

@@ -3,6 +3,7 @@
 
 import { RegisterPayload } from "@/database/payloads/user.payload";
 import { Routes } from "@/types/routes";
+import { FALLBACK_URL } from "@/utils";
 import { setUser } from "@/utils/auth";
 import {
   Button,
@@ -63,6 +64,7 @@ export default function Register() {
             alt="Logo da empresa ReUse"
             width={200}
             preview={false}
+            fallback={FALLBACK_URL}
           />
         </Flex>
       </Col>

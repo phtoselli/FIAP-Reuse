@@ -17,10 +17,10 @@ export enum CategoryDescription {
 }
 
 export enum CategoryId {
-  ROUPAS = "1",
-  CASA = "2",
-  CALÇADOS = "3",
-  ACESSÓRIOS = "4",
-  COSMÉTICOS = "5",
-  OUTROS = "6",
+  CLOTHING = "1",
+  HOUSE = "2",
+  FOOTWEAR = "3",
+  ACCESSORIES = "4",
+  COSMETICS = "5",
+  OTHERS = "6",
 }

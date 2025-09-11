@@ -7,6 +7,7 @@ import ContentLayout from "@/components/ContentLayout";
 import { useEffect, useState } from "react";
 import { getUser, setUser } from "@/utils/auth";
 import { User } from "@prisma/client";
+import { FALLBACK_URL } from "@/utils";
 
 type Props = {
   params: {
@@ -80,8 +81,8 @@ export default function UserPage({ params }: Props) {
             }}
           >
             <Image
-              src={userData.avatarUrl || "/default-avatar.png"}
               alt="Avatar"
+              src={userData.avatarUrl || "/default-avatar.png"}
               width={300}
               height={300}
               preview={false}
@@ -90,6 +91,7 @@ export default function UserPage({ params }: Props) {
                 objectFit: "cover",
                 cursor: "pointer",
               }}
+              fallback={FALLBACK_URL}
             />
           </Upload>
         </div>

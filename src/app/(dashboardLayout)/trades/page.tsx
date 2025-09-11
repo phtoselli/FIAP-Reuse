@@ -23,6 +23,7 @@ import { StringMap } from "@/types";
 import ContentLayout from "@/components/ContentLayout";
 import axios from "axios";
 import { getUser } from "@/utils/auth";
+import { FALLBACK_URL } from "@/utils";
 
 const { Option } = Select;
 const user = getUser();
@@ -198,6 +199,7 @@ export default function Trades() {
                     height={100}
                     style={{ borderRadius: 8, objectFit: "cover" }}
                     preview={false}
+                    fallback={FALLBACK_URL}
                   />
                   <div>
                     <p>{trade.message}</p>
