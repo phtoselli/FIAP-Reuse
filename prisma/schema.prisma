@@ -22,18 +22,22 @@ model User {
   posts              Post[]
   proposalsRequested Proposal[] @relation("UserProposalsRequested")
   proposalsReceived  Proposal[] @relation("UserProposalsReceived")
-  // tradesRequested    Trade[]     @relation("UserTradesRequested")
-  // tradesReceived     Trade[]     @relation("UserTradesReceived")
-  // tradeItems         TradeItem[]
+  tradesRequested    Trade[]    @relation("UserTradesRequested")
+  tradesReceived     Trade[]    @relation("UserTradesReceived")
+
+  Trade Trade[]
+
+  TradeItem TradeItem[]
 }
 
-// model Type {
-//   id           String  @id @default(uuid())
-//   code         String
-//   type         String
-//   description  String?
-//   // tradesStatus Trade[] @relation("TradeStatus")
-// }
+model Type {
+  id           String  @id @default(uuid())
+  code         String
+  type         String
+  description  String?
+  tradesStatus Trade[] @relation("TradeStatus")
+  Trade        Trade[]
+}
 
 model Post {
   id            String   @id @default(uuid())
@@ -49,23 +53,27 @@ model Post {
   conditionId   String?
   rating        Float?   @default(0)
 
-  user User @relation(fields: [userId], references: [id])
-  // tradeItems TradeItem[]
+  user       User        @relation(fields: [userId], references: [id])
+  tradeItems TradeItem[]
 }
 
-// model Trade {
-//   id          String      @id @default(uuid())
-//   createdAt   DateTime    @default(now()) @map("created_at")
-//   updatedAt   DateTime    @updatedAt @map("updated_at")
-//   finalizedAt DateTime?   @map("finalized_at")
-//   requesterId String
-//   responderId String
-//   statusId    String?
-//   requester   User        @relation("UserTradesRequested", fields: [requesterId], references: [id])
-//   responder   User        @relation("UserTradesReceived", fields: [responderId], references: [id])
-//   status      Type?       @relation("TradeStatus", fields: [statusId], references: [id])
-//   tradeItems  TradeItem[]
-// }
+model Trade {
+  id          String      @id @default(uuid())
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  finalizedAt DateTime?   @map("finalized_at")
+  requesterId String
+  responderId String
+  statusId    String?
+  requester   User        @relation("UserTradesRequested", fields: [requesterId], references: [id])
+  responder   User        @relation("UserTradesReceived", fields: [responderId], references: [id])
+  status      Type?       @relation("TradeStatus", fields: [statusId], references: [id])
+  tradeItems  TradeItem[]
+  User        User?       @relation(fields: [userId], references: [id])
+  userId      String?
+  Type        Type?       @relation(fields: [typeId], references: [id])
+  typeId      String?
+}
 
 model Proposal {
   id          String         @id @default(uuid())
@@ -88,15 +96,15 @@ model ProposalItem {
   isOffered  Boolean?
 }
 
-// model TradeItem {
-//   id      String @id @default(uuid())
-//   tradeId String
-//   postId  String
-//   ownerId String
-//   owner   User   @relation(fields: [ownerId], references: [id])
-//   post    Post   @relation(fields: [postId], references: [id])
-//   trade   Trade  @relation(fields: [tradeId], references: [id])
-// }
+model TradeItem {
+  id      String @id @default(uuid())
+  tradeId String
+  postId  String
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id])
+  post    Post   @relation(fields: [postId], references: [id])
+  trade   Trade  @relation(fields: [tradeId], references: [id])
+}
 
 model Address {
   id        String   @id @default(uuid())

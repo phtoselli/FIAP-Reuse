@@ -160,7 +160,7 @@ export default function TradeRequestModal() {
             <div>
               <Title level={4}>{targetProduct.nome}</Title>
               <Text type="secondary">
-                {getCategoryName(targetProduct.categoria?.id)}
+                Categoria: {targetProduct.categoria.id || "Sem Categoria"}
               </Text>
               <Paragraph
                 ellipsis={{ rows: 3, expandable: true, symbol: "mais" }}
