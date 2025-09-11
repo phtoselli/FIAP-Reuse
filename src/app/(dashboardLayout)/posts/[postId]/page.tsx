@@ -139,7 +139,11 @@ export default function PostDetailsPage() {
       {postData && !isLoading && !error && (
         <div style={{ display: "flex", gap: 32, flexWrap: "wrap" }}>
           <Image
-            src={postData.imagem || "/placeholder.png"}
+            src={
+              postData.imagem
+                ? `data:image/png;base64,${postData.imagem}`
+                : "/placeholder.png"
+            }
             width={400}
             height={400}
             style={{ objectFit: "cover", borderRadius: 8 }}
@@ -162,13 +166,11 @@ export default function PostDetailsPage() {
                 {postData.descricao || "-"}
               </Descriptions.Item>
               <Descriptions.Item label="Categoria">
-                {getCategoryDescription()}
+                {postData.categoria.id || "-"}
               </Descriptions.Item>
-              <Descriptions.Item label="Subcategoria">
-                {postData.categoria?.nome || "-"}
-              </Descriptions.Item>
+
               <Descriptions.Item label="Estado de Conservação">
-                {getConditionDescription()}
+                {postData.condicao?.tipo || "-"}
               </Descriptions.Item>
               <Descriptions.Item label="Criado em">
                 {new Date(postData.dataCriacao).toLocaleString()}
@@ -181,9 +183,9 @@ export default function PostDetailsPage() {
                   <Avatar src={postData.usuario?.avatarUrl || undefined} />
                   <div>
                     <div>{postData.usuario?.nome}</div>
-                    <div>
+                    {/* <div>
                       {postData.usuario?.cidade}, {postData.usuario?.estado}
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               </Descriptions.Item>

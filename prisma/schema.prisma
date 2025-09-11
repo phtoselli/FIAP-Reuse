@@ -9,31 +9,31 @@ datasource db {
 }
 
 model User {
-  id                 String      @id @default(uuid())
-  email              String      @unique
-  avatarUrl          String?     @map("avatar_url")
+  id                 String     @id @default(uuid())
+  email              String     @unique
+  avatarUrl          String?    @map("avatar_url")
   name               String
-  createdAt          DateTime    @default(now()) @map("created_at")
-  passwordHash       String      @map("password_hash")
-  updatedAt          DateTime    @updatedAt @map("updated_at")
+  createdAt          DateTime   @default(now()) @map("created_at")
+  passwordHash       String     @map("password_hash")
+  updatedAt          DateTime   @updatedAt @map("updated_at")
   city               String?
   state              String?
   Address            Address[]
   posts              Post[]
-  proposalsRequested Proposal[]  @relation("UserProposalsRequested")
-  proposalsReceived  Proposal[]  @relation("UserProposalsReceived")
-  tradesRequested    Trade[]     @relation("UserTradesRequested")
-  tradesReceived     Trade[]     @relation("UserTradesReceived")
-  tradeItems         TradeItem[]
+  proposalsRequested Proposal[] @relation("UserProposalsRequested")
+  proposalsReceived  Proposal[] @relation("UserProposalsReceived")
+  // tradesRequested    Trade[]     @relation("UserTradesRequested")
+  // tradesReceived     Trade[]     @relation("UserTradesReceived")
+  // tradeItems         TradeItem[]
 }
 
-model Type {
-  id           String  @id @default(uuid())
-  code         String
-  type         String
-  description  String?
-  tradesStatus Trade[] @relation("TradeStatus")
-}
+// model Type {
+//   id           String  @id @default(uuid())
+//   code         String
+//   type         String
+//   description  String?
+//   // tradesStatus Trade[] @relation("TradeStatus")
+// }
 
 model Post {
   id            String   @id @default(uuid())
@@ -49,23 +49,23 @@ model Post {
   conditionId   String?
   rating        Float?   @default(0)
 
-  user       User        @relation(fields: [userId], references: [id])
-  tradeItems TradeItem[]
+  user User @relation(fields: [userId], references: [id])
+  // tradeItems TradeItem[]
 }
 
-model Trade {
-  id          String      @id @default(uuid())
-  createdAt   DateTime    @default(now()) @map("created_at")
-  updatedAt   DateTime    @updatedAt @map("updated_at")
-  finalizedAt DateTime?   @map("finalized_at")
-  requesterId String
-  responderId String
-  statusId    String?
-  requester   User        @relation("UserTradesRequested", fields: [requesterId], references: [id])
-  responder   User        @relation("UserTradesReceived", fields: [responderId], references: [id])
-  status      Type?       @relation("TradeStatus", fields: [statusId], references: [id])
-  tradeItems  TradeItem[]
-}
+// model Trade {
+//   id          String      @id @default(uuid())
+//   createdAt   DateTime    @default(now()) @map("created_at")
+//   updatedAt   DateTime    @updatedAt @map("updated_at")
+//   finalizedAt DateTime?   @map("finalized_at")
+//   requesterId String
+//   responderId String
+//   statusId    String?
+//   requester   User        @relation("UserTradesRequested", fields: [requesterId], references: [id])
+//   responder   User        @relation("UserTradesReceived", fields: [responderId], references: [id])
+//   status      Type?       @relation("TradeStatus", fields: [statusId], references: [id])
+//   tradeItems  TradeItem[]
+// }
 
 model Proposal {
   id          String         @id @default(uuid())
@@ -88,15 +88,15 @@ model ProposalItem {
   isOffered  Boolean?
 }
 
-model TradeItem {
-  id      String @id @default(uuid())
-  tradeId String
-  postId  String
-  ownerId String
-  owner   User   @relation(fields: [ownerId], references: [id])
-  post    Post   @relation(fields: [postId], references: [id])
-  trade   Trade  @relation(fields: [tradeId], references: [id])
-}
+// model TradeItem {
+//   id      String @id @default(uuid())
+//   tradeId String
+//   postId  String
+//   ownerId String
+//   owner   User   @relation(fields: [ownerId], references: [id])
+//   post    Post   @relation(fields: [postId], references: [id])
+//   trade   Trade  @relation(fields: [tradeId], references: [id])
+// }
 
 model Address {
   id        String   @id @default(uuid())
