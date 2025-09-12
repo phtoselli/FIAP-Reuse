@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -37,7 +38,6 @@ export default function Dashboard() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Carregar usuários da API
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -46,9 +46,14 @@ export default function Dashboard() {
         const data = res.data;
 
         const mapped = data.usuarios.map((u: any) => ({
+          key: `${u.id}${Math.floor(Math.random())}`,
           id: u.id,
           name: u.nome,
-          avatar: u.avatarUrl || "https://i.pravatar.cc/150",
+          avatar:
+            u.avatarUrl ||
+            `https://i.pravatar.cc/150?u=${
+              Math.floor(Math.random() * 100) + 1
+            }`,
           location: `${u.cidade}, ${u.estado}`,
           createdAt: new Date(u.dataCriacao).toLocaleDateString(),
           email: u.email,
@@ -65,7 +70,6 @@ export default function Dashboard() {
     fetchUsers();
   }, []);
 
-  // Filtrar localmente
   const filteredUsers = users.filter((user) =>
     user.name.toLowerCase().includes(searchText.toLowerCase())
   );
@@ -98,7 +102,11 @@ export default function Dashboard() {
       key: "name",
       render: (_: string, record: User) => (
         <Space>
-          <Avatar src={record.avatar} />
+          <Avatar
+            src={record.avatar}
+            icon={<UserOutlined />}
+            style={{ backgroundColor: "#ddddddff" }}
+          />
           <span>{record.name}</span>
         </Space>
       ),

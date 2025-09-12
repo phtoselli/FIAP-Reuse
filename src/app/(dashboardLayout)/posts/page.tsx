@@ -10,17 +10,7 @@ import { QueryParamsKey } from "@/types/queryParams";
 import { Routes } from "@/types/routes";
 import { CategoryId } from "@/types/type/category";
 import { LoadingOutlined } from "@ant-design/icons";
-import {
-  Button,
-  Checkbox,
-  Divider,
-  Flex,
-  Image,
-  Typography,
-  theme,
-  Spin,
-  message,
-} from "antd";
+import { Button, Flex, Image, Typography, theme, Spin, message } from "antd";
 import { getUser } from "@/utils/auth";
 import VLibras from "@/components/Vlibras";
 import { FALLBACK_URL } from "@/utils";
