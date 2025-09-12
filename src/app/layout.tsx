@@ -11,18 +11,21 @@ import {
   useURLControlledModal,
 } from "@/hooks/useURLControlledModal";
 import CreatePostModal from "@/components/CreatePostModal";
+import TradeDetailsModal from "@/components/TradeDetailsModal";
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { isOpen: isOpenCreatePostModal } = useURLControlledModal(
+    URLControlledModalKeys.CREATE_POST_MODAL
+  );
   const { isOpen: isTradeRequestModalOpen } = useURLControlledModal(
     URLControlledModalKeys.TRADE_REQUEST_MODAL
   );
-
-  const { isOpen: isOpenCreatePostModal } = useURLControlledModal(
-    URLControlledModalKeys.CREATE_POST_MODAL
+  const { isOpen: isTradeDetailsModalOpen } = useURLControlledModal(
+    URLControlledModalKeys.TRADE_DETAILS_MODAL
   );
 
   return (
@@ -33,6 +36,7 @@ export default function RootLayout({
             {/* GLOBAL OPENED MODALS */}
             {isOpenCreatePostModal && <CreatePostModal />}
             {isTradeRequestModalOpen && <TradeRequestModal />}
+            {isTradeDetailsModalOpen && <TradeDetailsModal />}
             {/* ==================== */}
 
             {children}

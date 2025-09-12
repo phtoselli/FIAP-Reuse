@@ -2,7 +2,6 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import { redirect } from "next/navigation";
 import {
   LoadingOutlined,
   PlusOutlined,
@@ -23,7 +22,6 @@ import { QueryParamsKey } from "@/types/queryParams";
 import { GenericTypesMap } from "@/types";
 
 import { productService } from "@/service/products";
-import { Routes } from "@/types/routes";
 import { getUser } from "@/utils/auth";
 import {
   URLControlledModalKeys,

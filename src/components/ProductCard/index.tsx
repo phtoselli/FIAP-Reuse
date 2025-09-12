@@ -28,10 +28,10 @@ export default function ProductCard({ product }: Props) {
         hoverable
         cover={
           <Image
-            alt={product.nome}
+            alt={product?.nome}
             src={
-              product.imagem
-                ? `data:image/png;base64,${product.imagem}`
+              product?.imagem
+                ? `data:image/png;base64,${product?.imagem}`
                 : "/produto.png"
             }
             height={130}
@@ -61,13 +61,13 @@ export default function ProductCard({ product }: Props) {
         ]}
       >
         <Card.Meta
-          title={product.nome}
+          title={product?.nome}
           description={
             <Flex vertical gap={8}>
               <Flex align="center" justify="space-between">
-                <Rate disabled value={product.avaliacao} />
+                <Rate disabled value={product?.avaliacao} />
                 <Text type="secondary" style={{ fontSize: token.fontSizeSM }}>
-                  ({product.avaliacao} avaliações)
+                  ({product?.avaliacao} avaliações)
                 </Text>
               </Flex>
             </Flex>

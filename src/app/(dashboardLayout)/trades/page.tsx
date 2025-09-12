@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import {
@@ -18,23 +20,30 @@ import { SearchOutlined, EditOutlined, EyeOutlined } from "@ant-design/icons";
 import { useEffect, useMemo, useState } from "react";
 import getStatusColor from "@/utils/getStatusColor";
 import { TradeStatus } from "@/types/status";
-import { useRouter } from "next/navigation";
 import { StringMap } from "@/types";
 import ContentLayout from "@/components/ContentLayout";
 import axios from "axios";
 import { getUser } from "@/utils/auth";
 import { FALLBACK_URL } from "@/utils";
+import {
+  URLControlledModalKeys,
+  useURLControlledModal,
+} from "@/hooks/useURLControlledModal";
 
 const { Option } = Select;
 const user = getUser();
 
 export default function Trades() {
   const [form] = Form.useForm();
-  const [filters, setFilters] = useState<StringMap>({});
+
   const [role, setRole] = useState<"requester" | "responder">("requester");
+  const [filters, setFilters] = useState<StringMap>({});
   const [loading, setLoading] = useState(false);
   const [propostas, setPropostas] = useState<any[]>([]);
-  const router = useRouter();
+
+  const { open: openTradeDetailsModal } = useURLControlledModal(
+    URLControlledModalKeys.TRADE_DETAILS_MODAL
+  );
 
   const userId = user.id;
 
@@ -55,10 +64,6 @@ export default function Trades() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchPropostas();
-  }, [role, filters]);
 
   const filteredTrades = useMemo(() => {
     const search = (filters.search || "").toLowerCase();
@@ -97,9 +102,13 @@ export default function Trades() {
       case "finished":
         return "Proposta Finalizada";
       default:
-        return status; // fallback caso venha um status inesperado
+        return status;
     }
   };
+
+  useEffect(() => {
+    fetchPropostas();
+  }, [role, filters]);
 
   return (
     <ContentLayout
@@ -181,7 +190,7 @@ export default function Trades() {
                           <EyeOutlined />
                         )
                       }
-                      onClick={() => router.push(`/trades/details/${trade.id}`)}
+                      onClick={() => openTradeDetailsModal(trade.id)}
                       style={{ width: "30px", height: "20px" }}
                     />
                   </Tooltip>

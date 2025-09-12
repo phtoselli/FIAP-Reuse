@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -10,14 +11,11 @@ import {
   Divider,
   message,
   Spin,
+  Image,
 } from "antd";
 import { useRouter, useSearchParams } from "next/navigation";
 import BreadcrumbRoute from "@/components/BreadcrumbRoute";
-import {
-  HomeOutlined,
-  EnvironmentOutlined,
-  EditOutlined,
-} from "@ant-design/icons";
+import { EditOutlined } from "@ant-design/icons";
 import axios from "axios";
 
 const { Title, Text } = Typography;
@@ -33,7 +31,6 @@ export default function ShippingMethodPage() {
   const [trade, setTrade] = useState<any>(null);
   const [addresses, setAddresses] = useState<any[]>([]);
 
-  // Buscar informações da trade + endereços
   useEffect(() => {
     if (!tradeId) {
       message.error("ID da negociação não encontrado");
@@ -47,13 +44,12 @@ export default function ShippingMethodPage() {
 
         const [tradeRes, addrRes] = await Promise.all([
           axios.get(`/api/propostas/${tradeId}`),
-          axios.get(`/api/enderecos`), // você pode passar ?userId= se quiser só do usuário
+          axios.get(`/api/enderecos`),
         ]);
 
         setTrade(tradeRes.data);
         setAddresses(addrRes.data.enderecos || []);
 
-        // Selecionar o primeiro endereço por padrão
         if (addrRes.data.enderecos?.length > 0) {
           setSelectedAddress(addrRes.data.enderecos[0].id);
         }
@@ -98,7 +94,7 @@ export default function ShippingMethodPage() {
 
       const finalizationData = {
         responderId: trade?.responder?.id,
-        shippingAddress: selectedAddress, // agora é o id do endereço real
+        shippingAddress: selectedAddress,
         shippingMethod: selectedMethod,
       };
 
@@ -149,9 +145,7 @@ export default function ShippingMethodPage() {
         )}
 
         <Flex gap={48} align="flex-start" style={{ marginTop: 16 }}>
-          {/* Coluna esquerda - Endereços e Métodos */}
           <Flex vertical gap={32} style={{ flex: 1 }}>
-            {/* Endereços */}
             <Flex vertical gap={24}>
               <Title level={4}>Endereço de entrega</Title>
               <Radio.Group
@@ -189,7 +183,6 @@ export default function ShippingMethodPage() {
               </Button>
             </Flex>
 
-            {/* Métodos de envio */}
             <Flex vertical gap={24}>
               <Title level={4}>Método de envio</Title>
               <Radio.Group
@@ -217,7 +210,6 @@ export default function ShippingMethodPage() {
             <Divider />
           </Flex>
 
-          {/* Coluna direita - Imagem */}
           <Flex
             justify="center"
             align="center"
@@ -229,7 +221,7 @@ export default function ShippingMethodPage() {
               height: 320,
             }}
           >
-            <img
+            <Image
               src="/delivery-truck.png"
               alt="Delivery"
               style={{ maxHeight: "100%", objectFit: "contain" }}
@@ -237,7 +229,6 @@ export default function ShippingMethodPage() {
           </Flex>
         </Flex>
 
-        {/* Botões */}
         <Flex gap={16} justify="flex-end">
           <Button
             shape="round"

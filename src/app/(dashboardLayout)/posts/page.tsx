@@ -44,7 +44,6 @@ export default function Posts() {
 
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
-  const [activeFilters, setActiveFilters] = useState<string[]>([]);
 
   const fetchProducts = async () => {
     try {

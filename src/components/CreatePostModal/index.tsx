@@ -1,16 +1,18 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Form,
   Input,
   Select,
   Upload,
-  Button,
   Flex,
   message,
   Modal,
+  Row,
+  Col,
 } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import axios from "axios";
@@ -19,6 +21,9 @@ import {
   URLControlledModalKeys,
   useURLControlledModal,
 } from "@/hooks/useURLControlledModal";
+import Text from "antd/es/typography/Text";
+import useTypeService from "@/hooks/useTypeService";
+import { Types } from "@/types/type";
 
 export enum CategoryCode {
   CLOTHING = "ROUPAS",
@@ -38,15 +43,39 @@ export enum CategoryDescription {
   OTHERS = "OUTROS",
 }
 
-const { Option } = Select;
-const user = getUser();
-
 export default function CreatePostModal() {
   const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
 
-  const { isOpen: isOpenCreatePostModal, close: closeCreatePostModal } =
-    useURLControlledModal(URLControlledModalKeys.CREATE_POST_MODAL);
+  const [loading, setLoading] = useState(false);
+  const [renderUploadField, setRenderUploadField] = useState(false);
+
+  const user = getUser();
+
+  const { isOpen, close } = useURLControlledModal(
+    URLControlledModalKeys.CREATE_POST_MODAL
+  );
+
+  const {
+    get: getCategories,
+    data: categoriesData,
+    isLoading: isCategoriesLoading,
+  } = useTypeService();
+
+  const {
+    get: getConditions,
+    data: conditionsData,
+    isLoading: isConditionsLoading,
+  } = useTypeService();
+
+  const categoryOptions = useMemo(
+    () => categoriesData?.map((c) => ({ value: c.id, label: c.title })) ?? [],
+    [categoriesData]
+  );
+
+  const conditionOptions = useMemo(
+    () => conditionsData?.map((c) => ({ value: c.id, label: c.title })) ?? [],
+    [conditionsData]
+  );
 
   const handleSubmit = async (values: any) => {
     try {
@@ -60,12 +89,7 @@ export default function CreatePostModal() {
       formData.append("condicaoId", values.condicaoId || "");
       formData.append("usuarioId", user.id);
       formData.append("avaliacao", "0");
-
-      if (values.imagens && values.imagens.length > 0) {
-        values.imagens.forEach((file: any) => {
-          formData.append("imagens", file.originFileObj);
-        });
-      }
+      formData.append("imagem", values.originFileObj);
 
       await axios.post("/api/produtos", formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -73,7 +97,7 @@ export default function CreatePostModal() {
 
       message.success("Produto criado com sucesso!");
       form.resetFields();
-      closeCreatePostModal();
+      close();
     } catch (err: any) {
       console.error(err.response?.data || err);
       message.error("Erro ao criar produto. Tente novamente.");
@@ -84,83 +108,125 @@ export default function CreatePostModal() {
 
   const handleCancel = () => {
     form.resetFields();
-    closeCreatePostModal();
+    close();
   };
+
+  const onFormChange = (changedValues: { [key: string]: string }) => {
+    if ("imagem" in changedValues) {
+      setRenderUploadField(!renderUploadField);
+    }
+  };
+
+  useEffect(() => {
+    getCategories({ type: Types.CATEGORYTYPE });
+    getConditions({ type: Types.CONDITIONTYPE });
+  }, []);
 
   return (
     <Modal
+      centered
+      open={isOpen}
       destroyOnHidden
-      open={isOpenCreatePostModal}
-      onCancel={handleCancel}
-      onOk={() => form.submit()}
+      title="Criar Nova Publicação"
       okText="Criar publicação"
       cancelText="Cancelar"
+      onCancel={handleCancel}
+      onOk={() => form.submit()}
       okButtonProps={{ loading: loading }}
-      title="Criar Nova Publicação"
-      width={700}
+      styles={{ body: { marginTop: "16px" } }}
+      width={800}
     >
       <Form
         form={form}
         layout="vertical"
         onFinish={handleSubmit}
         style={{ marginTop: 24 }}
+        onValuesChange={(changedValues) => onFormChange(changedValues)}
       >
-        <Form.Item
-          label="Produto"
-          name="titulo"
-          rules={[{ required: true, message: "Informe o nome do produto" }]}
-        >
-          <Input placeholder="Nome do Produto (ex: Tênis All Star)" />
-        </Form.Item>
+        <Row gutter={[8, 8]}>
+          <Col span={12}>
+            <Form.Item
+              label="Imagem do Produto"
+              name="imagem"
+              valuePropName="fileList"
+              getValueFromEvent={(e) => e.fileList}
+              rules={[{ required: true, message: "Envie ao menos 1 imagem" }]}
+            >
+              <Upload
+                maxCount={1}
+                multiple={false}
+                listType="picture-card"
+                beforeUpload={() => false}
+                style={{ width: "100%", height: "240px" }}
+                itemRender={(originNode) => (
+                  <div style={{ width: "375px", height: "240px" }}>
+                    {originNode}
+                  </div>
+                )}
+              >
+                {renderUploadField ? null : (
+                  <Flex
+                    align="center"
+                    justify="center"
+                    vertical
+                    gap={8}
+                    style={{ width: "375px", height: "240px" }}
+                  >
+                    <PlusOutlined />
+                    <Text>Adicionar imagem</Text>
+                  </Flex>
+                )}
+              </Upload>
+            </Form.Item>
+          </Col>
 
-        <Form.Item
-          label="Categoria"
-          name="categoriaId"
-          rules={[{ required: true, message: "Selecione a categoria" }]}
-        >
-          <Select placeholder="Selecione">
-            {Object.entries(CategoryCode).map(([key, value]) => (
-              <Option key={key} value={value}>
-                {CategoryDescription[key as keyof typeof CategoryDescription]}
-              </Option>
-            ))}
-          </Select>
-        </Form.Item>
+          <Col span={12}>
+            <Row gutter={[8, 8]}>
+              <Col span={24}>
+                <Form.Item
+                  label="Produto"
+                  name="titulo"
+                  rules={[{ required: true, message: "" }]}
+                >
+                  <Input placeholder="Nome do Produto (ex: Tênis All Star)" />
+                </Form.Item>
+              </Col>
 
-        <Form.Item label="Estado de Conservação" name="condicaoId">
-          <Select placeholder="Selecione">
-            <Option value="cond-1">Novo</Option>
-            <Option value="cond-2">Seminovo</Option>
-            <Option value="cond-3">Usado</Option>
-            <Option value="cond-4">Para reparar</Option>
-          </Select>
-        </Form.Item>
+              <Col span={12}>
+                <Form.Item
+                  label="Categoria"
+                  name="categoriaId"
+                  rules={[{ required: true, message: "" }]}
+                >
+                  <Select
+                    placeholder="Selecione"
+                    options={categoryOptions}
+                    loading={isCategoriesLoading}
+                  />
+                </Form.Item>
+              </Col>
 
-        <Form.Item label="Descrição de Produto" name="descricao">
-          <Input.TextArea
-            rows={4}
-            placeholder="Ex: Tênis All Star número 35, em bom estado..."
-          />
-        </Form.Item>
+              <Col span={12}>
+                <Form.Item label="Estado de Conservação" name="condicaoId">
+                  <Select
+                    placeholder="Selecione"
+                    options={conditionOptions}
+                    loading={isConditionsLoading}
+                  />
+                </Form.Item>
+              </Col>
 
-        <Form.Item
-          label="Imagens"
-          name="imagens"
-          valuePropName="fileList"
-          getValueFromEvent={(e) => e.fileList}
-          rules={[{ required: true, message: "Envie ao menos 1 imagem" }]}
-        >
-          <Upload
-            listType="picture-card"
-            maxCount={3}
-            beforeUpload={() => false}
-          >
-            <div>
-              <PlusOutlined />
-              <div style={{ marginTop: 8 }}>Adicionar</div>
-            </div>
-          </Upload>
-        </Form.Item>
+              <Col span={24}>
+                <Form.Item label="Descrição de Produto" name="descricao">
+                  <Input.TextArea
+                    rows={4}
+                    placeholder="Ex: Tênis All Star número 35, em bom estado..."
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+          </Col>
+        </Row>
       </Form>
     </Modal>
   );

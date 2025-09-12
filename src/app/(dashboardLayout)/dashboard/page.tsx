@@ -7,14 +7,11 @@ import {
   Col,
   Input,
   message,
-  Rate,
   Row,
   Space,
   Statistic,
-  Switch,
   Table,
 } from "antd";
-import Title from "antd/es/typography/Title";
 import {
   UserOutlined,
   CalendarOutlined,
