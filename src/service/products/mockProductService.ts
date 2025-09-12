@@ -1,6 +1,4 @@
 import { Product } from "@/types/product";
-import { CategoryCode } from "@/types/type/category";
-import { ConditionCode } from "@/types/type/condition";
 import axios from "axios";
 
 const products: Product[] = [];
@@ -11,7 +9,7 @@ const productService = {
       .get(`http://localhost:3000/api/produtos`)
       .then((response) => {
         console.log("Resposta aqui", response.data.produtos);
-        return response.data.produtos; // Dados retornados
+        return response.data.produtos;
       })
       .catch((error) => {
         console.error("Erro na requisição:", error);

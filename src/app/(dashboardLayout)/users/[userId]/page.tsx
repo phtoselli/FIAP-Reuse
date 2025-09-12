@@ -22,8 +22,6 @@ export default function UserPage({ params }: Props) {
   const [formChanged, setFormChanged] = useState(false);
   const [userData, setUserData] = useState<User | null>(null);
 
-  console.log(userData);
-
   useEffect(() => {
     const storedUser = getUser();
 

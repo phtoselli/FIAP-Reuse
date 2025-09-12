@@ -51,8 +51,6 @@ export class ProposalController {
         );
       }
 
-      // Validar se o item tem postId válido
-      console.log(proposalData?.items);
       const item = proposalData.items[0];
       if (!item.postId || typeof item.postId !== "string") {
         return NextResponse.json(
