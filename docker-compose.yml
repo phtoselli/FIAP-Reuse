@@ -14,19 +14,19 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
-  app:
-    build: .
-    container_name: reuse_app
-    restart: always
-    env_file:
-      - .env.docker
-    ports:
-      - "3000:3000"
-    depends_on:
-      - db
-    volumes:
-      - .:/app
-    command: npm run dev
+  # app:
+  #   build: .
+  #   container_name: reuse_app
+  #   restart: always
+  #   env_file:
+  #     - .env.docker
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - db
+  #   volumes:
+  #     - .:/app
+  #   command: npm run dev
 
 volumes:
   postgres-data:
