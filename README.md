@@ -19,6 +19,45 @@ O projeto ReUse integra o IBM Watson Assistant para proporcionar uma experiênci
 - **Funcionalidade:** Aceita propostas de troca pendentes diretamente pelo chat, agilizando o processo de negociação
 - **Exemplo:** "Aceito a proposta prop456"
 
+## Como rodar o projeto
+
+### 1️⃣ Clone o repositório
+```bash
+git clone https://github.com/phtoselli/FIAP-Reuse.git
+cd FIAP-Reuse
+
+2️⃣ Instale as dependências
+
+npm install
+
+3️⃣ Crie o arquivo .env na raiz do projeto
+
+Adicione o seguinte conteúdo:
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/reuse_db"
+
+4️⃣ Gere o cliente Prisma
+
+npx prisma generate
+
+5️⃣ Inicie o Docker
+
+Certifique-se de que o Docker está aberto na sua máquina e execute:
+
+docker compose up
+
+6️⃣ Crie as tabelas no banco de dados
+
+npx prisma db push
+
+7️⃣ Execute o projeto
+
+npm run dev
+
+⚙️ Observação
+	-	Caso a versão do Docker seja atual, remova a primeira linha do arquivo docker-compose.yml:
+
+version: "3.9"
+
 ### 🚀 Como Usar
 
 1. **Acesse a página do chat:** `/chat`
