@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import WatsonService from '@/service/watson/WatsonService';
+import { ProductService } from '@/service/products';
+import { AddressService } from '@/service/addresses';
+import { ProposalService } from '@/service/proposals';
 
 const watsonService = new WatsonService();
 
@@ -26,8 +29,9 @@ export async function POST(request: NextRequest) {
         sessionId,
       });
       isRealWatson = true;
-    } catch (watsonError) {
-      console.log('Watson Assistant não disponível, usando modo demonstração:', watsonError.message);
+    } catch (watsonError: unknown) {
+      const errorMessage = watsonError instanceof Error ? watsonError.message : 'Erro desconhecido';
+      console.log('Watson Assistant não disponível, usando modo demonstração:', errorMessage);
       
       // Fallback para modo demonstração
       watsonResponse = simulateWatsonResponse(message);
@@ -35,7 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Processar intenções específicas do ReUse
-    const reUseResponse = await processReUseIntents(watsonResponse, userId, isRealWatson);
+    const reUseResponse = await processReUseIntents(watsonResponse, userId, isRealWatson, message);
 
     return NextResponse.json({
       success: true,
@@ -103,71 +107,124 @@ function simulateWatsonResponse(message: string) {
 /**
  * Processa as intenções específicas do ReUse
  */
-async function processReUseIntents(watsonResponse: any, userId?: string, isRealWatson: boolean = false) {
+async function processReUseIntents(watsonResponse: any, userId?: string, isRealWatson: boolean = false, originalMessage?: string) {
   const response: any = {
     action: null,
     data: null,
     message: null,
   };
 
-  // 1. Ver detalhes de produto
-  if (watsonService.isProductDetailsIntent(watsonResponse)) {
-    const productId = watsonService.extractProductId(watsonResponse);
+  // 1. Ver detalhes de produto - Fallback para detecção por texto
+  const messageText = (originalMessage || '').toLowerCase();
+  const hasProductIntent = watsonService.isProductDetailsIntent(watsonResponse) || 
+                          messageText.includes('detalhes do produto') || 
+                          messageText.includes('ver produto') ||
+                          messageText.includes('produto');
+  
+  if (hasProductIntent) {
+    // Tentar extrair ID do Watson primeiro, depois do texto da mensagem
+    let productId = watsonService.extractProductId(watsonResponse);
+    
+    // Fallback: extrair ID da mensagem usando regex
+    if (!productId && originalMessage) {
+      const idMatch = originalMessage.match(/produto\s+([a-f0-9-]{36})/i);
+      if (idMatch) {
+        productId = idMatch[1];
+      }
+    }
     
     if (productId) {
-      response.action = 'product_details';
-      response.data = { id: productId };
-      const statusMessage = isRealWatson 
-        ? '🔗 **Status:** Conectado ao Watson Assistant real' 
-        : '📝 **Status:** Modo demonstração (Watson não disponível)';
-      
-      response.message = `📦 **Produto ${productId}**\n\n` +
-                       `🔍 **Detalhes:** Produto identificado com sucesso!\n` +
-                       `${statusMessage}\n` +
-                       `💡 **Próximo passo:** Conectar banco de dados para buscar informações completas\n\n` +
-                       `**Funcionalidade implementada:** ✅\n` +
-                       `**Watson detectou:** Intenção de ver produto\n` +
-                       `**ID extraído:** ${productId}`;
+      try {
+        // Buscar detalhes reais do produto
+        const productService = new ProductService();
+        const productDetails = await productService.getProductById(productId);
+        
+        response.action = 'product_details';
+        response.data = productDetails;
+        
+        response.message = `📦 **Produto ${productId}**\n\n` +
+                         `🔍 **Detalhes:** ${productDetails?.nome || 'Produto encontrado'}\n` +
+                         `📝 **Descrição:** ${productDetails?.descricao || 'Descrição não disponível'}\n` +
+                         `🏷️ **Categoria:** ${productDetails?.categoria?.nome || 'Não informada'}\n` +
+                         `📊 **Condição:** ${productDetails?.condicao?.descricao || 'Não informada'}\n` +
+                         `👤 **Ofertante:** ${productDetails?.usuario?.nome || 'Não informado'}`;
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+        response.action = 'error';
+        response.message = `❌ Erro ao buscar produto ${productId}: ${errorMessage}`;
+      }
     } else {
       response.action = 'error';
       response.message = 'Por favor, forneça o ID do produto que deseja visualizar.';
     }
   }
 
-  // 2. Listar endereços do usuário
-  else if (watsonService.isListAddressesIntent(watsonResponse)) {
-    response.action = 'list_addresses';
-    response.data = [];
-    const statusMessage = isRealWatson 
-      ? '🔗 **Status:** Conectado ao Watson Assistant real' 
-      : '📝 **Status:** Modo demonstração (Watson não disponível)';
-    
-    response.message = `🏠 **Seus Endereços**\n\n` +
-                     `${statusMessage}\n` +
-                     `💡 **Próximo passo:** Conectar banco de dados para buscar endereços\n\n` +
-                     `**Funcionalidade implementada:** ✅\n` +
-                     `**Watson detectou:** Intenção de listar endereços\n` +
-                     `**Usuário:** ${userId || 'Não informado'}`;
+  // 2. Listar endereços do usuário - Fallback para detecção por texto
+  else if (watsonService.isListAddressesIntent(watsonResponse) || 
+           messageText.includes('endereços') || 
+           messageText.includes('enderecos') ||
+           messageText.includes('endereço') ||
+           messageText.includes('meus endereços') ||
+           messageText.includes('listar endereços')) {
+    try {
+      // Buscar endereços reais do usuário
+      const addressService = new AddressService();
+      const addresses = await addressService.getAddressesByUserId(userId || '');
+      
+      response.action = 'list_addresses';
+      response.data = addresses;
+      
+      let addressList = '';
+      if (addresses && addresses.length > 0) {
+        addressList = addresses.map((addr: any, index: number) => 
+          `${index + 1}. **${addr.street}, ${addr.number}**\n   📍 ${addr.city}, ${addr.state}\n   📮 CEP: ${addr.zipCode}`
+        ).join('\n\n');
+      } else {
+        addressList = 'Nenhum endereço cadastrado';
+      }
+      
+      response.message = `🏠 **Seus Endereços**\n\n` +
+                       `${addressList}`;
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      response.action = 'error';
+      response.message = `❌ Erro ao buscar endereços: ${errorMessage}`;
+    }
   }
 
-  // 3. Aceitar proposta de troca
-  else if (watsonService.isAcceptProposalIntent(watsonResponse)) {
-    const proposalId = watsonService.extractProposalId(watsonResponse);
+  // 3. Aceitar proposta de troca - Fallback para detecção por texto
+  else if (watsonService.isAcceptProposalIntent(watsonResponse) ||
+           messageText.includes('aceitar proposta') ||
+           messageText.includes('aceitar') ||
+           messageText.includes('proposta')) {
+    // Tentar extrair ID do Watson primeiro, depois do texto da mensagem
+    let proposalId = watsonService.extractProposalId(watsonResponse);
+    
+    // Fallback: extrair ID da mensagem usando regex
+    if (!proposalId && originalMessage) {
+      const idMatch = originalMessage.match(/proposta\s+([a-f0-9-]{36})/i);
+      if (idMatch) {
+        proposalId = idMatch[1];
+      }
+    }
     
     if (proposalId) {
-      response.action = 'accept_proposal';
-      response.data = { id: proposalId };
-      const statusMessage = isRealWatson 
-        ? '🔗 **Status:** Conectado ao Watson Assistant real' 
-        : '📝 **Status:** Modo demonstração (Watson não disponível)';
-      
-      response.message = `✅ **Proposta ${proposalId}**\n\n` +
-                       `${statusMessage}\n` +
-                       `💡 **Próximo passo:** Conectar banco de dados para aceitar proposta\n\n` +
-                       `**Funcionalidade implementada:** ✅\n` +
-                       `**Watson detectou:** Intenção de aceitar proposta\n` +
-                       `**ID extraído:** ${proposalId}\n` +
-                       `**Usuário:** ${userId || 'Não informado'}`;
+      try {
+        // Aceitar proposta real
+        const proposalService = new ProposalService();
+        const result = await proposalService.acceptProposal(proposalId, userId || '');
+        
+        response.action = 'accept_proposal';
+        response.data = result;
+        
+        response.message = `✅ **Proposta ${proposalId} Aceita!**\n\n` +
+                         `🎉 **Status:** Proposta aceita com sucesso\n` +
+                         `📋 **Detalhes:** ${result?.message || 'Proposta processada'}`;
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+        response.action = 'error';
+        response.message = `❌ Erro ao aceitar proposta ${proposalId}: ${errorMessage}`;
+      }
     } else {
       response.action = 'error';
       response.message = 'Por favor, forneça o ID da proposta que deseja aceitar.';
@@ -196,8 +253,9 @@ export async function GET(request: NextRequest) {
       // Tentar criar sessão real do Watson
       sessionId = await watsonService.createSession();
       isRealWatson = true;
-    } catch (watsonError) {
-      console.log('Watson Assistant não disponível, usando sessão de demonstração:', watsonError.message);
+    } catch (watsonError: unknown) {
+      const errorMessage = watsonError instanceof Error ? watsonError.message : 'Erro desconhecido';
+      console.log('Watson Assistant não disponível, usando sessão de demonstração:', errorMessage);
       // Fallback para sessão de demonstração
       sessionId = 'demo-session-' + Date.now();
       isRealWatson = false;

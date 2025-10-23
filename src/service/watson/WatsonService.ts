@@ -80,7 +80,7 @@ export class WatsonService {
         },
       });
 
-      return response.result as WatsonResponse;
+      return response.result as any;
     } catch (error) {
       console.error('Erro ao enviar mensagem para Watson:', error);
       throw new Error('Falha ao processar mensagem no Watson Assistant');
