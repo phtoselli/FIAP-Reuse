@@ -3,13 +3,12 @@
 import React, { useState } from 'react';
 import { Card, Typography, Space, Button, message } from 'antd';
 import { RobotOutlined, MessageOutlined } from '@ant-design/icons';
-import WatsonChat from '@/components/WatsonChat';
-import ContentLayout from '@/components/ContentLayout';
+import WatsonChat from '@/components/WatsonChat';import ContentLayout from '@/components/ContentLayout';
 
 const { Title, Text } = Typography;
 
 export default function ChatPage() {
-  const [userId] = useState('user-123'); // Em produção, viria do contexto de autenticação
+  const [userId] = useState('bab9bece-a0e4-445b-823c-c744666f38ec'); // Carol - usuário que pode aceitar propostas
 
   const handleProductDetails = (productId: string) => {
     message.success(`Detalhes do produto ${productId} carregados!`);
