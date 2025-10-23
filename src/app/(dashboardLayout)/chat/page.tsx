@@ -1,73 +1,43 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Card, Typography, Space, Button, message } from 'antd';
-import { RobotOutlined, MessageOutlined } from '@ant-design/icons';
-import WatsonChat from '@/components/WatsonChat';import ContentLayout from '@/components/ContentLayout';
+import { Card, Typography, Space } from 'antd';
+import { RobotOutlined } from '@ant-design/icons';
+import ContentLayout from '@/components/ContentLayout';
+import WatsonChat from '@/components/WatsonChat';
 
-const { Title, Text } = Typography;
+const { Title, Paragraph } = Typography;
 
 export default function ChatPage() {
-  const [userId] = useState('bab9bece-a0e4-445b-823c-c744666f38ec'); // Carol - usuário que pode aceitar propostas
-
-  const handleProductDetails = (productId: string) => {
-    message.success(`Detalhes do produto ${productId} carregados!`);
-    // Aqui você pode navegar para a página do produto ou abrir um modal
-  };
-
-  const handleListAddresses = (userId: string) => {
-    message.success(`Endereços do usuário ${userId} listados!`);
-    // Aqui você pode abrir um modal com os endereços ou navegar para a página de endereços
-  };
-
-  const handleAcceptProposal = (proposalId: string, userId: string) => {
-    message.success(`Proposta ${proposalId} aceita com sucesso!`);
-    // Aqui você pode atualizar a lista de propostas ou navegar para a página de propostas
-  };
+  const [userId] = useState("d21d52e9-2969-428c-8aba-e5e236eca94f"); // Alice
 
   return (
     <ContentLayout title="Assistente Virtual">
-      <Space direction="vertical" size="large" style={{ width: '100%' }}>
-        {/* Chat Interface */}
-        <WatsonChat
-          userId={userId}
-          onProductDetails={handleProductDetails}
-          onListAddresses={handleListAddresses}
-          onAcceptProposal={handleAcceptProposal}
-        />
-
-        {/* Instructions */}
-        <Card title="Instruções de Uso">
-          <Space direction="vertical" style={{ width: '100%' }}>
-            <div>
-              <Title level={4}>📦 Ver Detalhes de Produto</Title>
-              <Text>
-                Digite: <Text code>"Quero ver os detalhes do produto [ID]"</Text>
-                <br />
-                Exemplo: "Quero ver os detalhes do produto abc123"
-              </Text>
-            </div>
-            
-            <div>
-              <Title level={4}>🏠 Listar Endereços</Title>
-              <Text>
-                Digite: <Text code>"Quero ver meus endereços"</Text>
-                <br />
-                Exemplo: "Mostre meus endereços cadastrados"
-              </Text>
-            </div>
-            
-            <div>
-              <Title level={4}>✅ Aceitar Proposta</Title>
-              <Text>
-                Digite: <Text code>"Quero aceitar a proposta [ID]"</Text>
-                <br />
-                Exemplo: "Aceito a proposta xyz789"
-              </Text>
-            </div>
-          </Space>
-        </Card>
-      </Space>
+      <Card>
+        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+          <div style={{ textAlign: 'center' }}>
+            <RobotOutlined style={{ fontSize: '48px', color: '#1890ff', marginBottom: '16px' }} />
+            <Title level={2}>Assistente Virtual ReUse</Title>
+            <Paragraph>
+              Converse com nosso assistente para obter informações sobre produtos, 
+              endereços e propostas de troca.
+            </Paragraph>
+          </div>
+          
+          <WatsonChat 
+            userId={userId}
+            onProductDetails={(productId) => {
+              console.log('Product details requested:', productId);
+            }}
+            onListAddresses={(userId) => {
+              console.log('Addresses requested for user:', userId);
+            }}
+            onAcceptProposal={(proposalId, userId) => {
+              console.log('Proposal accepted:', proposalId, 'by user:', userId);
+            }}
+          />
+        </Space>
+      </Card>
     </ContentLayout>
   );
 }
