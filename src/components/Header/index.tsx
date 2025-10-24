@@ -58,6 +58,7 @@ export default function Header() {
     { key: Routes.POSTS, label: "Publicações" },
     { key: Routes.MY_POSTS, label: "Minhas Publicações" },
     { key: Routes.TRADES, label: "Propostas" },
+    { key: "/addresses", label: "Endereços" },
     { key: Routes.DASHBOARD, label: "Usuários" },
   ];
 

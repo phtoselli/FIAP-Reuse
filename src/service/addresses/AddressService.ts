@@ -296,6 +296,8 @@ export class AddressService {
     return {
       id: address.id,
       street: address.street,
+      number: address.number || '',
+      complement: address.complement,
       city: address.city,
       state: address.state,
       zipCode: address.zipCode,
@@ -310,7 +312,7 @@ export class AddressService {
         state: address.user.state,
         avatarUrl: address.user.avatarUrl,
       },
-      fullAddress: `${address.street}, ${address.city}, ${address.state} ${address.zipCode}, ${address.country}`,
+      fullAddress: `${address.street}, ${address.number || ''}${address.complement ? ', ' + address.complement : ''} - ${address.city}, ${address.state} - ${address.zipCode}`,
     };
   }
 }

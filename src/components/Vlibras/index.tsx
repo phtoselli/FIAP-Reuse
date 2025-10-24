@@ -27,9 +27,9 @@ export default function VLibras() {
   }, []);
 
   return (
-    <div vw className="enabled">
-      <div vw-access-button className="active"></div>
-      <div vw-plugin-wrapper>
+    <div vw="true" className="enabled">
+      <div vw-access-button="true" className="active"></div>
+      <div vw-plugin-wrapper="true">
         <div className="vw-plugin-top-wrapper"></div>
       </div>
     </div>

@@ -292,13 +292,13 @@ export class ProductService {
       },
       categoria: {
         id: post.categoryId,
-        nome: post.category?.name,
-        descricao: post.category?.description,
+        nome: post.category?.code || 'Categoria',
+        descricao: post.category?.description || 'Descrição da categoria',
       },
       subcategoria: {
         id: post.subcategoryId,
-        nome: post.subcategory?.name,
-        descricao: post.subcategory?.description,
+        nome: post.subcategory?.code || 'Subcategoria',
+        descricao: post.subcategory?.description || 'Descrição da subcategoria',
       },
       condicao: post.condition
         ? {

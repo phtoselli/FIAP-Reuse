@@ -2,6 +2,7 @@
 
 import "./globals.css";
 import "@ant-design/v5-patch-for-react-19";
+import { Suspense } from "react";
 
 import AntdProvider from "@/lib/antd/AntdProvider";
 import { AntdStyleRegistry } from "@/lib/antd/antd-style-registry";
@@ -12,7 +13,7 @@ import {
   useURLControlledModal,
 } from "@/hooks/useURLControlledModal";
 
-export default function RootLayout({
+function LayoutContent({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -22,33 +23,38 @@ export default function RootLayout({
   );
 
   return (
+    <>
+      {/* GLOBAL OPENED MODALS */}
+      {isTradeRequestModalOpen && <TradeRequestModal />}
+      {/* ==================== */}
+
+      {/* FLOATING CHAT BUTTON */}
+      <FloatingChatButton 
+        userId="d21d52e9-2969-428c-8aba-e5e236eca94f"
+        onListAddresses={(userId) => {
+          console.log('Addresses requested for user:', userId);
+        }}
+      />
+      {/* ==================== */}
+
+      {children}
+    </>
+  );
+}
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
     <html lang="en">
       <body>
         <AntdStyleRegistry>
           <AntdProvider>
-            {/* GLOBAL OPENED MODALS */}
-            {isTradeRequestModalOpen && <TradeRequestModal />}
-            {/* ==================== */}
-
-            {/* FLOATING CHAT BUTTON */}
-            <FloatingChatButton 
-              userId="d21d52e9-2969-428c-8aba-e5e236eca94f"
-              onProductDetails={(productId) => {
-                console.log('Product details requested:', productId);
-                // Aqui você pode implementar navegação para a página do produto
-              }}
-              onListAddresses={(userId) => {
-                console.log('Addresses requested for user:', userId);
-                // Aqui você pode implementar abertura de modal com endereços
-              }}
-              onAcceptProposal={(proposalId, userId) => {
-                console.log('Proposal accepted:', proposalId, 'by user:', userId);
-                // Aqui você pode implementar atualização da lista de propostas
-              }}
-            />
-            {/* ==================== */}
-
-            {children}
+            <Suspense fallback={<div>Loading...</div>}>
+              <LayoutContent>{children}</LayoutContent>
+            </Suspense>
           </AntdProvider>
         </AntdStyleRegistry>
       </body>

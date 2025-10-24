@@ -7,5 +7,3 @@ export { ProductService } from './ProductService';
 // Exporta os tipos
 export type { ProductModel, ProductCreateModel, ProductUpdateModel } from '@/types/product/ProductModel';
 
-// Exporta funções de teste
-export { testarFiltrosPorCategoria, testarPerformanceFiltros } from './test-filtros';

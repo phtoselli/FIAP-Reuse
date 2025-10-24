@@ -6,7 +6,7 @@ const proposalController = new ProposalController();
 // GET /api/propostas/:id - Buscar proposta por ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   return proposalController.getProposalById(request, { params });
 }
@@ -14,7 +14,7 @@ export async function GET(
 // PUT /api/propostas/:id - Atualizar proposta
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   return proposalController.updateProposal(request, { params });
 }
@@ -22,7 +22,7 @@ export async function PUT(
 // DELETE /api/propostas/:id - Deletar proposta
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   return proposalController.deleteProposal(request, { params });
 }

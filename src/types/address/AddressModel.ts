@@ -1,6 +1,8 @@
 export interface AddressModel {
   id: string;
   street: string;
+  number: string;
+  complement?: string | null;
   city: string;
   state: string;
   zipCode: string;
@@ -19,6 +21,8 @@ export interface AddressModel {
 
 export interface AddressCreateModel {
   street: string;
+  number: string;
+  complement?: string | null;
   city: string;
   state: string;
   zipCode: string;
@@ -28,6 +32,8 @@ export interface AddressCreateModel {
 
 export interface AddressUpdateModel {
   street?: string;
+  number?: string;
+  complement?: string | null;
   city?: string;
   state?: string;
   zipCode?: string;
@@ -37,6 +43,8 @@ export interface AddressUpdateModel {
 export interface AddressResponseModel {
   id: string;
   street: string;
+  number: string;
+  complement?: string | null;
   city: string;
   state: string;
   zipCode: string;

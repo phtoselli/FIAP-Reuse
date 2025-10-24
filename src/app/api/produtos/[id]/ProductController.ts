@@ -58,10 +58,10 @@ export class ProductController {
    */
   async updateProduct(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
   ) {
     try {
-      const { id } = params;
+      const { id } = await params;
       const body = await request.json();
 
       // Validação básica
@@ -100,10 +100,10 @@ export class ProductController {
    */
   async deactivateProduct(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
   ) {
     try {
-      const { id } = params;
+      const { id } = await params;
 
       // Validação básica
       if (!id || typeof id !== "string") {

@@ -18,16 +18,12 @@ interface ChatMessage {
 
 interface WatsonChatProps {
   userId?: string;
-  onProductDetails?: (productId: string) => void;
   onListAddresses?: (userId: string) => void;
-  onAcceptProposal?: (proposalId: string, userId: string) => void;
 }
 
 export default function WatsonChat({ 
   userId, 
-  onProductDetails, 
-  onListAddresses, 
-  onAcceptProposal 
+  onListAddresses 
 }: WatsonChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -113,12 +109,8 @@ export default function WatsonChat({
         setMessages(prev => [...prev, botMessage]);
 
         // Processa ações específicas
-        if (data.reuseResponse.action === 'product_details' && onProductDetails) {
-          onProductDetails(data.reuseResponse.data.id);
-        } else if (data.reuseResponse.action === 'list_addresses' && onListAddresses) {
+        if (data.reuseResponse.action === 'list_addresses' && onListAddresses) {
           onListAddresses(userId || '');
-        } else if (data.reuseResponse.action === 'accept_proposal' && onAcceptProposal) {
-          onAcceptProposal(data.reuseResponse.data.id, userId || '');
         }
       } else {
         message.error('Erro ao processar mensagem');
@@ -140,27 +132,21 @@ export default function WatsonChat({
 
   const quickActions = [
     {
-      label: 'Ver produto',
-      action: () => {
-        const productId = prompt('Digite o ID do produto:');
-        if (productId) {
-          setInputMessage(`Quero ver os detalhes do produto ${productId}`);
-        }
-      }
-    },
-    {
       label: 'Meus endereços',
       action: () => {
         setInputMessage('Quero ver meus endereços cadastrados');
       }
     },
     {
-      label: 'Aceitar proposta',
+      label: 'Como cadastrar item',
       action: () => {
-        const proposalId = prompt('Digite o ID da proposta:');
-        if (proposalId) {
-          setInputMessage(`Quero aceitar a proposta ${proposalId}`);
-        }
+        setInputMessage('Como cadastrar um item?');
+      }
+    },
+    {
+      label: 'Dicas de segurança',
+      action: () => {
+        setInputMessage('Dicas de segurança');
       }
     }
   ];

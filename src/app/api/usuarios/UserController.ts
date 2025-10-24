@@ -49,9 +49,9 @@ export class UserController {
   /**
    * GET /api/usuarios/:id - Buscar usuário por ID
    */
-  async getUserById(request: NextRequest, { params }: { params: { id: string } }) {
+  async getUserById(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
-      const { id } = params;
+      const { id } = await params;
 
       if (!id || typeof id !== 'string') {
         return NextResponse.json(
@@ -158,7 +158,7 @@ export class UserController {
    */
   async updateUser(request: NextRequest, { params }: { params: { id: string } }) {
     try {
-      const { id } = params;
+      const { id } = await params;
       const body = await request.json();
       const { nome, email, senha, cidade, estado, avatarUrl } = body;
 
@@ -218,7 +218,7 @@ export class UserController {
    */
   async deleteUser(request: NextRequest, { params }: { params: { id: string } }) {
     try {
-      const { id } = params;
+      const { id } = await params;
 
       if (!id || typeof id !== 'string') {
         return NextResponse.json(

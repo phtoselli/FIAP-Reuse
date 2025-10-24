@@ -173,10 +173,10 @@ export class ProposalController {
    */
   async updateProposal(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
   ) {
     try {
-      const { id } = params;
+      const { id } = await params;
       const body = await request.json();
       const { requesterId, ...updateData } = body;
 
@@ -226,10 +226,10 @@ export class ProposalController {
    */
   async deleteProposal(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
   ) {
     try {
-      const { id } = params;
+      const { id } = await params;
       const { searchParams } = new URL(request.url);
       const requesterId = searchParams.get("requesterId");
 
@@ -275,10 +275,10 @@ export class ProposalController {
    */
   async acceptProposal(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
   ) {
     try {
-      const { id } = params;
+      const { id } = await params;
       const body = await request.json();
       const { responderId } = body;
 
@@ -330,10 +330,10 @@ export class ProposalController {
    */
   async rejectProposal(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
   ) {
     try {
-      const { id } = params;
+      const { id } = await params;
       const body = await request.json();
       const { responderId } = body;
 

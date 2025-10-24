@@ -7,16 +7,12 @@ import WatsonChat from '@/components/WatsonChat';
 
 interface FloatingChatButtonProps {
   userId?: string;
-  onProductDetails?: (productId: string) => void;
   onListAddresses?: (userId: string) => void;
-  onAcceptProposal?: (proposalId: string, userId: string) => void;
 }
 
 export default function FloatingChatButton({ 
   userId, 
-  onProductDetails, 
-  onListAddresses, 
-  onAcceptProposal 
+  onListAddresses 
 }: FloatingChatButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -84,9 +80,7 @@ export default function FloatingChatButton({
       >
         <WatsonChat
           userId={userId}
-          onProductDetails={onProductDetails}
           onListAddresses={onListAddresses}
-          onAcceptProposal={onAcceptProposal}
         />
       </Drawer>
     </>

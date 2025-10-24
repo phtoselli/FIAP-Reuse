@@ -117,9 +117,9 @@ export class AddressController {
   /**
    * GET /api/enderecos/:id - Buscar endereço por ID
    */
-  async getAddressById(request: NextRequest, { params }: { params: { id: string } }) {
+  async getAddressById(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
-      const { id } = params;
+      const { id } = await params;
 
       if (!id || typeof id !== 'string') {
         return NextResponse.json(
@@ -159,9 +159,9 @@ export class AddressController {
   /**
    * PUT /api/enderecos/:id - Atualizar endereço
    */
-  async updateAddress(request: NextRequest, { params }: { params: { id: string } }) {
+  async updateAddress(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
-      const { id } = params;
+      const { id } = await params;
       const body = await request.json();
       const { userId, ...updateData } = body;
 
@@ -209,9 +209,9 @@ export class AddressController {
   /**
    * DELETE /api/enderecos/:id - Deletar endereço
    */
-  async deleteAddress(request: NextRequest, { params }: { params: { id: string } }) {
+  async deleteAddress(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
-      const { id } = params;
+      const { id } = await params;
       const { searchParams } = new URL(request.url);
       const userId = searchParams.get('userId');
 
