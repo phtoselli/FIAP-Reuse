@@ -282,6 +282,10 @@ export class ProposalController {
       const body = await request.json();
       const { responderId } = body;
 
+      console.log('🔍 Controller - ID da proposta:', id);
+      console.log('🔍 Controller - Body recebido:', body);
+      console.log('🔍 Controller - ResponderId:', responderId);
+
       if (!id || typeof id !== "string") {
         return NextResponse.json(
           { error: "ID da proposta é obrigatório" },
@@ -377,6 +381,28 @@ export class ProposalController {
         { error: "Erro interno do servidor" },
         { status: 500 }
       );
+    }
+  }
+
+  /**
+   * Finaliza os detalhes de envio de uma proposta já aceita
+   * @param id - ID da proposta
+   * @param shippingData - Dados de envio
+   * @returns Proposta atualizada
+   */
+  async finalizeShippingDetails(
+    id: string,
+    shippingData: { shippingAddress: string; shippingMethod: string }
+  ) {
+    try {
+      console.log('🔍 FinalizeShipping - ID da proposta:', id);
+      console.log('🔍 FinalizeShipping - Shipping data:', shippingData);
+
+      const result = await this.proposalService.finalizeShippingDetails(id, shippingData);
+      return result;
+    } catch (error: any) {
+      console.error("Erro no controller ao finalizar envio:", error);
+      throw new Error(error.message || "Erro interno ao finalizar envio");
     }
   }
 }

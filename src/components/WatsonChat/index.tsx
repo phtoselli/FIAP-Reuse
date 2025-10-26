@@ -112,6 +112,13 @@ export default function WatsonChat({
         if (data.reuseResponse.action === 'list_addresses' && onListAddresses) {
           onListAddresses(userId || '');
         }
+        
+        // Redireciona para finalização da troca após aceitar proposta
+        if (data.reuseResponse.action === 'accept_proposal' && data.reuseResponse.data?.redirectTo) {
+          setTimeout(() => {
+            window.location.href = data.reuseResponse.data.redirectTo;
+          }, 2000); // Aguarda 2 segundos para mostrar a mensagem
+        }
       } else {
         message.error('Erro ao processar mensagem');
       }
@@ -135,6 +142,12 @@ export default function WatsonChat({
       label: 'Meus endereços',
       action: () => {
         setInputMessage('Quero ver meus endereços cadastrados');
+      }
+    },
+    {
+      label: 'Propostas recebidas',
+      action: () => {
+        setInputMessage('Quero ver minhas propostas recebidas');
       }
     },
     {
@@ -215,6 +228,11 @@ export default function WatsonChat({
                       🏠 {msg.data.length} endereço(s) encontrado(s)
                     </Text>
                   )}
+                  {msg.action === 'list_proposals' && (
+                    <Text style={{ color: msg.isUser ? 'white' : 'black' }}>
+                      📋 {msg.data.length} proposta(s) encontrada(s)
+                    </Text>
+                  )}
                   {msg.action === 'accept_proposal' && (
                     <Text style={{ color: msg.isUser ? 'white' : 'black' }}>
                       ✅ Proposta aceita com sucesso!
@@ -243,8 +261,14 @@ export default function WatsonChat({
             <Button
               key={index}
               size="small"
+              type="primary"
               onClick={action.action}
               disabled={isLoading}
+              style={{
+                backgroundColor: '#1890ff',
+                borderColor: '#1890ff',
+                color: 'white'
+              }}
             >
               {action.label}
             </Button>

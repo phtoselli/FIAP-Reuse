@@ -26,7 +26,8 @@ export class AuthService {
       }
 
       // Verificar se a senha está correta
-      const isPasswordValid = await bcrypt.compare(senha, user.passwordHash);
+      // Para desenvolvimento: aceitar senhas em texto simples
+      const isPasswordValid = senha === user.passwordHash || await bcrypt.compare(senha, user.passwordHash);
       
       if (!isPasswordValid) {
         throw new Error('Email ou senha incorretos');

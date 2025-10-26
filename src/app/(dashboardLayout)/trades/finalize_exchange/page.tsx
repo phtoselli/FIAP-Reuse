@@ -25,7 +25,7 @@ const { Title, Text } = Typography;
 export default function ShippingMethodPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const tradeId = searchParams.get("tradeId");
+  const tradeId = searchParams.get("tradeId") || searchParams.get("proposalId");
 
   const [selectedAddress, setSelectedAddress] = useState<string>("");
   const [selectedMethod, setSelectedMethod] = useState<string>("correios");
@@ -95,18 +95,28 @@ export default function ShippingMethodPage() {
 
     try {
       setLoading(true);
+      
+      // Mostrar popup de "Finalizando negociação"
+      const hideLoading = message.loading("Finalizando negociação...", 0);
 
       const finalizationData = {
-        responderId: trade?.responder?.id,
         shippingAddress: selectedAddress, // agora é o id do endereço real
         shippingMethod: selectedMethod,
       };
 
-      await axios.post(`/api/propostas/${tradeId}/aceitar`, finalizationData);
+      console.log('🔍 Dados sendo enviados para finalização de envio:', finalizationData);
+      console.log('🔍 Proposal ID para finalização de envio:', tradeId);
+      console.log('🔍 Proposal data:', trade);
 
+      const response = await axios.post(`/api/propostas/${tradeId}/finalize-shipping`, finalizationData);
+      
+      console.log('🔍 Resposta da finalização:', response.data);
+
+      hideLoading();
       message.success("Negociação finalizada com sucesso!");
-      router.push("/trades");
+      router.push("/proposals-received");
     } catch (err: any) {
+      hideLoading();
       message.error(
         err.response?.data?.message || "Erro ao finalizar negociação"
       );

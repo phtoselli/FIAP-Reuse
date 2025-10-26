@@ -255,4 +255,31 @@ export class ProposalRepository {
 
     return prisma.proposal.count({ where });
   }
+
+  /**
+   * Atualiza os detalhes de envio de uma proposta
+   */
+  async updateShippingDetails(
+    id: string,
+    shippingData: { shippingAddress: string; shippingMethod: string }
+  ): Promise<any> {
+    console.log('🔍 Repository - Atualizando detalhes de envio:', { id, shippingData });
+    
+    try {
+      const result = await prisma.proposal.update({
+        where: { id },
+        data: {
+          shippingAddress: shippingData.shippingAddress,
+          shippingMethod: shippingData.shippingMethod,
+          updatedAt: new Date(),
+        },
+      });
+      
+      console.log('🔍 Repository - Resultado da atualização:', result);
+      return result;
+    } catch (error) {
+      console.error('🔍 Repository - Erro ao atualizar:', error);
+      throw error;
+    }
+  }
 }

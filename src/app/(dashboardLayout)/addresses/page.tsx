@@ -23,13 +23,10 @@ const { Text } = Typography;
 interface Address {
   id: string;
   street: string;
-  number: string;
   city: string;
   state: string;
   zipCode: string;
   country: string;
-  complement?: string;
-  fullAddress: string;
 }
 
 export default function AddressesPage() {
@@ -48,7 +45,7 @@ export default function AddressesPage() {
     try {
       setLoading(true);
       // Buscar endereços específicos da Alice
-      const response = await axios.get('/api/enderecos?userId=d21d52e9-2969-428c-8aba-e5e236eca94f');
+      const response = await axios.get('/api/enderecos?userId=6fd9c6b8-8ecd-482b-b321-a7ae05e44dc9');
       const allAddresses = response.data.enderecos || [];
       // Limitar a 5 endereços
       setAddresses(allAddresses.slice(0, 5));
@@ -66,8 +63,8 @@ export default function AddressesPage() {
       
       const addressData = {
         ...values,
-        userId: 'd21d52e9-2969-428c-8aba-e5e236eca94f', // Alice's ID
-        fullAddress: `${values.street}, ${values.number} - ${values.city}, ${values.state} - ${values.zipCode}`
+        userId: '6fd9c6b8-8ecd-482b-b321-a7ae05e44dc9', // Alice's ID
+        fullAddress: `${values.street} - ${values.city}, ${values.state} - ${values.zipCode}`
       };
 
       if (editingAddress) {
@@ -173,15 +170,13 @@ export default function AddressesPage() {
                   avatar={<EnvironmentOutlined style={{ fontSize: '24px', color: '#1890ff' }} />}
                   title={
                     <Space>
-                      <Text strong>{address.street}, {address.number}</Text>
+                      <Text strong>{address.street}</Text>
                     </Space>
                   }
                   description={
                     <Space direction="vertical" size={4}>
-                      <Text type="secondary">{address.fullAddress}</Text>
-                      {address.complement && (
-                        <Text type="secondary">Complemento: {address.complement}</Text>
-                      )}
+                      <Text type="secondary">📍 {address.city}, {address.state}</Text>
+                      <Text type="secondary">📮 CEP: {address.zipCode}</Text>
                     </Space>
                   }
                 />
@@ -212,25 +207,10 @@ export default function AddressesPage() {
         >
           <Form.Item
             name="street"
-            label="Rua"
-            rules={[{ required: true, message: 'Rua é obrigatória' }]}
+            label="Endereço Completo"
+            rules={[{ required: true, message: 'Endereço é obrigatório' }]}
           >
-            <Input placeholder="Nome da rua" />
-          </Form.Item>
-
-          <Form.Item
-            name="number"
-            label="Número"
-            rules={[{ required: true, message: 'Número é obrigatório' }]}
-          >
-            <Input placeholder="Número" />
-          </Form.Item>
-
-          <Form.Item
-            name="complement"
-            label="Complemento"
-          >
-            <Input placeholder="Apartamento, bloco, etc. (opcional)" />
+            <Input placeholder="Rua, número, apartamento, etc." />
           </Form.Item>
 
           <Form.Item

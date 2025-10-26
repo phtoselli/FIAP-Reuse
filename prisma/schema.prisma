@@ -76,16 +76,18 @@ model Trade {
 }
 
 model Proposal {
-  id          String         @id @default(uuid())
-  message     String?
-  status      String         @default("pending")
-  createdAt   DateTime       @default(now()) @map("created_at")
-  updatedAt   DateTime       @updatedAt @map("updated_at")
-  requesterId String
-  responderId String
-  requester   User           @relation("UserProposalsRequested", fields: [requesterId], references: [id])
-  responder   User           @relation("UserProposalsReceived", fields: [responderId], references: [id])
-  items       ProposalItem[]
+  id              String         @id @default(uuid())
+  message         String?
+  status          String         @default("pending")
+  shippingAddress String?        @map("shipping_address")
+  shippingMethod  String?        @map("shipping_method")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+  requesterId     String
+  responderId     String
+  requester       User           @relation("UserProposalsRequested", fields: [requesterId], references: [id])
+  responder       User           @relation("UserProposalsReceived", fields: [responderId], references: [id])
+  items           ProposalItem[]
 }
 
 model ProposalItem {

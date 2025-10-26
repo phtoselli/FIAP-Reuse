@@ -165,33 +165,44 @@ export class ProposalService {
     responderId: string
   ): Promise<ProposalResponseModel> {
     try {
+      console.log('🔍 Service - ID da proposta:', id);
+      console.log('🔍 Service - ResponderId:', responderId);
+
       // Verificar se a proposta existe
       const existingProposal = await this.proposalRepository.findById(id);
+      console.log('🔍 Service - Proposta encontrada:', existingProposal);
+      
       if (!existingProposal) {
         throw new Error("Proposta não encontrada");
       }
 
       // Verificar se o usuário é o responder da proposta
       if (existingProposal.responderId !== responderId) {
+        console.log('🔍 Service - ResponderId não confere:', existingProposal.responderId, 'vs', responderId);
         throw new Error("Apenas o destinatário da proposta pode aceitá-la");
       }
 
       // Verificar se a proposta ainda está pendente
       if (existingProposal.status !== "pending") {
+        console.log('🔍 Service - Status não é pending:', existingProposal.status);
         throw new Error("Apenas propostas pendentes podem ser aceitas");
       }
 
       // Aceitar a proposta
+      console.log('🔍 Service - Atualizando status para accepted');
       await this.proposalRepository.updateStatus(id, "accepted");
 
       // Buscar a proposta atualizada
       const updatedProposal = await this.proposalRepository.findById(id);
+      console.log('🔍 Service - Proposta atualizada:', updatedProposal);
 
       if (!updatedProposal) {
         throw new Error("Erro ao atualizar proposta");
       }
 
-      return this.mapProposalToResponseModel(updatedProposal);
+      const result = this.mapProposalToResponseModel(updatedProposal);
+      console.log('🔍 Service - Resultado final:', result);
+      return result;
     } catch (error) {
       console.error("Erro ao aceitar proposta:", error);
       throw new Error("Erro interno ao aceitar proposta");
@@ -322,63 +333,116 @@ export class ProposalService {
   }
 
   /**
+   * Finaliza os detalhes de envio de uma proposta já aceita
+   * @param id - ID da proposta
+   * @param shippingData - Dados de envio
+   * @returns Proposta atualizada
+   */
+  async finalizeShippingDetails(
+    id: string,
+    shippingData: { shippingAddress: string; shippingMethod: string }
+  ): Promise<ProposalResponseModel> {
+    try {
+      console.log('🔍 Service FinalizeShipping - ID da proposta:', id);
+      console.log('🔍 Service FinalizeShipping - Shipping data:', shippingData);
+
+      // Verificar se a proposta existe
+      const existingProposal = await this.proposalRepository.findById(id);
+      if (!existingProposal) {
+        throw new Error("Proposta não encontrada");
+      }
+
+      // Verificar se a proposta já foi aceita
+      if (existingProposal.status !== "accepted") {
+        throw new Error("Apenas propostas aceitas podem ter detalhes de envio finalizados");
+      }
+
+      // Atualizar os detalhes de envio
+      await this.proposalRepository.updateShippingDetails(id, shippingData);
+
+      // Buscar a proposta atualizada
+      const updatedProposal = await this.proposalRepository.findById(id);
+      if (!updatedProposal) {
+        throw new Error("Erro ao atualizar detalhes de envio");
+      }
+
+      const result = this.mapProposalToResponseModel(updatedProposal);
+      console.log('🔍 Service FinalizeShipping - Resultado final:', result);
+      return result;
+    } catch (error) {
+      console.error("Erro ao finalizar detalhes de envio:", error);
+      throw new Error("Erro interno ao finalizar detalhes de envio");
+    }
+  }
+
+  /**
    * Mapeia uma Proposal do Prisma para ProposalResponseModel
    * @param proposal - Proposal do Prisma
    * @returns ProposalResponseModel mapeado
    */
   private mapProposalToResponseModel(proposal: any): ProposalResponseModel {
-    return {
-      id: proposal.id,
-      message: proposal.message,
-      status: proposal.status,
-      createdAt: proposal.createdAt,
-      updatedAt: proposal.updatedAt,
-      requester: {
-        id: proposal.requester.id,
-        name: proposal.requester.name,
-        city: proposal.requester.city,
-        state: proposal.requester.state,
-        avatarUrl: proposal.requester.avatarUrl,
-      },
-      responder: {
-        id: proposal.responder.id,
-        name: proposal.responder.name,
-        city: proposal.responder.city,
-        state: proposal.responder.state,
-        avatarUrl: proposal.responder.avatarUrl,
-      },
-      items: proposal.items.map((item: any) => ({
-        id: item.id,
-        postId: item.postId,
-        isOffered: item.isOffered,
-        post: {
-          id: item.post.id,
-          title: item.post.title,
-          description: item.post.description,
-          imageUrl: item.post.imageUrl,
-          rating: item.post.rating,
-          isActive: item.post.isActive,
-          category: {
-            id: item.post.categoryRel?.id,
-            name: item.post.categoryRel?.name,
-            description: item.post.categoryRel?.description,
-          },
-          subcategory: {
-            id: item.post.subcategoryId,
-            name: item.post.subcategoryId,
-            description: item.post.subcategoryId,
-          },
-          condition: item.post.condition
-            ? {
-                id: item.post.condition.id,
-                code: item.post.condition.code,
-                type: item.post.condition.type,
-                description: item.post.condition.description,
-              }
-            : null,
+    console.log('🔍 mapProposalToResponseModel - Input proposal:', proposal);
+    
+    try {
+      const result = {
+        id: proposal.id,
+        message: proposal.message,
+        status: proposal.status,
+        createdAt: proposal.createdAt,
+        updatedAt: proposal.updatedAt,
+        requester: {
+          id: proposal.requester?.id || '',
+          name: proposal.requester?.name || '',
+          city: proposal.requester?.city || '',
+          state: proposal.requester?.state || '',
+          avatarUrl: proposal.requester?.avatarUrl || '',
         },
-      })),
-      totalItems: proposal.items?.filter((item: any) => item.isOffered).length,
-    };
+        responder: {
+          id: proposal.responder?.id || '',
+          name: proposal.responder?.name || '',
+          city: proposal.responder?.city || '',
+          state: proposal.responder?.state || '',
+          avatarUrl: proposal.responder?.avatarUrl || '',
+        },
+        items: proposal.items?.map((item: any) => ({
+          id: item.id,
+          postId: item.postId,
+          isOffered: item.isOffered,
+          post: {
+            id: item.post?.id || '',
+            title: item.post?.title || '',
+            description: item.post?.description || '',
+            imageUrl: item.post?.imageUrl || '',
+            rating: item.post?.rating || 0,
+            isActive: item.post?.isActive || false,
+            category: {
+              id: item.post?.categoryRel?.id || '',
+              name: item.post?.categoryRel?.name || '',
+              description: item.post?.categoryRel?.description || '',
+            },
+            subcategory: {
+              id: item.post?.subcategoryId || '',
+              name: item.post?.subcategoryId || '',
+              description: item.post?.subcategoryId || '',
+            },
+            condition: item.post?.condition
+              ? {
+                  id: item.post.condition.id,
+                  code: item.post.condition.code,
+                  type: item.post.condition.type,
+                  description: item.post.condition.description,
+                }
+              : null,
+          },
+        })) || [],
+        totalItems: proposal.items?.filter((item: any) => item.isOffered).length || 0,
+      };
+      
+      console.log('🔍 mapProposalToResponseModel - Result:', result);
+      return result;
+    } catch (error) {
+      console.error('🔍 mapProposalToResponseModel - Error:', error);
+      throw error;
+    }
   }
 }

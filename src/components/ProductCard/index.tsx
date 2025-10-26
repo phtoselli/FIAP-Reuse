@@ -30,8 +30,8 @@ export default function ProductCard({ product }: Props) {
             alt={product.nome}
             src={
               product.imagem
-                ? `data:image/png;base64,${product.imagem}`
-                : "/produto.png"
+                ? product.imagem
+                : "https://via.placeholder.com/200x130/4A90E2/FFFFFF?text=Produto"
             }
             height={130}
             preview={false}
@@ -47,8 +47,17 @@ export default function ProductCard({ product }: Props) {
         actions={[
           <InfoCircleOutlined
             key="product-info-button"
-            onClick={() => redirect(`${Routes.POSTS}/${product?.id}`)}
+            onClick={() => {
+              console.log('🔍 Product ID:', product?.id);
+              console.log('🔍 Route:', `${Routes.POSTS}/${product?.id}`);
+              window.location.href = `${Routes.POSTS}/${product?.id}`;
+            }}
             title="Informações do produto"
+            style={{ 
+              color: '#1890ff', 
+              fontSize: '18px',
+              fontWeight: 'bold'
+            }}
           />,
           <SwapOutlined
             key="trade-card-button"

@@ -9,7 +9,7 @@ import WatsonChat from '@/components/WatsonChat';
 const { Title, Paragraph } = Typography;
 
 export default function ChatPage() {
-  const [userId] = useState("d21d52e9-2969-428c-8aba-e5e236eca94f"); // Alice
+  const [userId] = useState("6fd9c6b8-8ecd-482b-b321-a7ae05e44dc9"); // Alice
 
   return (
     <ContentLayout title="Assistente Virtual">

@@ -17,7 +17,7 @@ export default function ContentLayout({
   extra,
 }: ContentLayoutProps) {
   return (
-    <div>
+    <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
       <Flex align="center" justify="space-between">
         <Flex vertical>
           <Title level={3}>{title}</Title>
@@ -35,6 +35,7 @@ export default function ContentLayout({
 
       <div
         style={{
+          flex: 1,
           overflowY: "auto",
           overflowX: "hidden",
         }}

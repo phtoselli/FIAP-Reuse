@@ -1,12 +1,13 @@
 export interface Product {
   id: string;
   nome: string;
-  descricao: string;
-  imagem: string;
+  descricao: string | null;
+  imagem: string | null;
   avaliacao: number;
   ativo: boolean;
   dataCriacao: string;
   dataAtualizacao: string;
+  categoryId: string; // Adicionado
   usuario: {
     id: string;
     nome: string;

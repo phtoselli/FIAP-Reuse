@@ -283,6 +283,7 @@ export class ProductService {
       ativo: post.isActive,
       dataCriacao: post.createdAt,
       dataAtualizacao: post.updatedAt,
+      categoryId: post.categoryId, // Adicionado
       usuario: {
         id: post.user.id,
         nome: post.user.name,

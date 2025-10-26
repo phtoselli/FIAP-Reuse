@@ -8,7 +8,7 @@ import useSearchParamsHelper from "@/hooks/useSearchParamsHelper";
 import { Product } from "@/types/product";
 import { QueryParamsKey } from "@/types/queryParams";
 import { Routes } from "@/types/routes";
-import { CategoryCode, CategoryId } from "@/types/type/category";
+import { CategoryCode } from "@/types/type/category";
 import { LoadingOutlined } from "@ant-design/icons";
 import {
   Button,
@@ -56,7 +56,8 @@ export default function Posts() {
         `/api/produtos?active=${payload?.active}&limit=${payload?.limit}`
       );
       const data = await res.json();
-
+      
+      
       setProductsData(data.produtos || []);
     } catch (error: any) {
       messageApi.error(error.message || "Erro ao buscar produtos");
@@ -128,47 +129,69 @@ export default function Posts() {
 
       <Divider />
 
-      <Spin
-        size="large"
-        spinning={isProductsLoading}
-        indicator={<LoadingOutlined />}
-        tip="Carregando produtos..."
-        style={{ width: "100%", height: "100%" }}
-      >
-        {categoriesToShow.map((category) => {
-          const categoryProducts = productsData?.filter(
-            (product: Product) => product.categoria?.id === category.value
-          );
+      {isProductsLoading && (
+        <div style={{ textAlign: 'center', padding: '50px' }}>
+          <Spin size="large" />
+          <p>Carregando produtos...</p>
+        </div>
+      )}
+      
+      {!isProductsLoading && (
+        <div>
+          {categoriesToShow.map((category) => {
+            const categoryProducts = productsData?.filter(
+              (product: Product) => {
+                // Mapear IDs de categoria para códigos
+                const categoryMapping: { [key: string]: string } = {
+                  '1': 'ROUPAS',
+                  '2': 'CASA', 
+                  '3': 'CALÇADOS',
+                  '4': 'ACESSÓRIOS',
+                  '5': 'COSMÉTICOS',
+                  '6': 'OUTROS'
+                };
+                
+                // Usar categoryId diretamente do produto (não categoria.id)
+                const productCategoryCode = categoryMapping[product.categoryId || ''];
+                const matches = productCategoryCode === category.value;
+                
+                
+                
+                return matches;
+              }
+            );
+            
+            
+            if (!categoryProducts || categoryProducts.length === 0) return null;
 
-          if (!categoryProducts || categoryProducts.length === 0) return null;
+            return (
+              <div key={category.value} style={{ marginBottom: 48 }}>
+                <Flex justify="space-between" align="center">
+                  <Title level={2} style={{ color: "#2A4BA0" }}>
+                    {category.label}
+                  </Title>
+                  <Button
+                    type="link"
+                    onClick={() =>
+                      redirect(Routes.CATEGORIES, [
+                        { [QueryParamsKey.CATEGORY]: category.value },
+                      ])
+                    }
+                  >
+                    Ver mais
+                  </Button>
+                </Flex>
 
-          return (
-            <div key={category.value} style={{ marginBottom: 48 }}>
-              <Flex justify="space-between" align="center">
-                <Title level={2} style={{ color: "#2A4BA0" }}>
-                  {category.label}
-                </Title>
-                <Button
-                  type="link"
-                  onClick={() =>
-                    redirect(Routes.CATEGORIES, [
-                      { [QueryParamsKey.CATEGORY]: category.value },
-                    ])
-                  }
-                >
-                  Ver mais
-                </Button>
-              </Flex>
-
-              <Flex wrap gap={16}>
-                {categoryProducts.slice(0, 4).map((product: Product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </Flex>
-            </div>
-          );
-        })}
-      </Spin>
+                <Flex wrap gap={16}>
+                  {categoryProducts.slice(0, 4).map((product: Product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </Flex>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

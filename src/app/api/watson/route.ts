@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import WatsonService from '@/service/watson/WatsonService';
 import { AddressService } from '@/service/addresses';
+import { ProposalService } from '@/service/proposals/ProposalService';
 
 const watsonService = new WatsonService();
 
@@ -114,6 +115,28 @@ async function processReUseIntents(watsonResponse: any, userId?: string, isRealW
 
   const messageText = (originalMessage || '').toLowerCase();
 
+  // PRIORIDADE 1: Se o Watson retornou uma resposta válida, usar ela (sempre priorizar Watson)
+  // MAS: Se for comando específico do ReUse, processar primeiro
+  const isReUseCommand = messageText.includes('aceitar proposta') || 
+                        messageText.includes('propostas recebidas') ||
+                        messageText.includes('propostas pendentes') ||
+                        messageText.includes('propostas') ||
+                        messageText.includes('minhas propostas') ||
+                        messageText.includes('aceitar a proposta') ||
+                        messageText.includes('meus endereços') ||
+                        messageText.includes('endereços') ||
+                        messageText.includes('listar endereços') ||
+                        messageText.includes('detalhes de endereço') ||
+                        messageText.includes('detalhes endereço') ||
+                        messageText.includes('endereço');
+  
+  if (isRealWatson && watsonResponse?.output?.generic?.[0]?.text && !isReUseCommand) {
+    response.action = 'chat';
+    response.message = watsonResponse.output.generic[0].text;
+    return response;
+  }
+
+  // PRIORIDADE 2: Automações específicas do ReUse
   // 1. Listar endereços do usuário
   if (watsonService.isListAddressesIntent(watsonResponse) || 
       messageText.includes('endereços') || 
@@ -129,9 +152,10 @@ async function processReUseIntents(watsonResponse: any, userId?: string, isRealW
       response.data = addresses;
       
       let addressList = '';
-      if (addresses && addresses.length > 0) {
-        addressList = addresses.map((addr: any, index: number) => 
-          `${index + 1}. **${addr.street}, ${addr.number || ''}${addr.complement ? ', ' + addr.complement : ''}**\n   📍 ${addr.city}, ${addr.state}\n   📮 CEP: ${addr.zipCode}`
+      const addressArray = addresses?.enderecos || addresses || [];
+      if (addressArray && addressArray.length > 0) {
+        addressList = addressArray.map((addr: any, index: number) => 
+          `${index + 1}. **${addr.street}**\n   📍 ${addr.city}, ${addr.state}\n   📮 CEP: ${addr.zipCode}`
         ).join('\n\n');
       } else {
         addressList = 'Nenhum endereço cadastrado';
@@ -145,7 +169,70 @@ async function processReUseIntents(watsonResponse: any, userId?: string, isRealW
     }
   }
 
-  // 2. Orientação sobre cadastro de itens
+         // 2. Listar propostas recebidas
+         else if (messageText.includes('propostas recebidas') ||
+                  messageText.includes('propostas') ||
+                  messageText.includes('minhas propostas') ||
+                  messageText.includes('propostas pendentes')) {
+           try {
+             const proposalService = new ProposalService();
+             const proposals = await proposalService.getProposalsByUserId(userId || '', 'responder');
+
+             response.action = 'list_proposals';
+             response.data = proposals;
+
+             // Filtrar apenas propostas pendentes
+             const pendingProposals = proposals?.filter((prop: any) => prop.status === 'pending') || [];
+
+             let proposalList = '';
+             if (pendingProposals && pendingProposals.length > 0) {
+               proposalList = pendingProposals.map((prop: any, index: number) => {
+                 return `**${index + 1}. ${prop.requester.name}**\n   "${prop.message.substring(0, 40)}..."\n   📅 ${new Date(prop.createdAt).toLocaleDateString('pt-BR')}\n   ⏳ **Status:** Pendente\n   🆔 **ID:** \`${prop.id}\``;
+               }).join('\n\n');
+             } else {
+               proposalList = 'Nenhuma proposta pendente';
+             }
+
+             response.message = `⏳ **Propostas Pendentes**\n\n${proposalList}\n\n💬 **Para aceitar uma proposta, digite:** "aceitar proposta [ID]"`;
+           } catch (error: unknown) {
+             const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+             response.action = 'error';
+             response.message = `❌ Erro ao buscar propostas: ${errorMessage}`;
+           }
+         }
+
+  // 3. Aceitar proposta via chat
+  else if (messageText.includes('aceitar proposta') || 
+           messageText.includes('aceitar a proposta')) {
+    try {
+      // Extrair ID da proposta da mensagem
+      const idMatch = messageText.match(/aceitar (?:a )?proposta\s+([a-f0-9-]+)/i);
+      if (!idMatch) {
+        response.action = 'error';
+        response.message = '❌ **ID da proposta não encontrado.**\n\n💡 **Formato correto:** "aceitar proposta [ID]"';
+        return response;
+      }
+      
+      const proposalId = idMatch[1];
+      const proposalService = new ProposalService();
+      
+      // Aceitar a proposta
+      await proposalService.acceptProposal(proposalId, userId || '');
+      
+      response.action = 'accept_proposal';
+      response.data = { 
+        proposalId,
+        redirectTo: `/trades/finalize_exchange?proposalId=${proposalId}`
+      };
+      response.message = `✅ **Proposta aceita com sucesso!**\n\n🔄 A proposta foi aceita e o usuário será notificado.\n\n🚀 **Redirecionando para finalização da troca...**`;
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      response.action = 'error';
+      response.message = `❌ Erro ao aceitar proposta: ${errorMessage}`;
+    }
+  }
+
+  // 4. Orientação sobre cadastro de itens
   else if (messageText.includes('cadastrar') || 
            messageText.includes('cadastro') ||
            messageText.includes('como cadastrar') ||
@@ -242,7 +329,7 @@ async function processReUseIntents(watsonResponse: any, userId?: string, isRealW
                       `Entre em contato com o suporte!`;
   }
 
-  // Resposta padrão do Watson
+  // Resposta padrão do ReUse (fallback apenas quando Watson não responde)
   else {
     response.action = 'chat';
     response.message = `👋 **Olá! Sou o assistente da ReUse**\n\n` +
