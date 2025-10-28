@@ -108,6 +108,22 @@ function simulateWatsonResponse(message: string) {
 		};
 	}
 
+	if (
+		lowerMessage.includes("propostas recebidas") ||
+		lowerMessage.includes("minhas propostas") ||
+		lowerMessage.includes("propostas pendentes")
+	) {
+		return {
+			output: {
+				generic: [
+					{ response_type: "text", text: "Vou listar suas propostas!" },
+				],
+				intents: [{ intent: "list_proposals", confidence: 1 }],
+				entities: [],
+			},
+		};
+	}
+
 	// Resposta padrão
 	return {
 		output: {
@@ -217,8 +233,6 @@ async function processReUseIntents(
 				userId || "",
 				"responder"
 			);
-
-			console.log("Propostas do usuário:", proposals);
 
 			response.action = "list_proposals";
 			response.data = proposals;
