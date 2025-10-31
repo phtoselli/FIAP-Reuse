@@ -92,7 +92,7 @@ export default function Posts() {
 					marginBottom: 48,
 				}}
 			>
-				<div style={{ width: "500px", padding: "40px" }}>
+				<div style={{ width: 700, padding: 40 }}>
 					<Title level={1} style={{ color: token["yellow-6"] }}>
 						A primeira plataforma de troca do país
 					</Title>
@@ -106,7 +106,11 @@ export default function Posts() {
 					</Paragraph>
 				</div>
 
-				<Flex align="center" justify="center" style={{ flex: 1 }}>
+				<Flex
+					align="center"
+					justify="end"
+					style={{ flex: 1, paddingRight: 40 }}
+				>
 					<Image src="/hero.png" width={300} alt="Banner" preview={false} />
 				</Flex>
 			</Flex>
