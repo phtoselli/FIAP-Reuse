@@ -1,7 +1,27 @@
-import getRandomImage, { Topics } from "@/utils/getRandomImage";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
+
+const Topics = {
+  PRODUCT: "product",
+  ELECTRONICS: "electronics",
+  FURNITURE: "furniture",
+  GADGETS: "gadgets",
+  FASHION: "fashion",
+  ACCESSORIES: "accessories",
+};
+
+function getRandomImage(topic) {
+  const topics = Object.values(Topics);
+
+  const chosenTopic =
+    topic && topics.includes(topic)
+      ? topic
+      : topics[Math.floor(Math.random() * topics.length)];
+
+  return `https://source.unsplash.com/random/500x400?${chosenTopic}&sig=${Math.random()}`;
+}
+
 
 async function main() {
   console.log("Iniciando seed...");
