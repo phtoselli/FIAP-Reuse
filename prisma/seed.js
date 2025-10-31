@@ -2,24 +2,10 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-const Topics = {
-  PRODUCT: "product",
-  ELECTRONICS: "electronics",
-  FURNITURE: "furniture",
-  GADGETS: "gadgets",
-  FASHION: "fashion",
-  ACCESSORIES: "accessories",
-};
+function getRandomImage() {
+  const url = `https://picsum.photos/500/500?random=${Math.floor(Math.random() * 100)}`;
 
-function getRandomImage(topic) {
-  const topics = Object.values(Topics);
-
-  const chosenTopic =
-    topic && topics.includes(topic)
-      ? topic
-      : topics[Math.floor(Math.random() * topics.length)];
-
-  return `https://source.unsplash.com/random/500x400?${chosenTopic}&sig=${Math.random()}`;
+  return url;
 }
 
 
@@ -63,21 +49,21 @@ async function main() {
           userId: user.id,
           categoryId: 2,
           subcategoryId: 1,
-          imageUrl: getRandomImage(Topics.ELECTRONICS),
+          imageUrl: getRandomImage(),
         },
         {
           title: `${user.name} Produto 2`,
           userId: user.id,
           categoryId: 3,
           subcategoryId: 2,
-          imageUrl: getRandomImage(Topics.FURNITURE),
+          imageUrl: getRandomImage(),
         },
         {
           title: `${user.name} Produto 3`,
           userId: user.id,
           categoryId: 4,
           subcategoryId: 3,
-          imageUrl: getRandomImage(Topics.GADGETS),
+          imageUrl: getRandomImage(),
         },
       ],
     });

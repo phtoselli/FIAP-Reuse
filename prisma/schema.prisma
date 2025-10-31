@@ -48,8 +48,8 @@ model Post {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
   userId        String
-  categoryId    String
-  subcategoryId String
+  categoryId    Int
+  subcategoryId Int
   conditionId   String?
   rating        Float?   @default(0)
 
