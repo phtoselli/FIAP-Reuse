@@ -78,6 +78,8 @@ export default function Posts() {
 			? categories.filter((cat) => activeFilters.includes(cat.value))
 			: categories;
 
+	console.log(productsData);
+
 	return (
 		<div>
 			{contextHolder}
