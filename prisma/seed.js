@@ -1,3 +1,4 @@
+import getRandomImage, { Topics } from "@/utils/getRandomImage";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -40,23 +41,20 @@ async function main() {
         {
           title: `${user.name} Produto 1`,
           userId: user.id,
-          categoryId: "1",
-          subcategoryId: "1",
-          imageUrl: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=400&fit=crop",
+          categoryId: 2,
+          imageUrl: getRandomImage(Topics.ELECTRONICS),
         },
         {
           title: `${user.name} Produto 2`,
           userId: user.id,
-          categoryId: "2",
-          subcategoryId: "2",
-          imageUrl: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=400&fit=crop",
+          categoryId: 3,
+          imageUrl: getRandomImage(Topics.FURNITURE),
         },
         {
           title: `${user.name} Produto 3`,
           userId: user.id,
-          categoryId: "3",
-          subcategoryId: "3",
-          imageUrl: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=400&fit=crop",
+          categoryId: 4,
+          imageUrl: getRandomImage(Topics.GADGETS),
         },
       ],
     });
