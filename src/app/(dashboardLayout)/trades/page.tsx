@@ -3,9 +3,9 @@
 import ContentLayout from "@/components/ContentLayout";
 import { StringMap } from "@/types";
 import { TradeStatus } from "@/types/status";
-import { getUser } from "@/utils/auth";
+import { getUserId } from "@/utils/auth";
 import getStatusColor from "@/utils/getStatusColor";
-import { EditOutlined, EyeOutlined, SearchOutlined } from "@ant-design/icons";
+import { SearchOutlined } from "@ant-design/icons";
 import {
 	Button,
 	Card,
@@ -18,14 +18,12 @@ import {
 	Select,
 	Spin,
 	Tag,
-	Tooltip,
 } from "antd";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 const { Option } = Select;
-const user = getUser();
 
 export default function Trades() {
 	const [form] = Form.useForm();
@@ -33,9 +31,9 @@ export default function Trades() {
 	const [role, setRole] = useState<"requester" | "responder">("requester");
 	const [loading, setLoading] = useState(false);
 	const [propostas, setPropostas] = useState<any[]>([]);
-	const router = useRouter();
 
-	const userId = user.id;
+	const router = useRouter();
+	const userId = getUserId();
 
 	const fetchPropostas = async () => {
 		try {
@@ -163,40 +161,31 @@ export default function Trades() {
 										: trade.requester?.name
 								}`}
 								extra={
-									<Tooltip
-										title={
-											role === "requester"
-												? "Editar proposta"
-												: "Ver detalhes da proposta"
-										}
+									<Button
+										color="primary"
+										variant="filled"
+										onClick={() => router.push(`/trades/details/${trade.id}`)}
+										style={{ height: "20px" }}
 									>
-										<Button
-											color="primary"
-											variant="filled"
-											icon={
-												role === "requester" ? (
-													<EditOutlined />
-												) : (
-													<EyeOutlined />
-												)
-											}
-											onClick={() => router.push(`/trades/details/${trade.id}`)}
-											style={{ width: "30px", height: "20px" }}
-										/>
-									</Tooltip>
+										{role === "requester" ? "Editar proposta" : "Ver proposta"}
+									</Button>
 								}
 							>
 								<Flex gap={16}>
 									<Image
 										src={
-											trade.items?.[0]?.post.imageUrl
-												? `data:image/png;base64,${trade.items?.[0]?.post.imageUrl}`
-												: "/produto.png"
+											trade.items?.[0]?.post.imageUrl ??
+											`https://picsum.photos/500/500?random=${Math.floor(
+												Math.random() * 100
+											)}`
 										}
 										alt="Imagem da proposta"
-										width={100}
-										height={100}
-										style={{ borderRadius: 8, objectFit: "cover" }}
+										style={{
+											borderRadius: 8,
+											objectFit: "cover",
+											height: 100,
+											width: 100,
+										}}
 										preview={false}
 									/>
 									<div>

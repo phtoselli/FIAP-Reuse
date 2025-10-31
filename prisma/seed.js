@@ -4,10 +4,14 @@ const prisma = new PrismaClient();
 
 function getRandomImage() {
   const url = `https://picsum.photos/500/500?random=${Math.floor(Math.random() * 100)}`;
-
   return url;
 }
 
+function getRandomAvatar(gender) {
+  if (gender === 'male') return `https://xsgames.co/randomusers/assets/avatars/male/${Math.floor(Math.random() * 78) + 1}.jpg`;
+  if (gender === 'female') return `https://xsgames.co/randomusers/assets/avatars/female/${Math.floor(Math.random() * 78) + 1}.jpg`;
+  return `https://xsgames.co/randomusers/assets/avatars/pixel/${Math.floor(Math.random() * 53) + 1}.jpg`;
+}
 
 async function main() {
   console.log("Iniciando seed...");
@@ -20,6 +24,7 @@ async function main() {
         passwordHash: "123",
         city: "SP",
         state: "SP",
+        avatarUrl: getRandomAvatar("female")
       },
       {
         name: "Bob",
@@ -27,6 +32,7 @@ async function main() {
         passwordHash: "123",
         city: "RJ",
         state: "RJ",
+        avatarUrl: getRandomAvatar("male")
       },
       {
         name: "Carol",
@@ -34,6 +40,7 @@ async function main() {
         passwordHash: "123",
         city: "MG",
         state: "MG",
+        avatarUrl: getRandomAvatar("female")
       },
     ],
     skipDuplicates: true,

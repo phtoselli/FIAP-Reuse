@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 import { Suspense } from "react";
 import "./globals.css";
 
+import CreatePostModal from "@/components/CreatePostModal";
+import EditPostModal from "@/components/EditPostModal";
 import FloatingChatButton from "@/components/FloatingChatButton";
 import Footer from "@/components/Footer";
 import TopHeader from "@/components/TopHeader";
@@ -27,13 +29,19 @@ function LayoutContent({
 		URLControlledModalKeys.TRADE_REQUEST_MODAL
 	);
 
+	const { isOpen: isEditPostModalOpen } = useURLControlledModal(
+		URLControlledModalKeys.EDIT_POST_MODAL
+	);
+
+	const { isOpen: isCreatePostModalOpen } = useURLControlledModal(
+		URLControlledModalKeys.CREATE_POST_MODAL
+	);
+
 	const userId = getUserId();
 
-	// Páginas que não devem ter TopHeader e Footer
 	const isLoginPage = pathname === "/login" || pathname === "/register";
 	const isRootPage = pathname === "/";
 
-	// Se for página de login, register ou root, renderiza sem TopHeader e Footer
 	if (isLoginPage || isRootPage) {
 		return <div style={{ minHeight: "100vh" }}>{children}</div>;
 	}
@@ -47,6 +55,8 @@ function LayoutContent({
 			{/* ==================== */}
 
 			{/* GLOBAL OPENED MODALS */}
+			{isEditPostModalOpen && <EditPostModal />}
+			{isCreatePostModalOpen && <CreatePostModal />}
 			{isTradeRequestModalOpen && <TradeRequestModal />}
 			{/* ==================== */}
 
