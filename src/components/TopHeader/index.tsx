@@ -1,5 +1,7 @@
 "use client";
 
+import useSearchParamsHelper from "@/hooks/useSearchParamsHelper";
+import { Routes } from "@/types/routes";
 import { MAX_CONTAINER_WIDTH } from "@/utils/constants";
 import {
 	EditOutlined,
@@ -11,6 +13,12 @@ import { Input, Typography } from "antd";
 const { Text } = Typography;
 
 export default function TopHeader() {
+	const { redirect } = useSearchParamsHelper();
+
+	const handleClickLogo = () => {
+		redirect(Routes.POSTS);
+	};
+
 	return (
 		<div
 			style={{
@@ -35,8 +43,22 @@ export default function TopHeader() {
 						gap: "32px",
 					}}
 				>
-					<div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-						<div style={{ display: "flex", alignItems: "center", gap: "0px" }}>
+					<div
+						style={{
+							display: "flex",
+							alignItems: "center",
+							gap: "16px",
+						}}
+					>
+						<div
+							style={{
+								display: "flex",
+								alignItems: "center",
+								gap: "0px",
+								cursor: "pointer",
+							}}
+							onClick={handleClickLogo}
+						>
 							<Text
 								style={{
 									fontSize: "28px",

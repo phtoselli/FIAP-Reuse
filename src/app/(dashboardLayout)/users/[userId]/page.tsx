@@ -17,7 +17,7 @@ import {
 	Typography,
 } from "antd";
 import { notFound } from "next/navigation";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const { Title, Text } = Typography;
 
@@ -27,8 +27,12 @@ type Props = {
 	};
 };
 
-export default function UserPage({ params }: Props) {
-	const { userId } = params;
+export default function UserPage({
+	params,
+}: {
+	params: Promise<{ userId: string }>;
+}) {
+	const { userId } = React.use(params);
 	const [form] = Form.useForm();
 	const [formChanged, setFormChanged] = useState(false);
 	const [userData, setUserData] = useState<User | null>(null);
