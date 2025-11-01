@@ -9,7 +9,6 @@ import { Product } from "@/types/product";
 import { QueryParamsKey } from "@/types/queryParams";
 import { Routes } from "@/types/routes";
 import { CategoryCode } from "@/types/type/category";
-import { getUser } from "@/utils/auth";
 import {
 	Button,
 	Checkbox,
@@ -22,6 +21,7 @@ import {
 	theme,
 } from "antd";
 import { useEffect, useState } from "react";
+import { useProductStore } from "./store";
 
 const { Title, Paragraph } = Typography;
 
@@ -38,45 +38,21 @@ export default function Posts() {
 	const { token } = theme.useToken();
 	const { redirect } = useSearchParamsHelper();
 
-	const [productsData, setProductsData] = useState<Product[] | null>(null);
 	const [activeFilters, setActiveFilters] = useState<string[]>([]);
-	const [isProductsLoading, setIsProductsLoading] = useState(false);
 	const [messageApi, contextHolder] = message.useMessage();
 
-	const getAllProducts = async (payload: {
-		limit: number;
-		offset?: number;
-		active: boolean;
-	}) => {
-		try {
-			setIsProductsLoading(true);
-
-			const res = await fetch(
-				`/api/produtos?active=${payload?.active}&limit=${payload?.limit}`
-			);
-			const data = await res.json();
-
-			setProductsData(data.produtos || []);
-		} catch (error: any) {
-			messageApi.error(error.message || "Erro ao buscar produtos");
-		} finally {
-			setIsProductsLoading(false);
-		}
-	};
-
-	useEffect(() => {
-		if (!getUser()) {
-			redirect(Routes.LOGIN);
-			return;
-		}
-
-		getAllProducts({ limit: 20, offset: 0, active: true });
-	}, []);
+	const { produtos, isLoading, getAllProducts } = useProductStore();
 
 	const categoriesToShow =
 		activeFilters.length > 0
 			? categories.filter((cat) => activeFilters.includes(cat.value))
 			: categories;
+
+	useEffect(() => {
+		if (produtos.length < 1) {
+			getAllProducts();
+		}
+	}, []);
 
 	return (
 		<div>
@@ -135,36 +111,32 @@ export default function Posts() {
 
 			<Divider />
 
-			{isProductsLoading && (
+			{isLoading && (
 				<div style={{ textAlign: "center", padding: "50px" }}>
 					<Spin size="large" />
 					<p>Carregando produtos...</p>
 				</div>
 			)}
 
-			{!isProductsLoading && (
+			{!isLoading && (
 				<div>
 					{categoriesToShow.map((category) => {
-						const categoryProducts = productsData?.filter(
-							(product: Product) => {
-								// Mapear IDs de categoria para códigos
-								const categoryMapping: { [key: string]: string } = {
-									1: "ROUPAS",
-									2: "CASA",
-									3: "CALÇADOS",
-									4: "ACESSÓRIOS",
-									5: "COSMÉTICOS",
-									6: "OUTROS",
-								};
+						const categoryProducts = produtos?.filter((product: Product) => {
+							const categoryMapping: { [key: string]: string } = {
+								1: "ROUPAS",
+								2: "CASA",
+								3: "CALÇADOS",
+								4: "ACESSÓRIOS",
+								5: "COSMÉTICOS",
+								6: "OUTROS",
+							};
 
-								// Usar categoryId diretamente do produto (não categoria.id)
-								const productCategoryCode =
-									categoryMapping[product.categoryId || ""];
-								const matches = productCategoryCode === category.value;
+							const productCategoryCode =
+								categoryMapping[product.categoryId || ""];
+							const matches = productCategoryCode === category.value;
 
-								return matches;
-							}
-						);
+							return matches;
+						});
 
 						if (!categoryProducts || categoryProducts.length === 0) return null;
 

@@ -1,12 +1,12 @@
 "use client";
 
+import { useProductStore } from "@/app/(dashboardLayout)/posts/store";
 import {
 	URLControlledModalKeys,
 	useURLControlledModal,
 } from "@/hooks/useURLControlledModal";
 import { Categories } from "@/types/category";
 import { getUser } from "@/utils/auth";
-import { FileImageOutlined } from "@ant-design/icons";
 import {
 	Button,
 	Divider,
@@ -31,6 +31,44 @@ export default function CreatePostModal() {
 		URLControlledModalKeys.CREATE_POST_MODAL
 	);
 
+	const { getAllProducts } = useProductStore();
+
+	const handleSave = async (values: any) => {
+		try {
+			setLoading(true);
+			const user = getUser();
+			if (!user) throw new Error("Usuário não está logado");
+
+			const payload = {
+				title: values.nome,
+				description: values.descricao || "",
+				categoryId: Number(values.categoria),
+				subcategoryId: 1,
+				conditionId: values.condicao || null,
+				userId: user.id,
+				rating: 0,
+				imageUrl: values.imagem || "",
+			};
+
+			await axios.post("/api/produtos", payload);
+
+			message.success("Publicação criada com sucesso!");
+
+			await getAllProducts();
+			onCancel();
+		} catch (error: any) {
+			console.error("Erro ao criar publicação:", error);
+			message.error(error.response?.data?.error || "Erro ao criar publicação");
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const onCancel = () => {
+		form.resetFields();
+		close();
+	};
+
 	useEffect(() => {
 		if (!isOpen) return;
 
@@ -42,39 +80,6 @@ export default function CreatePostModal() {
 
 		form.resetFields();
 	}, [isOpen]);
-
-	const handleSave = async (values: any) => {
-		try {
-			setLoading(true);
-			const user = getUser();
-			if (!user) throw new Error("Usuário não está logado");
-
-			const payload = {
-				titulo: values.nome,
-				descricao: values.descricao || "",
-				categoriaId: values.categoria,
-				subcategoriaId: "",
-				condicaoId: values.condicao || "",
-				usuarioId: user.id,
-				imagemUrl: values.imagem,
-				avaliacao: 0,
-			};
-
-			await axios.post("/api/produtos", payload);
-			message.success("Produto criado com sucesso!");
-			onCancel();
-		} catch (error: any) {
-			console.error(error);
-			message.error(error.message || "Erro ao criar produto");
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	const onCancel = () => {
-		form.resetFields();
-		close();
-	};
 
 	return (
 		<Modal
@@ -122,15 +127,8 @@ export default function CreatePostModal() {
 						</Select>
 					</Form.Item>
 
-					<Form.Item
-						label="URL da Imagem"
-						name="imagem"
-						rules={[{ required: true, message: "Informe a URL da imagem" }]}
-					>
-						<Input
-							placeholder="Cole a URL da imagem"
-							prefix={<FileImageOutlined />}
-						/>
+					<Form.Item label="Imagem" name="imagem">
+						<Input placeholder="Adicione a URL da imagem" />
 					</Form.Item>
 
 					<Divider />

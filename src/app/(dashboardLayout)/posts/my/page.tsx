@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import useTypeService from "@/hooks/useTypeService";
 import {
 	LoadingOutlined,
 	PlusOutlined,
@@ -13,35 +12,33 @@ import { useEffect, useMemo } from "react";
 import ContentLayout from "@/components/ContentLayout";
 import ProductCard from "@/components/ProductCard";
 import useSearchParamsHelper from "@/hooks/useSearchParamsHelper";
-import useService from "@/hooks/useService";
+import useTypeService from "@/hooks/useTypeService";
 import {
 	URLControlledModalKeys,
 	useURLControlledModal,
 } from "@/hooks/useURLControlledModal";
-import { productService } from "@/service/products";
 import { GenericTypesMap } from "@/types";
 import { Product } from "@/types/product";
-import { QueryParamsKey } from "@/types/queryParams";
 import { Types } from "@/types/type";
 import { getUserId } from "@/utils/auth";
+import { useProductStore } from "../store";
 
 export default function MyPosts() {
 	const [form] = Form.useForm();
-
 	const { getParam, routerAddParam, routerRemoveParam } =
 		useSearchParamsHelper();
 
-	const searchParam = getParam(QueryParamsKey.SEARCH);
-	const categoryParam = getParam(QueryParamsKey.CATEGORY);
-	const conditionParam = getParam(QueryParamsKey.CONDITION);
+	const searchParam = getParam("search");
+	const categoryParam = getParam("category");
+	const conditionParam = getParam("condition");
 
 	const userId = getUserId()?.toString();
 
-	const {
-		data: productsData,
-		execute: getAllProducts,
-		isLoading: isProductsLoading,
-	} = useService(productService.get);
+	const { produtos, isLoading, getAllProducts } = useProductStore();
+
+	const { open: openCreateNewPostModal } = useURLControlledModal(
+		URLControlledModalKeys.CREATE_POST_MODAL
+	);
 
 	const {
 		get: getCategories,
@@ -55,34 +52,22 @@ export default function MyPosts() {
 		isLoading: isConditionsLoading,
 	} = useTypeService();
 
-	const { open: openCreateNewPostModal } = useURLControlledModal(
-		URLControlledModalKeys.CREATE_POST_MODAL
-	);
-
 	const categoryOptions = useMemo(() => {
 		if (!categoriesData) return [];
-		return categoriesData.map((category) => ({
-			value: category.id,
-			label: category.title,
-		}));
+		return categoriesData.map((c) => ({ value: c.id, label: c.title }));
 	}, [categoriesData]);
 
 	const conditionOptions = useMemo(() => {
 		if (!conditionsData) return [];
-		return conditionsData.map((condition) => ({
-			value: condition.code,
-			label: condition.title,
-		}));
+		return conditionsData.map((c) => ({ value: c.code, label: c.title }));
 	}, [conditionsData]);
 
 	const filteredProducts = useMemo(() => {
-		if (!productsData || !userId) return [];
+		if (!produtos || !userId) return [];
 
-		return productsData.filter((product: Product) => {
-			// Verifica se o produto pertence ao usuário logado
+		return produtos.filter((product: Product) => {
 			const isOwner = product.usuario?.id?.toString() === userId;
 
-			// Filtros iguais à tela de Posts
 			const matchesSearch =
 				!searchParam ||
 				searchParam.length === 0 ||
@@ -103,18 +88,19 @@ export default function MyPosts() {
 
 			return isOwner && matchesSearch && matchesCategory && matchesCondition;
 		});
-	}, [productsData, userId, searchParam, categoryParam, conditionParam]);
+	}, [produtos, userId, searchParam, categoryParam, conditionParam]);
 
 	const onFormValuesChange = (changedValue: GenericTypesMap) => {
 		const key = Object.keys(changedValue)[0];
 		const value = changedValue[key];
-
 		if (value) routerAddParam(key, value);
 		else routerRemoveParam(key);
 	};
 
 	useEffect(() => {
-		getAllProducts();
+		if (!produtos || produtos.length < 1) {
+			getAllProducts();
+		}
 
 		if (searchParam) form.setFieldValue("search", searchParam.join(","));
 		if (categoryParam) form.setFieldValue("category", categoryParam);
@@ -139,7 +125,6 @@ export default function MyPosts() {
 			}
 		>
 			<Flex gap={8}>
-				{/* Filtros */}
 				<Card
 					title="Filtros"
 					style={{ width: "250px", flexShrink: 0 }}
@@ -179,43 +164,39 @@ export default function MyPosts() {
 					</Form>
 				</Card>
 
-				{/* Lista de produtos */}
-				<Spin
-					size="large"
-					spinning={isProductsLoading}
-					indicator={<LoadingOutlined />}
-					tip="Carregando produtos..."
-					style={{ width: "100%", height: "100%" }}
-				>
-					<Card
-						title="Produtos"
-						style={{
+				<Card
+					title="Produtos"
+					style={{
+						flex: 1,
+						display: "flex",
+						flexDirection: "column",
+						width: "calc(100vw - 308px)",
+						height: "calc(100vh - 170px)",
+					}}
+					styles={{
+						body: {
 							flex: 1,
+							minHeight: 0,
+							padding: "8px",
+							overflowY: "auto",
 							display: "flex",
-							flexDirection: "column",
-							width: "calc(100vw - 308px)",
-							height: "calc(100vh - 170px)",
-						}}
-						styles={{
-							body: {
-								flex: 1,
-								minHeight: 0,
-								padding: "8px",
-								overflowY: "auto",
-								display: "flex",
-								flexWrap: "wrap",
-							},
-						}}
-					>
-						{filteredProducts.length > 0 ? (
-							filteredProducts.map((product: Product) => (
-								<ProductCard key={`mypost-${product.id}`} product={product} />
-							))
-						) : (
-							<p>Nenhuma publicação encontrada.</p>
-						)}
-					</Card>
-				</Spin>
+							flexWrap: "wrap",
+						},
+					}}
+				>
+					<Spin
+						size="large"
+						spinning={filteredProducts.length < 1 || isLoading}
+						indicator={<LoadingOutlined />}
+						tip="Carregando produtos..."
+						style={{ width: "100%", height: "100%" }}
+					/>
+
+					{filteredProducts.length > 0 &&
+						filteredProducts.map((product: Product) => (
+							<ProductCard key={`mypost-${product.id}`} product={product} />
+						))}
+				</Card>
 			</Flex>
 		</ContentLayout>
 	);
