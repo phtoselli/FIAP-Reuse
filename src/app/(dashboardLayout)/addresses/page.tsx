@@ -1,6 +1,10 @@
 "use client";
 
 import ContentLayout from "@/components/ContentLayout";
+import {
+	URLControlledModalKeys,
+	useURLControlledModal,
+} from "@/hooks/useURLControlledModal";
 import { getUserId } from "@/utils/auth";
 import {
 	DeleteOutlined,
@@ -23,6 +27,7 @@ import {
 } from "antd";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useAddressStore } from "./store";
 
 const { Text } = Typography;
 
@@ -36,7 +41,6 @@ interface Address {
 }
 
 export default function AddressesPage() {
-	const [addresses, setAddresses] = useState<Address[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [modalVisible, setModalVisible] = useState(false);
 	const [editingAddress, setEditingAddress] = useState<Address | null>(null);
@@ -44,30 +48,11 @@ export default function AddressesPage() {
 
 	const userId = getUserId();
 
-	// Buscar endereços do usuário
-	useEffect(() => {
-		fetchAddresses();
-	}, [userId]);
+	const { open: openCreateAddressModal } = useURLControlledModal(
+		URLControlledModalKeys.CREATE_ADDRESS_MODAL
+	);
 
-	const fetchAddresses = async () => {
-		try {
-			setLoading(true);
-			// Buscar endereços específicos da Alice
-			const response = await axios.get(
-				`/api/enderecos?userId=${
-					userId || "6fd9c6b8-8ecd-482b-b321-a7ae05e44dc9"
-				}`
-			);
-			const allAddresses = response.data.enderecos || [];
-			// Limitar a 5 endereços
-			setAddresses(allAddresses.slice(0, 5));
-		} catch (error) {
-			console.error("Erro ao buscar endereços:", error);
-			message.error("Erro ao carregar endereços");
-		} finally {
-			setLoading(false);
-		}
-	};
+	const { addresses, isLoading, getAllAddresses } = useAddressStore();
 
 	const handleSubmit = async (values: any) => {
 		try {
@@ -75,16 +60,14 @@ export default function AddressesPage() {
 
 			const addressData = {
 				...values,
-				userId: userId || "6fd9c6b8-8ecd-482b-b321-a7ae05e44dc9", // Alice's ID
+				userId: userId || "6fd9c6b8-8ecd-482b-b321-a7ae05e44dc9",
 				fullAddress: `${values.street} - ${values.city}, ${values.state} - ${values.zipCode}`,
 			};
 
 			if (editingAddress) {
-				// Atualizar endereço existente
 				await axios.put(`/api/enderecos/${editingAddress.id}`, addressData);
 				message.success("Endereço atualizado com sucesso!");
 			} else {
-				// Criar novo endereço
 				await axios.post("/api/enderecos", addressData);
 				message.success("Endereço cadastrado com sucesso!");
 			}
@@ -92,7 +75,7 @@ export default function AddressesPage() {
 			setModalVisible(false);
 			setEditingAddress(null);
 			form.resetFields();
-			fetchAddresses();
+			getAllAddresses(userId);
 		} catch (error: any) {
 			console.error("Erro ao salvar endereço:", error);
 			message.error(error.response?.data?.error || "Erro ao salvar endereço");
@@ -112,7 +95,7 @@ export default function AddressesPage() {
 			setLoading(true);
 			await axios.delete(`/api/enderecos/${addressId}`);
 			message.success("Endereço removido com sucesso!");
-			fetchAddresses();
+			getAllAddresses(userId);
 		} catch (error: any) {
 			console.error("Erro ao deletar endereço:", error);
 			message.error(error.response?.data?.error || "Erro ao remover endereço");
@@ -122,10 +105,14 @@ export default function AddressesPage() {
 	};
 
 	const handleAddNew = () => {
-		setEditingAddress(null);
 		form.resetFields();
-		setModalVisible(true);
+		setEditingAddress(null);
+		openCreateAddressModal();
 	};
+
+	useEffect(() => {
+		getAllAddresses(userId);
+	}, [userId]);
 
 	return (
 		<ContentLayout title="Meus Endereços">
@@ -141,7 +128,7 @@ export default function AddressesPage() {
 					</Button>
 				</div>
 
-				{loading ? (
+				{isLoading ? (
 					<div style={{ textAlign: "center", padding: "40px" }}>
 						<Spin size="large" />
 					</div>

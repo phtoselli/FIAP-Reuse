@@ -7,6 +7,7 @@ export enum URLControlledModalKeys {
 	EDIT_POST_MODAL = "edit-post",
 	CREATE_POST_MODAL = "create-post",
 	TRADE_REQUEST_MODAL = "trade-request",
+	CREATE_ADDRESS_MODAL = "create-address",
 }
 
 /**

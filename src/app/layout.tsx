@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Suspense } from "react";
 import "./globals.css";
 
+import CreateAddressModal from "@/components/CreateAddressModal";
 import CreatePostModal from "@/components/CreatePostModal";
 import EditPostModal from "@/components/EditPostModal";
 import FloatingChatButton from "@/components/FloatingChatButton";
@@ -37,6 +38,10 @@ function LayoutContent({
 		URLControlledModalKeys.CREATE_POST_MODAL
 	);
 
+	const { isOpen: isCreateAddressModalOpen } = useURLControlledModal(
+		URLControlledModalKeys.CREATE_ADDRESS_MODAL
+	);
+
 	const userId = getUserId();
 
 	const isLoginPage = pathname === "/login" || pathname === "/register";
@@ -58,6 +63,7 @@ function LayoutContent({
 			{isEditPostModalOpen && <EditPostModal />}
 			{isCreatePostModalOpen && <CreatePostModal />}
 			{isTradeRequestModalOpen && <TradeRequestModal />}
+			{isCreateAddressModalOpen && <CreateAddressModal />}
 			{/* ==================== */}
 
 			{/* FLOATING CHAT BUTTON */}
