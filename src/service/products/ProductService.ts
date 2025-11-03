@@ -5,6 +5,7 @@ import {
 	ProductModel,
 	ProductUpdateModel,
 } from "@/types/product/ProductModel";
+import { categoriesOptions } from "@/utils/categories";
 
 export class ProductService {
 	private postRepository: PostRepository;
@@ -78,7 +79,7 @@ export class ProductService {
 	 * @returns Lista de produtos filtrados com informações de paginação
 	 */
 	async getProductsWithFilters(filters: {
-		categoryId?: string;
+		categoryId?: number;
 		activeOnly?: boolean;
 		limit?: number;
 		offset?: number;
@@ -92,13 +93,14 @@ export class ProductService {
 		try {
 			const { limit, offset, ...countFilters } = filters;
 
+			// Não convertemos para string
+			const filtersForRepo = { ...countFilters };
+
 			// Buscar produtos com filtros
-			const posts = await this.postRepository.findWithFilters(filters);
+			const posts = await this.postRepository.findWithFilters(filtersForRepo);
 
-			// Contar total de produtos que atendem aos filtros
-			const total = await this.postRepository.countWithFilters(countFilters);
+			const total = await this.postRepository.countWithFilters(filtersForRepo);
 
-			// Calcular se há mais produtos
 			const currentLimit = limit || posts.length;
 			const currentOffset = offset || 0;
 			const hasMore = currentOffset + currentLimit < total;
@@ -173,8 +175,8 @@ export class ProductService {
 			title: productData.title,
 			description: productData.description ?? "",
 			image: productData.image ?? "",
-			categoryId: productData.categoryId ?? 1,
-			conditionId: productData.conditionId ?? 1,
+			categoryId: Number(productData.categoryId) ?? 1,
+			conditionId: Number(productData.conditionId) ?? 1,
 			userId: productData.userId,
 			rating: Number(productData.rating) ?? 0,
 		});
@@ -208,10 +210,10 @@ export class ProductService {
 			if (productData.description !== undefined)
 				updateData.description = productData.description;
 			if (productData.image !== undefined) updateData.image = productData.image;
-			if (productData.categoryId)
-				updateData.categoryId = productData.categoryId;
+			if (productData.categoryId !== undefined)
+				updateData.categoryId = String(productData.categoryId);
 			if (productData.conditionId !== undefined)
-				updateData.conditionId = productData.conditionId;
+				updateData.conditionId = String(productData.conditionId);
 			if (productData.isActive !== undefined)
 				updateData.isActive = productData.isActive;
 			if (productData.rating !== undefined)
@@ -263,30 +265,32 @@ export class ProductService {
 		return {
 			id: post.id,
 			name: post.title,
-			description: post.description,
-			image: post.imageUrl,
-			rating: Number(post.rating),
+			description: post.description || null,
+			image: post.image || null,
+			rating: post.rating !== undefined ? Number(post.rating) : null,
 			isActive: post.isActive,
 			createdAt: post.createdAt,
 			updatedAt: post.updatedAt,
 			user: {
 				id: post.user.id,
 				name: post.user.name,
-				city: post.user.city,
-				state: post.user.state,
-				avatarUrl: post.user.avatarUrl,
+				city: post.user.city || null,
+				state: post.user.state || null,
+				avatarUrl: post.user.avatarUrl || null,
 			},
 			category: {
 				id: post.categoryId,
-				name: post.category?.code || "Category",
-				description: post.category?.description || "Category description",
+				name:
+					categoriesOptions.find((cat) => cat.value === post.categoryId)
+						?.label || "Outros",
+				description: null,
 			},
 			condition: post.condition
 				? {
 						id: post.condition.id,
 						code: post.condition.code,
 						type: post.condition.type,
-						description: post.condition.description,
+						description: post.condition.description || null,
 				  }
 				: null,
 		};

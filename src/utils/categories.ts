@@ -14,12 +14,12 @@ export const CategoriesEnum = Object.fromEntries(
 			.normalize("NFD")
 			.replace(/[\u0300-\u036f]/g, "")
 			.replace(/\s+/g, "_"),
-		index + 1,
+		String(index + 1),
 	])
 );
 
 export const categoriesOptions = categories.map((label, index) => ({
-	value: index + 1,
+	value: String(index + 1),
 	label,
 }));
 

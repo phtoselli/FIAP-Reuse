@@ -7,19 +7,22 @@ const productService = new ProductService();
 export async function GET(request: NextRequest) {
 	try {
 		const { searchParams } = new URL(request.url);
+
 		const limit = searchParams.get("limit");
 		const offset = searchParams.get("offset");
-		const categoryId = searchParams.get("categoryId");
 		const active = searchParams.get("active");
+		const categoryIdParam = searchParams.get("categoryId");
 
-		// Converter parâmetros para números
 		const limitNum = limit ? parseInt(limit) : undefined;
 		const offsetNum = offset ? parseInt(offset) : undefined;
-		const activeOnly = active === "false" ? false : true;
+		const activeOnly = active !== "false";
+		const validCategoryId = Number(categoryIdParam);
+
+		const categoryId = !isNaN(validCategoryId) ? validCategoryId : undefined;
 
 		let result;
 
-		if (categoryId) {
+		if (categoryId !== undefined && !isNaN(categoryId)) {
 			result = await productService.getProductsWithFilters({
 				categoryId,
 				activeOnly,
@@ -48,17 +51,17 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
 	try {
 		const data = await request.json();
-		const novoProduto = await productService.createProduct({
-			title: data.title,
-			description: data.description || "",
-			categoryId: Number(data.categoryId),
-			conditionId: data.conditionId || null,
+		const newProduct = await productService.createProduct({
+			title: data.title ?? "Título do produto",
+			description: data.description || "Descrição do produto",
+			categoryId: data.categoryId ? String(data.categoryId) : "1",
+			conditionId: data.conditionId ? String(data.conditionId) : "1",
 			userId: data.userId,
 			rating: Number(data.rating) || 0,
-			image: data.image,
+			image: data.image || "",
 		});
 
-		return NextResponse.json(novoProduto, { status: 201 });
+		return NextResponse.json(newProduct, { status: 201 });
 	} catch (err: any) {
 		console.error("Erro ao criar produto:", err);
 		return NextResponse.json(

@@ -20,7 +20,8 @@ export const useProductStore = create<ProductStoreState>((set) => ({
 		try {
 			const res = await fetch("/api/produtos?active=true&limit=999");
 			const data = await res.json();
-			set({ produtos: data.produtos || [] });
+
+			set({ produtos: data.products || [] });
 		} catch (err: any) {
 			console.error("Erro ao buscar produtos:", err);
 			set({ produtos: [] });

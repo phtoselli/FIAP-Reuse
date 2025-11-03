@@ -8,7 +8,7 @@ import useSearchParamsHelper from "@/hooks/useSearchParamsHelper";
 import { Product } from "@/types/product";
 import { QueryParamsKey } from "@/types/queryParams";
 import { Routes } from "@/types/routes";
-import { CategoriesEnum, categoriesOptions } from "@/utils/categories";
+import { categoriesOptions } from "@/utils/categories";
 import {
 	Button,
 	Checkbox,
@@ -28,8 +28,10 @@ const { Title, Paragraph } = Typography;
 export default function Posts() {
 	const { token } = theme.useToken();
 	const { redirect } = useSearchParamsHelper();
-	const [activeFilters, setActiveFilters] = useState<string[]>([]);
+
 	const [messageApi, contextHolder] = message.useMessage();
+	const [activeFilters, setActiveFilters] = useState<string[]>([]);
+
 	const { produtos, isLoading, getAllProducts } = useProductStore();
 
 	const categoriesToShow =
@@ -110,18 +112,10 @@ export default function Posts() {
 			{!isLoading && (
 				<div>
 					{categoriesToShow.map((category) => {
-						const categoryMapping = Object.fromEntries(
-							Object.entries(CategoriesEnum).map(([key, value]) => [
-								String(value),
-								key,
-							])
+						const categoryProducts = produtos.filter(
+							(product: Product) =>
+								String(product.category.id) === String(category.value)
 						);
-
-						const categoryProducts = produtos.filter((product: Product) => {
-							const productCategoryCode =
-								categoryMapping[product.categoryId || ""];
-							return productCategoryCode === category.label.toUpperCase();
-						});
 
 						if (!categoryProducts || categoryProducts.length === 0) return null;
 
