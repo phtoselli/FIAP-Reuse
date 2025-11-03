@@ -10,6 +10,7 @@ import { Product } from "@/types/product";
 import { getUser } from "@/utils/auth";
 import { categoriesOptions } from "@/utils/categories";
 import { conditionOptions } from "@/utils/conditions";
+import { getBase64 } from "@/utils/getBase64";
 import { UploadOutlined } from "@ant-design/icons";
 import {
 	Button,
@@ -36,14 +37,6 @@ export default function EditPostModal() {
 	const { isOpen, close, paramValue } = useURLControlledModal(
 		URLControlledModalKeys.EDIT_POST_MODAL
 	);
-
-	const getBase64 = (file: File): Promise<string> =>
-		new Promise((resolve, reject) => {
-			const reader = new FileReader();
-			reader.readAsDataURL(file);
-			reader.onload = () => resolve(reader.result as string);
-			reader.onerror = (error) => reject(error);
-		});
 
 	const onCancel = () => {
 		form.resetFields();
