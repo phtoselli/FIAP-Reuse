@@ -12,16 +12,15 @@ import { useEffect, useMemo } from "react";
 import ContentLayout from "@/components/ContentLayout";
 import ProductCard from "@/components/ProductCard";
 import useSearchParamsHelper from "@/hooks/useSearchParamsHelper";
-import useTypeService from "@/hooks/useTypeService";
 import {
 	URLControlledModalKeys,
 	useURLControlledModal,
 } from "@/hooks/useURLControlledModal";
 import { GenericTypesMap } from "@/types";
 import { Product } from "@/types/product";
-import { Types } from "@/types/type";
 import { getUserId } from "@/utils/auth";
 import { categoriesOptions } from "@/utils/categories";
+import { conditionOptions } from "@/utils/conditions";
 import { useProductStore } from "../store";
 
 export default function MyPosts() {
@@ -41,38 +40,25 @@ export default function MyPosts() {
 		URLControlledModalKeys.CREATE_POST_MODAL
 	);
 
-	const {
-		get: getConditions,
-		data: conditionsData,
-		isLoading: isConditionsLoading,
-	} = useTypeService();
-
-	const conditionOptions = useMemo(() => {
-		if (!conditionsData) return [];
-		return conditionsData.map((c) => ({ value: c.code, label: c.title }));
-	}, [conditionsData]);
-
 	const filteredProducts = useMemo(() => {
 		if (!produtos || !userId) return [];
 
 		return produtos.filter((product: Product) => {
-			const isOwner = product.usuario?.id?.toString() === userId;
+			const isOwner = product.user?.id?.toString() === userId;
 
 			const matchesSearch =
 				!searchParam ||
 				searchParam.length === 0 ||
 				searchParam.some(
 					(term) =>
-						product.nome.toLowerCase().includes(term.toLowerCase()) ||
-						product.descricao?.toLowerCase().includes(term.toLowerCase())
+						product.name.toLowerCase().includes(term.toLowerCase()) ||
+						product.description?.toLowerCase().includes(term.toLowerCase())
 				);
 
 			const matchesCategory =
 				!categoryParam ||
 				categoryParam.length === 0 ||
-				categoryParam.includes(
-					product.categoryId?.toString() || product.categoria?.id?.toString()
-				);
+				categoryParam.includes(product.category?.id?.toString());
 
 			const matchesCondition = !conditionParam || conditionParam.length === 0;
 
@@ -95,8 +81,6 @@ export default function MyPosts() {
 		if (searchParam) form.setFieldValue("search", searchParam.join(","));
 		if (categoryParam) form.setFieldValue("category", categoryParam);
 		if (conditionParam) form.setFieldValue("condition", conditionParam);
-
-		getConditions({ type: Types.CONDITIONTYPE });
 	}, []);
 
 	return (
@@ -145,45 +129,44 @@ export default function MyPosts() {
 								mode="multiple"
 								placeholder="Estado de conservação"
 								options={conditionOptions}
-								loading={isConditionsLoading}
 							/>
 						</Form.Item>
 					</Form>
 				</Card>
 
-				<Card
-					title="Produtos"
-					style={{
-						flex: 1,
-						display: "flex",
-						flexDirection: "column",
-						width: "calc(100vw - 308px)",
-						height: "calc(100vh - 170px)",
-					}}
-					styles={{
-						body: {
-							flex: 1,
-							minHeight: 0,
-							padding: "8px",
-							overflowY: "auto",
-							display: "flex",
-							flexWrap: "wrap",
-						},
-					}}
+				<Spin
+					size="large"
+					spinning={isLoading}
+					indicator={<LoadingOutlined />}
+					tip="Carregando produtos..."
+					style={{ width: "100%", height: "100%" }}
 				>
-					<Spin
-						size="large"
-						spinning={filteredProducts.length < 1 || isLoading}
-						indicator={<LoadingOutlined />}
-						tip="Carregando produtos..."
-						style={{ width: "100%", height: "100%" }}
-					/>
-
-					{filteredProducts.length > 0 &&
-						filteredProducts.map((product: Product) => (
-							<ProductCard key={`mypost-${product.id}`} product={product} />
-						))}
-				</Card>
+					<Card
+						title="Produtos"
+						style={{
+							flex: 1,
+							display: "flex",
+							flexDirection: "column",
+							width: "calc(100vw - 308px)",
+							height: "calc(100vh - 170px)",
+						}}
+						styles={{
+							body: {
+								flex: 1,
+								minHeight: 0,
+								padding: "8px",
+								overflowY: "auto",
+								display: "flex",
+								flexWrap: "wrap",
+							},
+						}}
+					>
+						{filteredProducts.length > 0 &&
+							filteredProducts.map((product: Product) => (
+								<ProductCard key={`mypost-${product.id}`} product={product} />
+							))}
+					</Card>
+				</Spin>
 			</Flex>
 		</ContentLayout>
 	);

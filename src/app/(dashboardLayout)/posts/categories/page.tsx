@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import useTypeService from "@/hooks/useTypeService";
 import { LoadingOutlined, SearchOutlined } from "@ant-design/icons";
 import { Card, Flex, Form, Input, Select, Spin } from "antd";
 import { useEffect, useMemo } from "react";
@@ -9,15 +8,14 @@ import { useEffect, useMemo } from "react";
 import BreadcrumbRoute from "@/components/BreadcrumbRoute";
 import ContentLayout from "@/components/ContentLayout";
 import ProductCard from "@/components/ProductCard";
-import useService from "@/hooks/useService";
 
 import useSearchParamsHelper from "@/hooks/useSearchParamsHelper";
-import { productService } from "@/service/products";
 import { GenericTypesMap } from "@/types";
 import { Product } from "@/types/product";
 import { QueryParamsKey } from "@/types/queryParams";
-import { Types } from "@/types/type";
-import { categoriaOptions } from "@/utils/categories";
+import { categoriesOptions } from "@/utils/categories";
+import { conditionOptions } from "@/utils/conditions";
+import { useProductStore } from "../store";
 
 export default function Categories() {
 	const [form] = Form.useForm();
@@ -25,76 +23,43 @@ export default function Categories() {
 	const { getParam, routerAddParam, routerRemoveParam } =
 		useSearchParamsHelper();
 
+	const { produtos, isLoading, getAllProducts } = useProductStore();
+
 	const searchParam = getParam(QueryParamsKey.SEARCH);
 	const categoryParam = getParam(QueryParamsKey.CATEGORY);
 	const conditionParam = getParam(QueryParamsKey.CONDITION);
 
-	const {
-		data: productsData,
-		execute: getAllProducts,
-		isLoading: isProductsLoading,
-	} = useService(productService.get);
-
-	const {
-		get: getCategories,
-		data: categoriesData,
-		isLoading: isCategoriesLoading,
-	} = useTypeService();
-
-	const {
-		get: getConditions,
-		data: conditionsData,
-		isLoading: isConditionsLoading,
-	} = useTypeService();
-
 	const title = useMemo(() => {
-		if (categoryParam?.length && categoriesData) {
-			const selectedCategory = categoriesData.find(
-				(c) => c.code === categoryParam[0]
+		if (categoryParam?.length) {
+			const selectedCategory = categoriesOptions.find(
+				(c) => c.value === categoryParam[0]
 			);
-			return selectedCategory?.title || "Produtos";
+			return `Produtos (${selectedCategory?.label})` || "Produtos";
 		}
 		return "Produtos";
-	}, [categoryParam, categoriesData]);
-
-	const categoryOptions = useMemo(() => {
-		if (!categoriesData) return [];
-		return categoriesData.map((category) => ({
-			value: category.id,
-			label: category.title,
-		}));
-	}, [categoriesData]);
-
-	const conditionOptions = useMemo(() => {
-		if (!conditionsData) return [];
-
-		return conditionsData.map((condition) => ({
-			value: condition.code,
-			label: condition.title,
-		}));
-	}, [conditionsData]);
+	}, [categoryParam, categoriesOptions]);
 
 	const filteredProducts = useMemo(() => {
-		if (!productsData) return [];
+		if (!produtos) return [];
 
-		return productsData.filter((product: Product) => {
+		return produtos.filter((product: Product) => {
 			const matchesSearch =
 				!searchParam ||
 				searchParam.length === 0 ||
 				searchParam.some(
 					(term) =>
-						product.nome.toLowerCase().includes(term.toLowerCase()) ||
-						product.descricao?.toLowerCase().includes(term.toLowerCase())
+						product.name.toLowerCase().includes(term.toLowerCase()) ||
+						product.description?.toLowerCase().includes(term.toLowerCase())
 				);
 
 			const matchesCategory =
 				!categoryParam ||
 				categoryParam.length === 0 ||
-				categoryParam.includes(product.categoryId.toString());
+				categoryParam.includes(product.category.id.toString());
 
 			return matchesSearch && matchesCategory;
 		});
-	}, [productsData, searchParam, categoryParam, conditionParam]);
+	}, [produtos, searchParam, categoryParam, conditionParam]);
 
 	const onFormValuesChange = (changedValue: GenericTypesMap) => {
 		const key = Object.keys(changedValue)[0];
@@ -108,7 +73,9 @@ export default function Categories() {
 	};
 
 	useEffect(() => {
-		getAllProducts();
+		if (!produtos || produtos.length < 1) {
+			getAllProducts();
+		}
 
 		if (searchParam) {
 			form.setFieldValue("search", searchParam.join(","));
@@ -121,15 +88,11 @@ export default function Categories() {
 		if (conditionParam) {
 			form.setFieldValue("condition", conditionParam);
 		}
-
-		getCategories({ type: Types.CATEGORYTYPE });
-		getConditions({ type: Types.CONDITIONTYPE });
 	}, []);
 
 	return (
 		<ContentLayout title={title} extra={<BreadcrumbRoute />}>
 			<Flex gap={8}>
-				{/* Filtros */}
 				<Card
 					title="Filtros"
 					style={{ width: "250px", flexShrink: 0 }}
@@ -151,7 +114,7 @@ export default function Categories() {
 						<Form.Item name="category" label="Categoria">
 							<Select
 								placeholder="Selecione uma categoria"
-								options={categoriaOptions}
+								options={categoriesOptions}
 							/>
 						</Form.Item>
 
@@ -161,22 +124,20 @@ export default function Categories() {
 								mode="multiple"
 								placeholder="Estado de conservação"
 								options={conditionOptions}
-								loading={isConditionsLoading}
 							/>
 						</Form.Item>
 					</Form>
 				</Card>
 
-				{/* Lista de produtos */}
 				<Spin
 					size="large"
-					spinning={isProductsLoading}
+					spinning={isLoading}
 					indicator={<LoadingOutlined />}
 					tip="Carregando produtos..."
 					style={{ width: "100%", height: "100%" }}
 				>
 					<Card
-						title={title}
+						title="Produtos"
 						style={{
 							flex: 1,
 							display: "flex",
