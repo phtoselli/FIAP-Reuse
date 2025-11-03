@@ -1,13 +1,12 @@
-"use client";
-
 import { useProductStore } from "@/app/(dashboardLayout)/posts/store";
 import {
 	URLControlledModalKeys,
 	useURLControlledModal,
 } from "@/hooks/useURLControlledModal";
-import { Categories } from "@/types/category";
 import { getUser } from "@/utils/auth";
-import { categoriaOptions } from "@/utils/categories";
+import { categoriesOptions } from "@/utils/categories";
+import { conditionOptions } from "@/utils/conditions";
+import { UploadOutlined } from "@ant-design/icons";
 import {
 	Button,
 	Divider,
@@ -17,22 +16,22 @@ import {
 	Modal,
 	Select,
 	Spin,
+	Upload,
 } from "antd";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
 export default function CreatePostModal() {
 	const [form] = Form.useForm();
+
+	const { getAllProducts } = useProductStore();
+
 	const [loading, setLoading] = useState(false);
-	const [categories, setCategories] = useState<
-		{ label: string; value: string }[]
-	>([]);
+	const [fileBase64, setFileBase64] = useState<string | null>(null);
 
 	const { isOpen, close } = useURLControlledModal(
 		URLControlledModalKeys.CREATE_POST_MODAL
 	);
-
-	const { getAllProducts } = useProductStore();
 
 	const handleSave = async (values: any) => {
 		try {
@@ -41,20 +40,18 @@ export default function CreatePostModal() {
 			if (!user) throw new Error("Usuário não está logado");
 
 			const payload = {
-				title: values.nome,
-				description: values.descricao || "",
-				categoryId: Number(values.categoria),
-				subcategoryId: 1,
-				conditionId: values.condicao || null,
+				title: values.name,
+				description: values.description,
+				categoryId: values.categoryId,
+				conditionId: values.conditionId,
 				userId: user.id,
 				rating: 0,
-				imageUrl: values.imagem || "",
+				image: fileBase64,
 			};
 
 			await axios.post("/api/produtos", payload);
 
 			message.success("Publicação criada com sucesso!");
-
 			await getAllProducts();
 			onCancel();
 		} catch (error: any) {
@@ -67,20 +64,24 @@ export default function CreatePostModal() {
 
 	const onCancel = () => {
 		form.resetFields();
+		setFileBase64(null);
 		close();
 	};
 
 	useEffect(() => {
 		if (!isOpen) return;
 
-		const catOptions = Object.entries(Categories).map(([key, value]) => ({
-			label: value.namePT,
-			value: key,
-		}));
-		setCategories(catOptions);
-
 		form.resetFields();
+		setFileBase64(null);
 	}, [isOpen]);
+
+	const getBase64 = (file: File): Promise<string> =>
+		new Promise((resolve, reject) => {
+			const reader = new FileReader();
+			reader.readAsDataURL(file);
+			reader.onload = () => resolve(reader.result as string);
+			reader.onerror = (error) => reject(error);
+		});
 
 	return (
 		<Modal
@@ -91,13 +92,11 @@ export default function CreatePostModal() {
 			footer={null}
 			width={600}
 		>
-			{loading ? (
-				<Spin tip="Salvando produto..." />
-			) : (
+			<Spin spinning={loading} tip="Salvando produto...">
 				<Form form={form} layout="vertical" onFinish={handleSave}>
 					<Form.Item
 						label="Nome"
-						name="nome"
+						name="name"
 						rules={[{ required: true, message: "O nome é obrigatório" }]}
 					>
 						<Input placeholder="Nome do produto" />
@@ -105,7 +104,7 @@ export default function CreatePostModal() {
 
 					<Form.Item
 						label="Descrição"
-						name="descricao"
+						name="description"
 						rules={[{ required: true, message: "A descrição é obrigatória" }]}
 					>
 						<Input.TextArea rows={4} placeholder="Descrição do produto" />
@@ -113,26 +112,43 @@ export default function CreatePostModal() {
 
 					<Form.Item
 						label="Categoria"
-						name="categoria"
+						name="categoryId"
 						rules={[{ required: true, message: "A categoria é obrigatória" }]}
 					>
 						<Select
 							placeholder="Selecione uma categoria"
-							options={categoriaOptions}
+							options={categoriesOptions}
 						/>
 					</Form.Item>
 
-					<Form.Item label="Condição" name="condicao">
-						<Select placeholder="Selecione">
-							<Select.Option value="cond-1">Novo</Select.Option>
-							<Select.Option value="cond-2">Seminovo</Select.Option>
-							<Select.Option value="cond-3">Usado</Select.Option>
-							<Select.Option value="cond-4">Para reparar</Select.Option>
-						</Select>
+					<Form.Item
+						label="Condição"
+						name="conditionId"
+						rules={[
+							{
+								required: true,
+								message: "O estado de conservação é obrigatório",
+							},
+						]}
+					>
+						<Select
+							placeholder="Selecione um estado de conservação"
+							options={conditionOptions}
+						/>
 					</Form.Item>
 
-					<Form.Item label="Imagem" name="imagem">
-						<Input placeholder="Adicione a URL da imagem" />
+					<Form.Item label="Imagem">
+						<Upload
+							accept="image/*"
+							beforeUpload={async (file) => {
+								const base64 = await getBase64(file);
+								setFileBase64(base64);
+								return false;
+							}}
+							showUploadList={!!fileBase64}
+						>
+							<Button icon={<UploadOutlined />}>Selecionar imagem</Button>
+						</Upload>
 					</Form.Item>
 
 					<Divider />
@@ -143,7 +159,7 @@ export default function CreatePostModal() {
 						</Button>
 					</Form.Item>
 				</Form>
-			)}
+			</Spin>
 		</Modal>
 	);
 }

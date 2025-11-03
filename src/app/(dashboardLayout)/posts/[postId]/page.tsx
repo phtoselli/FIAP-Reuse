@@ -2,14 +2,12 @@
 "use client";
 
 import ContentLayout from "@/components/ContentLayout";
-import { Product } from "@/types/product";
-import { CategoryDescription } from "@/types/type/category";
-import { ConditionDescription } from "@/types/type/condition";
 import {
 	CloseCircleOutlined,
 	EditOutlined,
 	LoadingOutlined,
 	SwapOutlined,
+	UserOutlined,
 } from "@ant-design/icons";
 import {
 	Avatar,
@@ -30,17 +28,19 @@ import {
 	URLControlledModalKeys,
 	useURLControlledModal,
 } from "@/hooks/useURLControlledModal";
-import { Categories } from "@/types/category";
 import { getUserId } from "@/utils/auth";
+import { useProductStore } from "../store";
 
 const { Title, Paragraph, Text } = Typography;
 
 export default function PostDetailsPage() {
-	const { token } = theme.useToken();
-	const { postId } = useParams();
+	const userId = getUserId();
 
-	const [postData, setPostData] = useState<Product | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
+	const { postId } = useParams();
+	const { token } = theme.useToken();
+
+	const { produtos, getAllProducts, isLoading } = useProductStore();
+
 	const [error, setError] = useState<string | null>(null);
 
 	const { open: openTradeRequestModal } = useURLControlledModal(
@@ -51,80 +51,37 @@ export default function PostDetailsPage() {
 		URLControlledModalKeys.EDIT_POST_MODAL
 	);
 
-	const userId = getUserId();
-
-	const getCategoryNamePT = (categoryId?: string | number) => {
-		if (!categoryId) return "-";
-		const id = Number(categoryId) as keyof typeof Categories;
-		return Categories[id]?.namePT || "-";
-	};
+	const filteredProduct = produtos.find((product) => product.id === postId);
 
 	useEffect(() => {
-		async function fetchProduct() {
-			if (!postId) return;
-
-			setIsLoading(true);
-			setError(null);
-
-			try {
-				const res = await fetch(`/api/produtos/${postId}`);
-				if (!res.ok) {
-					const errData = await res.json();
-					throw new Error(errData?.error || "Erro ao buscar produto");
-				}
-				const data: Product = await res.json();
-				setPostData(data);
-			} catch (err: any) {
-				setError(err.message);
-				setPostData(null);
-			} finally {
-				setIsLoading(false);
-			}
+		if (!produtos || produtos.length < 1) {
+			getAllProducts();
 		}
-
-		fetchProduct();
-	}, [postId]);
-
-	const getConditionDescription = () => {
-		if (!postData?.condicao?.codigo) return "-";
-		const code = postData.condicao.codigo as keyof typeof ConditionDescription;
-		return ConditionDescription[code] || "-";
-	};
-
-	const getCategoryDescription = () => {
-		if (!postData?.categoria?.nome) return "-";
-		return (
-			CategoryDescription[
-				postData.categoria.nome as keyof typeof CategoryDescription
-			] || "-"
-		);
-	};
-
-	console.log(postData);
+	}, []);
 
 	return (
 		<ContentLayout
 			title="Detalhes do produto"
 			extra={
-				postData && (
+				filteredProduct && (
 					<>
-						{userId === postData.usuario.id && (
+						{userId === filteredProduct.user.id && (
 							<Button
 								type="primary"
 								icon={<EditOutlined />}
 								size="large"
-								onClick={() => openEditPostModal(postData.id)}
+								onClick={() => openEditPostModal(filteredProduct.id)}
 							>
 								Editar Publicação
 							</Button>
 						)}
 
-						{userId !== postData.usuario.id && (
+						{userId !== filteredProduct.user.id && (
 							<Button
 								type="primary"
 								icon={<SwapOutlined />}
 								size="large"
-								onClick={() => openTradeRequestModal(postData.id)}
+								onClick={() => openTradeRequestModal(filteredProduct.id)}
 							>
 								Enviar proposta de troca
 							</Button>
@@ -133,7 +90,7 @@ export default function PostDetailsPage() {
 				)
 			}
 		>
-			{isLoading && !postData && !error && (
+			{isLoading && !filteredProduct && !error && (
 				<Result
 					icon={<LoadingOutlined style={{ fontSize: 80 }} />}
 					title="Carregando informações do produto..."
@@ -141,7 +98,7 @@ export default function PostDetailsPage() {
 				/>
 			)}
 
-			{!isLoading && error && !postData && (
+			{!isLoading && error && !filteredProduct && (
 				<Result
 					status="error"
 					title="Produto não encontrado"
@@ -165,22 +122,26 @@ export default function PostDetailsPage() {
 				</Result>
 			)}
 
-			{postData && !isLoading && !error && (
+			{filteredProduct && !isLoading && !error && (
 				<div style={{ display: "flex", gap: 32, flexWrap: "wrap" }}>
 					<Image
-						src={postData.imagem ?? "/placeholder.png"}
+						src={filteredProduct.image ?? "/placeholder.png"}
 						width={400}
 						height={400}
 						style={{ objectFit: "cover", borderRadius: 8 }}
-						alt={postData.nome}
+						alt={filteredProduct.name}
 					/>
 
 					<div style={{ flex: 1 }}>
-						<Title level={4}>{postData.nome}</Title>
+						<Title level={4}>{filteredProduct.name}</Title>
 						<div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-							<Rate disabled defaultValue={postData.avaliacao} allowHalf />
-							<Tag color={postData.ativo ? "green" : "red"}>
-								{postData.ativo ? "Ativo" : "Inativo"}
+							<Rate
+								disabled
+								defaultValue={filteredProduct.rating || 0}
+								allowHalf
+							/>
+							<Tag color={filteredProduct.isActive ? "green" : "red"}>
+								{filteredProduct.isActive ? "Ativo" : "Inativo"}
 							</Tag>
 						</div>
 
@@ -188,31 +149,30 @@ export default function PostDetailsPage() {
 
 						<Descriptions column={1} bordered>
 							<Descriptions.Item label="Descrição">
-								{postData.descricao || "-"}
+								{filteredProduct.description || "-"}
 							</Descriptions.Item>
 							<Descriptions.Item label="Categoria">
-								{postData.categoria.id
-									? getCategoryNamePT(postData.categoria.id)
-									: "-"}
+								{filteredProduct.category.name || "Outros"}
 							</Descriptions.Item>
 
 							<Descriptions.Item label="Estado de Conservação">
-								{postData.condicao?.tipo || "-"}
+								{filteredProduct.condition?.name || "Novo"}
 							</Descriptions.Item>
 							<Descriptions.Item label="Criado em">
-								{new Date(postData.dataCriacao).toLocaleString()}
+								{new Date(filteredProduct.createdAt).toLocaleString()}
 							</Descriptions.Item>
 							<Descriptions.Item label="Atualizado em">
-								{new Date(postData.dataAtualizacao).toLocaleString()}
+								{new Date(filteredProduct.updatedAt).toLocaleString()}
 							</Descriptions.Item>
 							<Descriptions.Item label="Usuário">
 								<div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-									<Avatar src={postData.usuario?.avatarUrl || undefined} />
+									<Avatar
+										src={filteredProduct.user?.avatarUrl}
+										icon={<UserOutlined />}
+										style={{ backgroundColor: "orange" }}
+									/>
 									<div>
-										<div>{postData.usuario?.nome}</div>
-										{/* <div>
-                      {postData.usuario?.cidade}, {postData.usuario?.estado}
-                    </div> */}
+										<div>{filteredProduct.user?.name}</div>
 									</div>
 								</div>
 							</Descriptions.Item>
