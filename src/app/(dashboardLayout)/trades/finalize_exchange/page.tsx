@@ -1,272 +1,266 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import {
-  Card,
-  Flex,
-  Typography,
-  Button,
-  Radio,
-  Divider,
-  message,
-  Spin,
-} from "antd";
-import { useRouter, useSearchParams } from "next/navigation";
 import BreadcrumbRoute from "@/components/BreadcrumbRoute";
+import { EditOutlined } from "@ant-design/icons";
 import {
-  HomeOutlined,
-  EnvironmentOutlined,
-  EditOutlined,
-} from "@ant-design/icons";
+	Button,
+	Card,
+	Divider,
+	Flex,
+	message,
+	Radio,
+	Spin,
+	Typography,
+} from "antd";
 import axios from "axios";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const { Title, Text } = Typography;
 
 export default function ShippingMethodPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const tradeId = searchParams.get("tradeId") || searchParams.get("proposalId");
+	const router = useRouter();
+	const searchParams = useSearchParams();
+	const tradeId = searchParams.get("tradeId") || searchParams.get("proposalId");
 
-  const [selectedAddress, setSelectedAddress] = useState<string>("");
-  const [selectedMethod, setSelectedMethod] = useState<string>("correios");
-  const [loading, setLoading] = useState(false);
-  const [trade, setTrade] = useState<any>(null);
-  const [addresses, setAddresses] = useState<any[]>([]);
+	const [selectedAddress, setSelectedAddress] = useState<string>("");
+	const [selectedMethod, setSelectedMethod] = useState<string>("correios");
+	const [loading, setLoading] = useState(false);
+	const [trade, setTrade] = useState<any>(null);
+	const [addresses, setAddresses] = useState<any[]>([]);
 
-  // Buscar informações da trade + endereços
-  useEffect(() => {
-    if (!tradeId) {
-      message.error("ID da negociação não encontrado");
-      router.push("/trades");
-      return;
-    }
+	// Buscar informações da trade + endereços
+	useEffect(() => {
+		if (!tradeId) {
+			message.error("ID da negociação não encontrado");
+			router.push("/trades");
+			return;
+		}
 
-    const fetchData = async () => {
-      try {
-        setLoading(true);
+		const fetchData = async () => {
+			try {
+				setLoading(true);
 
-        const [tradeRes, addrRes] = await Promise.all([
-          axios.get(`/api/propostas/${tradeId}`),
-          axios.get(`/api/enderecos`), // você pode passar ?userId= se quiser só do usuário
-        ]);
+				const [tradeRes, addrRes] = await Promise.all([
+					axios.get(`/api/propostas/${tradeId}`),
+					axios.get(`/api/enderecos`), // você pode passar ?userId= se quiser só do usuário
+				]);
 
-        setTrade(tradeRes.data);
-        setAddresses(addrRes.data.enderecos || []);
+				setTrade(tradeRes.data);
+				setAddresses(addrRes.data.enderecos || []);
 
-        // Selecionar o primeiro endereço por padrão
-        if (addrRes.data.enderecos?.length > 0) {
-          setSelectedAddress(addrRes.data.enderecos[0].id);
-        }
-      } catch (err: any) {
-        message.error(err.response?.data?.error || "Erro ao carregar dados");
-        router.push("/trades");
-      } finally {
-        setLoading(false);
-      }
-    };
+				// Selecionar o primeiro endereço por padrão
+				if (addrRes.data.enderecos?.length > 0) {
+					setSelectedAddress(addrRes.data.enderecos[0].id);
+				}
+			} catch (err: any) {
+				message.error(err.response?.data?.error || "Erro ao carregar dados");
+				router.push("/trades");
+			} finally {
+				setLoading(false);
+			}
+		};
 
-    fetchData();
-  }, [tradeId, router]);
+		fetchData();
+	}, [tradeId, router]);
 
-  const methods = [
-    {
-      key: "correios",
-      label: "Grátis Correios",
-      description: "Entrega em 7 dias",
-    },
-    { key: "loggi", label: "R$7,90 Loggi", description: "Entrega em 1-2 dias" },
-    {
-      key: "jadlog",
-      label: "R$17,90 Jadlog",
-      description: "Entrega em 2 dias",
-    },
-  ];
+	const methods = [
+		{
+			key: "correios",
+			label: "Grátis Correios",
+			description: "Entrega em 7 dias",
+		},
+		{ key: "loggi", label: "R$7,90 Loggi", description: "Entrega em 1-2 dias" },
+		{
+			key: "jadlog",
+			label: "R$17,90 Jadlog",
+			description: "Entrega em 2 dias",
+		},
+	];
 
-  const handleFinish = async () => {
-    if (!tradeId) {
-      message.error("ID da negociação não encontrado");
-      return;
-    }
+	const handleFinish = async () => {
+		if (!tradeId) {
+			message.error("ID da negociação não encontrado");
+			return;
+		}
 
-    if (!selectedAddress) {
-      message.error("Selecione um endereço de entrega");
-      return;
-    }
+		if (!selectedAddress) {
+			message.error("Selecione um endereço de entrega");
+			return;
+		}
 
-    try {
-      setLoading(true);
-      
-      // Mostrar popup de "Finalizando negociação"
-      const hideLoading = message.loading("Finalizando negociação...", 0);
+		try {
+			setLoading(true);
 
-      const finalizationData = {
-        shippingAddress: selectedAddress, // agora é o id do endereço real
-        shippingMethod: selectedMethod,
-      };
+			// Mostrar popup de "Finalizando negociação"
+			message.loading("Finalizando negociação...", 0);
 
-      console.log('🔍 Dados sendo enviados para finalização de envio:', finalizationData);
-      console.log('🔍 Proposal ID para finalização de envio:', tradeId);
-      console.log('🔍 Proposal data:', trade);
+			const finalizationData = {
+				shippingAddress: selectedAddress,
+				shippingMethod: selectedMethod,
+			};
 
-      const response = await axios.post(`/api/propostas/${tradeId}/finalize-shipping`, finalizationData);
-      
-      console.log('🔍 Resposta da finalização:', response.data);
+			const response = await axios.post(
+				`/api/propostas/${tradeId}/finalize-shipping`,
+				finalizationData
+			);
 
-      hideLoading();
-      message.success("Negociação finalizada com sucesso!");
-      router.push("/proposals-received");
-    } catch (err: any) {
-      hideLoading();
-      message.error(
-        err.response?.data?.message || "Erro ao finalizar negociação"
-      );
-      console.error("Erro ao finalizar:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+			message.destroy();
+			message.success("Negociação finalizada com sucesso!");
+			router.push("/proposals-received");
+		} catch (err: any) {
+			message.destroy();
 
-  if (loading && !trade) {
-    return (
-      <Flex justify="center" align="center" style={{ height: 400 }}>
-        <Spin size="large" />
-      </Flex>
-    );
-  }
+			message.error(
+				err.response?.data?.message || "Erro ao finalizar negociação"
+			);
+			console.error("Erro ao finalizar:", err);
+		} finally {
+			setLoading(false);
+		}
+	};
 
-  return (
-    <Spin spinning={loading}>
-      <Flex vertical gap={24} style={{ width: "100%" }}>
-        <BreadcrumbRoute />
+	if (loading && !trade) {
+		return (
+			<Flex justify="center" align="center" style={{ height: 400 }}>
+				<Spin size="large" />
+			</Flex>
+		);
+	}
 
-        <Title level={2} style={{ color: "#2A4BA0", margin: 0 }}>
-          Forma de Envio
-        </Title>
-        <Text type="secondary">
-          Selecione a melhor forma de envio para seu produto
-        </Text>
+	return (
+		<Spin spinning={loading}>
+			<Flex vertical gap={24} style={{ width: "100%" }}>
+				<BreadcrumbRoute />
 
-        {trade && (
-          <Card style={{ borderRadius: 12, backgroundColor: "#f8f9ff" }}>
-            <Text type="secondary">Finalizando negociação:</Text>
-            <Title level={4} style={{ margin: "8px 0", color: "#2A4BA0" }}>
-              {trade.items?.[0]?.post?.title || "Produto"}
-            </Title>
-            <Text>
-              Com: <Text strong>{trade.requester?.name}</Text>
-            </Text>
-          </Card>
-        )}
+				<Title level={2} style={{ color: "#2A4BA0", margin: 0 }}>
+					Forma de Envio
+				</Title>
+				<Text type="secondary">
+					Selecione a melhor forma de envio para seu produto
+				</Text>
 
-        <Flex gap={48} align="flex-start" style={{ marginTop: 16 }}>
-          {/* Coluna esquerda - Endereços e Métodos */}
-          <Flex vertical gap={32} style={{ flex: 1 }}>
-            {/* Endereços */}
-            <Flex vertical gap={24}>
-              <Title level={4}>Endereço de entrega</Title>
-              <Radio.Group
-                onChange={(e) => setSelectedAddress(e.target.value)}
-                value={selectedAddress}
-                style={{ width: "100%" }}
-              >
-                {addresses.map((addr) => (
-                  <Card
-                    key={addr.id}
-                    style={{ borderRadius: 12, marginBottom: 10 }}
-                  >
-                    <Flex align="center" justify="space-between">
-                      <Flex gap={12}>
-                        <Radio value={addr.id} />
-                        <Flex vertical>
-                          <Text strong>{addr.street}</Text>
-                          <Text type="secondary">{addr.fullAddress}</Text>
-                        </Flex>
-                      </Flex>
-                      <Button type="link" size="small" icon={<EditOutlined />}>
-                        Editar
-                      </Button>
-                    </Flex>
-                  </Card>
-                ))}
-              </Radio.Group>
+				{trade && (
+					<Card style={{ borderRadius: 12, backgroundColor: "#f8f9ff" }}>
+						<Text type="secondary">Finalizando negociação:</Text>
+						<Title level={4} style={{ margin: "8px 0", color: "#2A4BA0" }}>
+							{trade.items?.[0]?.post?.title || "Produto"}
+						</Title>
+						<Text>
+							Com: <Text strong>{trade.requester?.name}</Text>
+						</Text>
+					</Card>
+				)}
 
-              <Button
-                block
-                shape="round"
-                style={{ height: 40, borderStyle: "dashed" }}
-              >
-                + Adicionar novo endereço
-              </Button>
-            </Flex>
+				<Flex gap={48} align="flex-start" style={{ marginTop: 16 }}>
+					{/* Coluna esquerda - Endereços e Métodos */}
+					<Flex vertical gap={32} style={{ flex: 1 }}>
+						{/* Endereços */}
+						<Flex vertical gap={24}>
+							<Title level={4}>Endereço de entrega</Title>
+							<Radio.Group
+								onChange={(e) => setSelectedAddress(e.target.value)}
+								value={selectedAddress}
+								style={{ width: "100%" }}
+							>
+								{addresses.map((addr) => (
+									<Card
+										key={addr.id}
+										style={{ borderRadius: 12, marginBottom: 10 }}
+									>
+										<Flex align="center" justify="space-between">
+											<Flex gap={12}>
+												<Radio value={addr.id} />
+												<Flex vertical>
+													<Text strong>{addr.street}</Text>
+													<Text type="secondary">{addr.fullAddress}</Text>
+												</Flex>
+											</Flex>
+											<Button type="link" size="small" icon={<EditOutlined />}>
+												Editar
+											</Button>
+										</Flex>
+									</Card>
+								))}
+							</Radio.Group>
 
-            {/* Métodos de envio */}
-            <Flex vertical gap={24}>
-              <Title level={4}>Método de envio</Title>
-              <Radio.Group
-                onChange={(e) => setSelectedMethod(e.target.value)}
-                value={selectedMethod}
-                style={{ width: "100%" }}
-              >
-                {methods.map((method) => (
-                  <Card
-                    key={method.key}
-                    style={{ borderRadius: 12, marginBottom: 10 }}
-                  >
-                    <Flex align="center" gap={12}>
-                      <Radio value={method.key} />
-                      <Flex vertical>
-                        <Text strong>{method.label}</Text>
-                        <Text type="secondary">{method.description}</Text>
-                      </Flex>
-                    </Flex>
-                  </Card>
-                ))}
-              </Radio.Group>
-            </Flex>
+							<Button
+								block
+								shape="round"
+								style={{ height: 40, borderStyle: "dashed" }}
+							>
+								+ Adicionar novo endereço
+							</Button>
+						</Flex>
 
-            <Divider />
-          </Flex>
+						{/* Métodos de envio */}
+						<Flex vertical gap={24}>
+							<Title level={4}>Método de envio</Title>
+							<Radio.Group
+								onChange={(e) => setSelectedMethod(e.target.value)}
+								value={selectedMethod}
+								style={{ width: "100%" }}
+							>
+								{methods.map((method) => (
+									<Card
+										key={method.key}
+										style={{ borderRadius: 12, marginBottom: 10 }}
+									>
+										<Flex align="center" gap={12}>
+											<Radio value={method.key} />
+											<Flex vertical>
+												<Text strong>{method.label}</Text>
+												<Text type="secondary">{method.description}</Text>
+											</Flex>
+										</Flex>
+									</Card>
+								))}
+							</Radio.Group>
+						</Flex>
 
-          {/* Coluna direita - Imagem */}
-          <Flex
-            justify="center"
-            align="center"
-            style={{
-              flex: "0 0 320px",
-              borderRadius: 12,
-              background: "#f9f9f9",
-              padding: 24,
-              height: 320,
-            }}
-          >
-            <img
-              src="/delivery-truck.png"
-              alt="Delivery"
-              style={{ maxHeight: "100%", objectFit: "contain" }}
-            />
-          </Flex>
-        </Flex>
+						<Divider />
+					</Flex>
 
-        {/* Botões */}
-        <Flex gap={16} justify="flex-end">
-          <Button
-            shape="round"
-            style={{ width: 200 }}
-            onClick={() => router.back()}
-          >
-            Voltar
-          </Button>
-          <Button
-            type="primary"
-            shape="round"
-            style={{ width: 220, backgroundColor: "#2A4BA0" }}
-            onClick={handleFinish}
-            disabled={!tradeId}
-          >
-            Finalizar negociação
-          </Button>
-        </Flex>
-      </Flex>
-    </Spin>
-  );
+					{/* Coluna direita - Imagem */}
+					<Flex
+						justify="center"
+						align="center"
+						style={{
+							flex: "0 0 320px",
+							borderRadius: 12,
+							background: "#f9f9f9",
+							padding: 24,
+							height: 320,
+						}}
+					>
+						<img
+							src="/delivery-truck.png"
+							alt="Delivery"
+							style={{ maxHeight: "100%", objectFit: "contain" }}
+						/>
+					</Flex>
+				</Flex>
+
+				{/* Botões */}
+				<Flex gap={16} justify="flex-end">
+					<Button
+						shape="round"
+						style={{ width: 200 }}
+						onClick={() => router.back()}
+					>
+						Voltar
+					</Button>
+					<Button
+						type="primary"
+						shape="round"
+						style={{ width: 220, backgroundColor: "#2A4BA0" }}
+						onClick={handleFinish}
+						disabled={!tradeId}
+					>
+						Finalizar negociação
+					</Button>
+				</Flex>
+			</Flex>
+		</Spin>
+	);
 }
