@@ -8,6 +8,7 @@ import {
 import { Categories } from "@/types/category";
 import { Product } from "@/types/product";
 import { getUser } from "@/utils/auth";
+import { categoriaOptions } from "@/utils/categories";
 import { FileImageOutlined } from "@ant-design/icons";
 import {
 	Button,
@@ -141,7 +142,10 @@ export default function EditPostModal() {
 						name="categoria"
 						rules={[{ required: true, message: "A categoria é obrigatória" }]}
 					>
-						<Select placeholder="Selecione a categoria" options={categories} />
+						<Select
+							placeholder="Selecione uma categoria"
+							options={categoriaOptions}
+						/>
 					</Form.Item>
 
 					<Form.Item

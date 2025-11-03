@@ -1,55 +1,48 @@
 export interface ProductModel {
-  id: string;
-  nome: string;
-  descricao: string | null;
-  imagem: string | null;
-  avaliacao: number | null;
-  ativo: boolean;
-  dataCriacao: Date;
-  dataAtualizacao: Date;
-  usuario: {
-    id: string;
-    nome: string;
-    cidade: string | null;
-    estado: string | null;
-    avatarUrl: string | null;
-  };
-  categoria: {
-    id: string;
-    nome: string;
-    descricao: string | null;
-  };
-  subcategoria: {
-    id: string;
-    nome: string;
-    descricao: string | null;
-  };
-  condicao: {
-    id: string;
-    codigo: string;
-    tipo: string;
-    descricao: string | null;
-  } | null;
+	id: string;
+	name: string;
+	description: string | null;
+	image: string | null;
+	rating: number | null;
+	isActive: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+	user: {
+		id: string;
+		name: string;
+		city: string | null;
+		state: string | null;
+		avatarUrl: string | null;
+	};
+	category: {
+		id: number;
+		name: string;
+		description: string | null;
+	};
+	condition: {
+		id: number;
+		code: string;
+		type: string;
+		description: string | null;
+	} | null;
 }
 
 export interface ProductCreateModel {
-  titulo: string;
-  descricao?: string;
-  imagemUrl?: string;
-  categoriaId: string;
-  subcategoriaId: string;
-  condicaoId: string | null;
-  usuarioId: string;
-  avaliacao?: number;
+	title: string;
+	description?: string;
+	image?: string;
+	categoryId?: number;
+	conditionId?: number;
+	userId: string;
+	rating?: number;
 }
 
 export interface ProductUpdateModel {
-  titulo?: string;
-  descricao?: string;
-  imagemUrl?: string;
-  categoriaId?: string;
-  subcategoriaId?: string;
-  condicaoId?: string;
-  ativo?: boolean;
-  avaliacao?: number;
+	title?: string;
+	description?: string;
+	image?: string;
+	categoryId?: number;
+	conditionId?: number;
+	isActive?: boolean;
+	rating?: number;
 }

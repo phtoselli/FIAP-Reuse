@@ -21,6 +21,7 @@ import { GenericTypesMap } from "@/types";
 import { Product } from "@/types/product";
 import { Types } from "@/types/type";
 import { getUserId } from "@/utils/auth";
+import { categoriesOptions } from "@/utils/categories";
 import { useProductStore } from "../store";
 
 export default function MyPosts() {
@@ -41,21 +42,10 @@ export default function MyPosts() {
 	);
 
 	const {
-		get: getCategories,
-		data: categoriesData,
-		isLoading: isCategoriesLoading,
-	} = useTypeService();
-
-	const {
 		get: getConditions,
 		data: conditionsData,
 		isLoading: isConditionsLoading,
 	} = useTypeService();
-
-	const categoryOptions = useMemo(() => {
-		if (!categoriesData) return [];
-		return categoriesData.map((c) => ({ value: c.id, label: c.title }));
-	}, [categoriesData]);
 
 	const conditionOptions = useMemo(() => {
 		if (!conditionsData) return [];
@@ -106,7 +96,6 @@ export default function MyPosts() {
 		if (categoryParam) form.setFieldValue("category", categoryParam);
 		if (conditionParam) form.setFieldValue("condition", conditionParam);
 
-		getCategories({ type: Types.CATEGORYTYPE });
 		getConditions({ type: Types.CONDITIONTYPE });
 	}, []);
 
@@ -145,10 +134,8 @@ export default function MyPosts() {
 
 						<Form.Item name="category" label="Categoria">
 							<Select
-								allowClear
-								placeholder="Categoria"
-								options={categoryOptions}
-								loading={isCategoriesLoading}
+								placeholder="Selecione uma categoria"
+								options={categoriesOptions}
 							/>
 						</Form.Item>
 

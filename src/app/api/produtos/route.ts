@@ -10,7 +10,6 @@ export async function GET(request: NextRequest) {
 		const limit = searchParams.get("limit");
 		const offset = searchParams.get("offset");
 		const categoryId = searchParams.get("categoryId");
-		const subcategoryId = searchParams.get("subcategoryId");
 		const active = searchParams.get("active");
 
 		// Converter parâmetros para números
@@ -23,7 +22,6 @@ export async function GET(request: NextRequest) {
 		if (categoryId) {
 			result = await productService.getProductsWithFilters({
 				categoryId,
-				subcategoryId: subcategoryId || undefined,
 				activeOnly,
 				limit: limitNum,
 				offset: offsetNum,
@@ -50,19 +48,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
 	try {
 		const data = await request.json();
-		const imageUrl =
-			data.imageUrl?.trim() ||
-			`https://picsum.photos/500/500?random=${Math.floor(Math.random() * 100)}`;
-
 		const novoProduto = await productService.createProduct({
-			titulo: data.title,
-			descricao: data.description || "",
-			categoriaId: Number(data.categoryId),
-			subcategoriaId: Number(data.subcategoryId),
-			condicaoId: data.conditionId || null,
-			usuarioId: data.userId,
-			avaliacao: Number(data.rating) || 0,
-			imagemUrl: imageUrl,
+			title: data.title,
+			description: data.description || "",
+			categoryId: Number(data.categoryId),
+			conditionId: data.conditionId || null,
+			userId: data.userId,
+			rating: Number(data.rating) || 0,
+			image: data.image,
 		});
 
 		return NextResponse.json(novoProduto, { status: 201 });

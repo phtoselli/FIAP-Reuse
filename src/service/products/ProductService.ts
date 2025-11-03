@@ -79,12 +79,11 @@ export class ProductService {
 	 */
 	async getProductsWithFilters(filters: {
 		categoryId?: string;
-		subcategoryId?: string;
 		activeOnly?: boolean;
 		limit?: number;
 		offset?: number;
 	}): Promise<{
-		produtos: ProductModel[];
+		products: ProductModel[];
 		total: number;
 		limit: number;
 		offset: number;
@@ -105,7 +104,7 @@ export class ProductService {
 			const hasMore = currentOffset + currentLimit < total;
 
 			return {
-				produtos: posts.map((post) => this.mapPostToProductModel(post)),
+				products: posts.map((post) => this.mapPostToProductModel(post)),
 				total,
 				limit: currentLimit,
 				offset: currentOffset,
@@ -129,7 +128,7 @@ export class ProductService {
 		limit?: number,
 		offset?: number
 	): Promise<{
-		produtos: ProductModel[];
+		products: ProductModel[];
 		total: number;
 		limit: number;
 		offset: number;
@@ -149,7 +148,7 @@ export class ProductService {
 			const hasMore = currentOffset + currentLimit < total;
 
 			return {
-				produtos: posts.map((post) => this.mapPostToProductModel(post)),
+				products: posts.map((post) => this.mapPostToProductModel(post)),
 				total,
 				limit: currentLimit,
 				offset: currentOffset,
@@ -170,15 +169,14 @@ export class ProductService {
 	 */
 	async createProduct(productData: ProductCreateModel): Promise<ProductModel> {
 		const post = await this.postRepository.create({
-			title: productData.titulo,
-			description: productData.descricao ?? "",
-			imageUrl: productData.imagemUrl ?? "",
-			categoryId: productData.categoriaId,
-			subcategoryId: productData.subcategoriaId,
-			conditionId: productData.condicaoId,
-			userId: productData.usuarioId,
-			rating: productData.avaliacao || 0,
 			isActive: true,
+			title: productData.title,
+			description: productData.description ?? "",
+			image: productData.image ?? "",
+			categoryId: productData.categoryId ?? 1,
+			conditionId: productData.conditionId ?? 1,
+			userId: productData.userId,
+			rating: Number(productData.rating) ?? 0,
 		});
 
 		const createdPost = await this.postRepository.findById(post.id);
@@ -206,21 +204,18 @@ export class ProductService {
 
 			// Preparar dados para atualização
 			const updateData: any = {};
-			if (productData.titulo) updateData.title = productData.titulo;
-			if (productData.descricao !== undefined)
-				updateData.description = productData.descricao;
-			if (productData.imagemUrl !== undefined)
-				updateData.imageUrl = productData.imagemUrl;
-			if (productData.categoriaId)
-				updateData.categoryId = productData.categoriaId;
-			if (productData.subcategoriaId)
-				updateData.subcategoryId = productData.subcategoriaId;
-			if (productData.condicaoId !== undefined)
-				updateData.conditionId = productData.condicaoId;
-			if (productData.ativo !== undefined)
-				updateData.isActive = productData.ativo;
-			if (productData.avaliacao !== undefined)
-				updateData.rating = productData.avaliacao;
+			if (productData.title) updateData.title = productData.title;
+			if (productData.description !== undefined)
+				updateData.description = productData.description;
+			if (productData.image !== undefined) updateData.image = productData.image;
+			if (productData.categoryId)
+				updateData.categoryId = productData.categoryId;
+			if (productData.conditionId !== undefined)
+				updateData.conditionId = productData.conditionId;
+			if (productData.isActive !== undefined)
+				updateData.isActive = productData.isActive;
+			if (productData.rating !== undefined)
+				updateData.rating = Number(productData.rating);
 
 			// Atualizar o produto
 			await this.postRepository.update(id, updateData);
@@ -267,37 +262,31 @@ export class ProductService {
 	private mapPostToProductModel(post: any): ProductModel {
 		return {
 			id: post.id,
-			nome: post.title,
-			descricao: post.description,
-			imagem: post.imageUrl,
-			avaliacao: post.rating,
-			ativo: post.isActive,
-			dataCriacao: post.createdAt,
-			dataAtualizacao: post.updatedAt,
-			categoryId: post.categoryId, // Adicionado
-			usuario: {
+			name: post.title,
+			description: post.description,
+			image: post.imageUrl,
+			rating: Number(post.rating),
+			isActive: post.isActive,
+			createdAt: post.createdAt,
+			updatedAt: post.updatedAt,
+			user: {
 				id: post.user.id,
-				nome: post.user.name,
-				cidade: post.user.city,
-				estado: post.user.state,
+				name: post.user.name,
+				city: post.user.city,
+				state: post.user.state,
 				avatarUrl: post.user.avatarUrl,
 			},
-			categoria: {
+			category: {
 				id: post.categoryId,
-				nome: post.category?.code || "Categoria",
-				descricao: post.category?.description || "Descrição da categoria",
+				name: post.category?.code || "Category",
+				description: post.category?.description || "Category description",
 			},
-			subcategoria: {
-				id: post.subcategoryId,
-				nome: post.subcategory?.code || "Subcategoria",
-				descricao: post.subcategory?.description || "Descrição da subcategoria",
-			},
-			condicao: post.condition
+			condition: post.condition
 				? {
 						id: post.condition.id,
-						codigo: post.condition.code,
-						tipo: post.condition.type,
-						descricao: post.condition.description,
+						code: post.condition.code,
+						type: post.condition.type,
+						description: post.condition.description,
 				  }
 				: null,
 		};

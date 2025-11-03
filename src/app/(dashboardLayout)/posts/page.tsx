@@ -8,7 +8,7 @@ import useSearchParamsHelper from "@/hooks/useSearchParamsHelper";
 import { Product } from "@/types/product";
 import { QueryParamsKey } from "@/types/queryParams";
 import { Routes } from "@/types/routes";
-import { CategoryCode } from "@/types/type/category";
+import { CategoriesEnum, categoriesOptions } from "@/utils/categories";
 import {
 	Button,
 	Checkbox,
@@ -25,28 +25,17 @@ import { useProductStore } from "./store";
 
 const { Title, Paragraph } = Typography;
 
-const categories = [
-	{ label: CategoryCode.CLOTHING, value: CategoryCode.CLOTHING },
-	{ label: CategoryCode.HOUSE, value: CategoryCode.HOUSE },
-	{ label: CategoryCode.FOOTWEAR, value: CategoryCode.FOOTWEAR },
-	{ label: CategoryCode.ACCESSORIES, value: CategoryCode.ACCESSORIES },
-	{ label: CategoryCode.COSMETICS, value: CategoryCode.COSMETICS },
-	{ label: CategoryCode.OTHERS, value: CategoryCode.OTHERS },
-];
-
 export default function Posts() {
 	const { token } = theme.useToken();
 	const { redirect } = useSearchParamsHelper();
-
 	const [activeFilters, setActiveFilters] = useState<string[]>([]);
 	const [messageApi, contextHolder] = message.useMessage();
-
 	const { produtos, isLoading, getAllProducts } = useProductStore();
 
 	const categoriesToShow =
 		activeFilters.length > 0
-			? categories.filter((cat) => activeFilters.includes(cat.value))
-			: categories;
+			? categoriesOptions.filter((cat) => activeFilters.includes(cat.value))
+			: categoriesOptions;
 
 	useEffect(() => {
 		if (produtos.length < 1) {
@@ -102,9 +91,9 @@ export default function Posts() {
 			>
 				<Title level={4}>Filtros</Title>
 				<Checkbox.Group
-					options={categories}
+					options={categoriesOptions}
 					value={activeFilters}
-					onChange={(values) => setActiveFilters(values as string[])}
+					onChange={(values) => setActiveFilters(values)}
 					style={{ display: "flex", gap: 16, flexWrap: "wrap" }}
 				/>
 			</div>
@@ -121,21 +110,17 @@ export default function Posts() {
 			{!isLoading && (
 				<div>
 					{categoriesToShow.map((category) => {
-						const categoryProducts = produtos?.filter((product: Product) => {
-							const categoryMapping: { [key: string]: string } = {
-								1: "ROUPAS",
-								2: "CASA",
-								3: "CALÇADOS",
-								4: "ACESSÓRIOS",
-								5: "COSMÉTICOS",
-								6: "OUTROS",
-							};
+						const categoryMapping = Object.fromEntries(
+							Object.entries(CategoriesEnum).map(([key, value]) => [
+								String(value),
+								key,
+							])
+						);
 
+						const categoryProducts = produtos.filter((product: Product) => {
 							const productCategoryCode =
 								categoryMapping[product.categoryId || ""];
-							const matches = productCategoryCode === category.value;
-
-							return matches;
+							return productCategoryCode === category.label.toUpperCase();
 						});
 
 						if (!categoryProducts || categoryProducts.length === 0) return null;
@@ -150,7 +135,7 @@ export default function Posts() {
 										type="link"
 										onClick={() =>
 											redirect(Routes.CATEGORIES, [
-												{ [QueryParamsKey.CATEGORY]: category.value },
+												{ [QueryParamsKey.CATEGORY]: String(category.value) },
 											])
 										}
 									>

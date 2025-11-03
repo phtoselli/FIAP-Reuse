@@ -7,6 +7,7 @@ import {
 } from "@/hooks/useURLControlledModal";
 import { Categories } from "@/types/category";
 import { getUser } from "@/utils/auth";
+import { categoriaOptions } from "@/utils/categories";
 import {
 	Button,
 	Divider,
@@ -115,7 +116,10 @@ export default function CreatePostModal() {
 						name="categoria"
 						rules={[{ required: true, message: "A categoria é obrigatória" }]}
 					>
-						<Select placeholder="Selecione a categoria" options={categories} />
+						<Select
+							placeholder="Selecione uma categoria"
+							options={categoriaOptions}
+						/>
 					</Form.Item>
 
 					<Form.Item label="Condição" name="condicao">

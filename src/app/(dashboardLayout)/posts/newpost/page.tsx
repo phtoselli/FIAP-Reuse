@@ -8,35 +8,17 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import ContentLayout from "@/components/ContentLayout";
-import { getUser } from "@/utils/auth";
+import { getUserId } from "@/utils/auth";
+import { categoriesOptions } from "@/utils/categories";
+import { conditionOptions } from "@/utils/conditions";
 import { useProductStore } from "../store";
-
-export enum CategoryCode {
-	CLOTHING = "ROUPAS",
-	HOUSE = "CASA",
-	FOOTWEAR = "CALÇADOS",
-	ACCESSORIES = "ACESSÓRIOS",
-	COSMETICS = "COSMÉTICOS",
-	OTHERS = "OUTROS",
-}
-
-export enum CategoryDescription {
-	CLOTHING = "ROUPAS",
-	HOUSE = "CASA",
-	FOOTWEAR = "CALÇADOS",
-	ACCESSORIES = "ACESSÓRIOS",
-	COSMETICS = "COSMÉTICOS",
-	OTHERS = "OUTROS",
-}
-
-const { Option } = Select;
-const user = getUser();
 
 export default function NewPost() {
 	const [form] = Form.useForm();
 	const [loading, setLoading] = useState(false);
 
 	const router = useRouter();
+	const userId = getUserId();
 
 	const { getAllProducts } = useProductStore();
 
@@ -45,19 +27,13 @@ export default function NewPost() {
 			setLoading(true);
 
 			const formData = new FormData();
-			formData.append("titulo", values.titulo);
-			formData.append("descricao", values.descricao || "");
-			formData.append("categoriaId", values.categoriaId);
-			formData.append("subcategoriaId", " ");
-			formData.append("condicaoId", values.condicaoId || "");
-			formData.append("usuarioId", user.id);
-			formData.append("avaliacao", "0");
-
-			if (values.imagens && values.imagens.length > 0) {
-				values.imagens.forEach((file: any) => {
-					formData.append("imagens", file.originFileObj);
-				});
-			}
+			formData.append("title", values.title);
+			formData.append("description", values.description || "");
+			formData.append("categoryId", values.categoryId);
+			formData.append("conditionId", values.conditionId || "");
+			formData.append("userId", userId);
+			formData.append("rating", "0");
+			formData.append("image", values.image[0].originFileObj);
 
 			await axios.post("/api/produtos", formData, {
 				headers: { "Content-Type": "multipart/form-data" },
@@ -107,7 +83,7 @@ export default function NewPost() {
 				>
 					<Form.Item
 						label="Produto"
-						name="titulo"
+						name="title"
 						rules={[{ required: true, message: "Informe o nome do produto" }]}
 					>
 						<Input placeholder="Nome do Produto (ex: Tênis All Star)" />
@@ -115,28 +91,29 @@ export default function NewPost() {
 
 					<Form.Item
 						label="Categoria"
-						name="categoriaId"
+						name="categoryId"
 						rules={[{ required: true, message: "Selecione a categoria" }]}
 					>
-						<Select placeholder="Selecione">
-							{Object.entries(CategoryCode).map(([key, value]) => (
-								<Option key={key} value={value}>
-									{CategoryDescription[key as keyof typeof CategoryDescription]}
-								</Option>
-							))}
-						</Select>
+						<Select
+							placeholder="Selecione uma categoria"
+							options={categoriesOptions}
+						/>
 					</Form.Item>
 
-					<Form.Item label="Estado de Conservação" name="condicaoId">
-						<Select placeholder="Selecione">
-							<Option value="cond-1">Novo</Option>
-							<Option value="cond-2">Seminovo</Option>
-							<Option value="cond-3">Usado</Option>
-							<Option value="cond-4">Para reparar</Option>
-						</Select>
+					<Form.Item
+						label="Estado de Conservação"
+						name="conditionId"
+						rules={[
+							{ required: true, message: "Selecione um estado de conservação" },
+						]}
+					>
+						<Select
+							placeholder="Selecione um estado de conservação"
+							options={conditionOptions}
+						/>
 					</Form.Item>
 
-					<Form.Item label="Descrição de Produto" name="descricao">
+					<Form.Item label="Descrição de Produto" name="description">
 						<Input.TextArea
 							rows={4}
 							placeholder="Ex: Tênis All Star número 35, em bom estado..."
@@ -144,16 +121,17 @@ export default function NewPost() {
 					</Form.Item>
 
 					<Form.Item
-						label="Imagens"
-						name="imagens"
+						label="Imagem"
+						name="image"
 						valuePropName="fileList"
 						getValueFromEvent={(e) => e.fileList}
-						rules={[{ required: true, message: "Envie ao menos 1 imagem" }]}
+						rules={[{ required: true, message: "Envie uma imagem" }]}
 					>
 						<Upload
 							listType="picture-card"
-							maxCount={3}
-							beforeUpload={() => false} // impede upload automático
+							maxCount={1}
+							accept="image/*"
+							beforeUpload={() => false}
 						>
 							<div>
 								<PlusOutlined />

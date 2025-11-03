@@ -17,6 +17,7 @@ import { GenericTypesMap } from "@/types";
 import { Product } from "@/types/product";
 import { QueryParamsKey } from "@/types/queryParams";
 import { Types } from "@/types/type";
+import { categoriaOptions } from "@/utils/categories";
 
 export default function Categories() {
 	const [form] = Form.useForm();
@@ -149,10 +150,8 @@ export default function Categories() {
 
 						<Form.Item name="category" label="Categoria">
 							<Select
-								allowClear
-								placeholder="Categoria"
-								options={categoryOptions}
-								loading={isCategoriesLoading}
+								placeholder="Selecione uma categoria"
+								options={categoriaOptions}
 							/>
 						</Form.Item>
 
