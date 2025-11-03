@@ -60,7 +60,10 @@ export default function MyPosts() {
 				categoryParam.length === 0 ||
 				categoryParam.includes(product.category?.id?.toString());
 
-			const matchesCondition = !conditionParam || conditionParam.length === 0;
+			const matchesCondition =
+				!conditionParam ||
+				conditionParam.length === 0 ||
+				(product.condition && conditionParam.includes(product.condition.id));
 
 			return isOwner && matchesSearch && matchesCategory && matchesCondition;
 		});
@@ -118,6 +121,7 @@ export default function MyPosts() {
 
 						<Form.Item name="category" label="Categoria">
 							<Select
+								allowClear
 								placeholder="Selecione uma categoria"
 								options={categoriesOptions}
 							/>

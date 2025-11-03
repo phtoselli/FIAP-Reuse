@@ -1,49 +1,46 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { ProductService } from '@/service/products/ProductService';
+import { ProductService } from "@/service/products/ProductService";
+import { NextRequest, NextResponse } from "next/server";
 
 const productService = new ProductService();
 
 // GET /api/produtos/categoria/:categoryId - Listar produtos por categoria
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { categoryId: string } }
+	request: NextRequest,
+	{ params }: { params: { categoryId: string } }
 ) {
-  try {
-    const { categoryId } = params;
-    const { searchParams } = new URL(request.url);
-    
-    const limit = searchParams.get('limit');
-    const offset = searchParams.get('offset');
-    const active = searchParams.get('active');
-    const subcategoryId = searchParams.get('subcategoryId');
+	try {
+		const { categoryId } = params;
+		const { searchParams } = new URL(request.url);
 
-    // Converter parâmetros para números
-    const limitNum = limit ? parseInt(limit) : undefined;
-    const offsetNum = offset ? parseInt(offset) : undefined;
-    const activeOnly = active === 'false' ? false : true;
+		const limit = searchParams.get("limit");
+		const offset = searchParams.get("offset");
+		const active = searchParams.get("active");
 
-    if (!categoryId || typeof categoryId !== 'string') {
-      return NextResponse.json(
-        { error: 'ID da categoria é obrigatório' },
-        { status: 400 }
-      );
-    }
+		// Converter parâmetros para números
+		const limitNum = limit ? parseInt(limit) : undefined;
+		const offsetNum = offset ? parseInt(offset) : undefined;
+		const activeOnly = active === "false" ? false : true;
 
-    const result = await productService.getProductsWithFilters({
-      categoryId,
-      subcategoryId: subcategoryId || undefined,
-      activeOnly,
-      limit: limitNum,
-      offset: offsetNum,
-    });
+		if (!categoryId || typeof categoryId !== "string") {
+			return NextResponse.json(
+				{ error: "ID da categoria é obrigatório" },
+				{ status: 400 }
+			);
+		}
 
-    return NextResponse.json(result);
+		const result = await productService.getProductsWithFilters({
+			categoryId,
+			activeOnly,
+			limit: limitNum,
+			offset: offsetNum,
+		});
 
-  } catch (error) {
-    console.error('Erro ao listar produtos por categoria:', error);
-    return NextResponse.json(
-      { error: 'Erro interno do servidor' },
-      { status: 500 }
-    );
-  }
+		return NextResponse.json(result);
+	} catch (error) {
+		console.error("Erro ao listar produtos por categoria:", error);
+		return NextResponse.json(
+			{ error: "Erro interno do servidor" },
+			{ status: 500 }
+		);
+	}
 }

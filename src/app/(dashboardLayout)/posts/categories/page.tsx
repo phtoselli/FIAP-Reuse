@@ -55,9 +55,14 @@ export default function Categories() {
 			const matchesCategory =
 				!categoryParam ||
 				categoryParam.length === 0 ||
-				categoryParam.includes(product.category.id.toString());
+				categoryParam.includes(product.category?.id?.toString());
 
-			return matchesSearch && matchesCategory;
+			const matchesCondition =
+				!conditionParam ||
+				conditionParam.length === 0 ||
+				(product.condition && conditionParam.includes(product.condition.id));
+
+			return matchesSearch && matchesCategory && matchesCondition;
 		});
 	}, [produtos, searchParam, categoryParam, conditionParam]);
 
@@ -113,6 +118,7 @@ export default function Categories() {
 
 						<Form.Item name="category" label="Categoria">
 							<Select
+								allowClear
 								placeholder="Selecione uma categoria"
 								options={categoriesOptions}
 							/>

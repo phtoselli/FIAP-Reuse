@@ -6,6 +6,7 @@ import {
 	ProductUpdateModel,
 } from "@/types/product/ProductModel";
 import { categoriesOptions } from "@/utils/categories";
+import { conditionOptions } from "@/utils/conditions";
 
 export class ProductService {
 	private postRepository: PostRepository;
@@ -79,7 +80,7 @@ export class ProductService {
 	 * @returns Lista de produtos filtrados com informações de paginação
 	 */
 	async getProductsWithFilters(filters: {
-		categoryId?: number;
+		categoryId?: string;
 		activeOnly?: boolean;
 		limit?: number;
 		offset?: number;
@@ -175,8 +176,8 @@ export class ProductService {
 			title: productData.title,
 			description: productData.description ?? "",
 			image: productData.image ?? "",
-			categoryId: Number(productData.categoryId) ?? 1,
-			conditionId: Number(productData.conditionId) ?? 1,
+			categoryId: productData.categoryId ?? "1",
+			conditionId: productData.conditionId ?? "1",
 			userId: productData.userId,
 			rating: Number(productData.rating) ?? 0,
 		});
@@ -285,14 +286,14 @@ export class ProductService {
 						?.label || "Outros",
 				description: null,
 			},
-			condition: post.condition
-				? {
-						id: post.condition.id,
-						code: post.condition.code,
-						type: post.condition.type,
-						description: post.condition.description || null,
-				  }
-				: null,
+
+			condition: {
+				id: post.conditionId,
+				name:
+					conditionOptions.find((cat) => cat.value === post.conditionId)
+						?.label || "Outros",
+				description: null,
+			},
 		};
 	}
 }

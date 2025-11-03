@@ -21,8 +21,7 @@ export interface Product {
 	};
 	condition: {
 		id: string;
-		code: string;
-		type: string;
+		name: string;
 		description: string | null;
 	} | null;
 }
