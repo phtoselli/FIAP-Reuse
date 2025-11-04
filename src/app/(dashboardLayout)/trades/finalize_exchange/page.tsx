@@ -25,11 +25,30 @@ export default function ShippingMethodPage() {
 
 	const [selectedAddress, setSelectedAddress] = useState<string>("");
 	const [selectedMethod, setSelectedMethod] = useState<string>("correios");
-	const [loading, setLoading] = useState(false);
+	const [loading, setLoading] = useState(true);
 	const [trade, setTrade] = useState<any>(null);
 	const [addresses, setAddresses] = useState<any[]>([]);
 
-	// Buscar informações da trade + endereços
+	// métodos de envio pré-definidos
+	const methods = [
+		{
+			key: "correios",
+			label: "Grátis Correios",
+			description: "Entrega em até 7 dias úteis",
+		},
+		{
+			key: "loggi",
+			label: "R$7,90 Loggi",
+			description: "Entrega rápida (1 a 2 dias úteis)",
+		},
+		{
+			key: "jadlog",
+			label: "R$17,90 Jadlog",
+			description: "Entrega expressa (2 dias úteis)",
+		},
+	];
+
+	// busca dados iniciais
 	useEffect(() => {
 		if (!tradeId) {
 			message.error("ID da negociação não encontrado");
@@ -39,17 +58,14 @@ export default function ShippingMethodPage() {
 
 		const fetchData = async () => {
 			try {
-				setLoading(true);
-
 				const [tradeRes, addrRes] = await Promise.all([
 					axios.get(`/api/propostas/${tradeId}`),
-					axios.get(`/api/enderecos`), // você pode passar ?userId= se quiser só do usuário
+					axios.get(`/api/enderecos`),
 				]);
 
 				setTrade(tradeRes.data);
 				setAddresses(addrRes.data.enderecos || []);
 
-				// Selecionar o primeiro endereço por padrão
 				if (addrRes.data.enderecos?.length > 0) {
 					setSelectedAddress(addrRes.data.enderecos[0].id);
 				}
@@ -64,57 +80,30 @@ export default function ShippingMethodPage() {
 		fetchData();
 	}, [tradeId, router]);
 
-	const methods = [
-		{
-			key: "correios",
-			label: "Grátis Correios",
-			description: "Entrega em 7 dias",
-		},
-		{ key: "loggi", label: "R$7,90 Loggi", description: "Entrega em 1-2 dias" },
-		{
-			key: "jadlog",
-			label: "R$17,90 Jadlog",
-			description: "Entrega em 2 dias",
-		},
-	];
-
 	const handleFinish = async () => {
-		if (!tradeId) {
-			message.error("ID da negociação não encontrado");
+		if (!selectedAddress || !selectedMethod) {
+			message.warning("Selecione um endereço e um método de envio");
 			return;
 		}
 
-		if (!selectedAddress) {
-			message.error("Selecione um endereço de entrega");
-			return;
-		}
+		const key = "finalize";
 
 		try {
 			setLoading(true);
+			message.loading({ content: "Finalizando negociação...", key });
 
-			// Mostrar popup de "Finalizando negociação"
-			message.loading("Finalizando negociação...", 0);
-
-			const finalizationData = {
+			await axios.post(`/api/propostas/${tradeId}/finalize-shipping`, {
 				shippingAddress: selectedAddress,
 				shippingMethod: selectedMethod,
-			};
+			});
 
-			const response = await axios.post(
-				`/api/propostas/${tradeId}/finalize-shipping`,
-				finalizationData
-			);
-
-			message.destroy();
-			message.success("Negociação finalizada com sucesso!");
-			router.push("/proposals-received");
+			message.success({ content: "Negociação finalizada com sucesso!", key });
+			router.push("/trades");
 		} catch (err: any) {
-			message.destroy();
-
-			message.error(
-				err.response?.data?.message || "Erro ao finalizar negociação"
-			);
-			console.error("Erro ao finalizar:", err);
+			message.error({
+				content: err.response?.data?.message || "Erro ao finalizar negociação",
+				key,
+			});
 		} finally {
 			setLoading(false);
 		}
@@ -130,30 +119,30 @@ export default function ShippingMethodPage() {
 
 	return (
 		<Spin spinning={loading}>
-			<Flex vertical gap={24} style={{ width: "100%" }}>
+			<Flex vertical gap={24}>
 				<BreadcrumbRoute />
 
 				<Title level={2} style={{ color: "#2A4BA0", margin: 0 }}>
 					Forma de Envio
 				</Title>
 				<Text type="secondary">
-					Selecione a melhor forma de envio para seu produto
+					Selecione o endereço e a forma de envio do produto
 				</Text>
 
 				{trade && (
 					<Card style={{ borderRadius: 12, backgroundColor: "#f8f9ff" }}>
 						<Text type="secondary">Finalizando negociação:</Text>
 						<Title level={4} style={{ margin: "8px 0", color: "#2A4BA0" }}>
-							{trade.items?.[0]?.post?.title || "Produto"}
+							{trade.items?.[0]?.post?.title || "Produto sem título"}
 						</Title>
 						<Text>
-							Com: <Text strong>{trade.requester?.name}</Text>
+							Com: <Text strong>{trade.requester?.name || "Usuário"}</Text>
 						</Text>
 					</Card>
 				)}
 
 				<Flex gap={48} align="flex-start" style={{ marginTop: 16 }}>
-					{/* Coluna esquerda - Endereços e Métodos */}
+					{/* Coluna esquerda */}
 					<Flex vertical gap={32} style={{ flex: 1 }}>
 						{/* Endereços */}
 						<Flex vertical gap={24}>
@@ -163,25 +152,33 @@ export default function ShippingMethodPage() {
 								value={selectedAddress}
 								style={{ width: "100%" }}
 							>
-								{addresses.map((addr) => (
-									<Card
-										key={addr.id}
-										style={{ borderRadius: 12, marginBottom: 10 }}
-									>
-										<Flex align="center" justify="space-between">
-											<Flex gap={12}>
-												<Radio value={addr.id} />
-												<Flex vertical>
-													<Text strong>{addr.street}</Text>
-													<Text type="secondary">{addr.fullAddress}</Text>
+								{addresses.length > 0 ? (
+									addresses.map((addr) => (
+										<Card
+											key={addr.id}
+											style={{ borderRadius: 12, marginBottom: 10 }}
+										>
+											<Flex align="center" justify="space-between">
+												<Flex gap={12}>
+													<Radio value={addr.id} />
+													<Flex vertical>
+														<Text strong>{addr.street}</Text>
+														<Text type="secondary">{addr.fullAddress}</Text>
+													</Flex>
 												</Flex>
+												<Button
+													type="link"
+													size="small"
+													icon={<EditOutlined />}
+												>
+													Editar
+												</Button>
 											</Flex>
-											<Button type="link" size="small" icon={<EditOutlined />}>
-												Editar
-											</Button>
-										</Flex>
-									</Card>
-								))}
+										</Card>
+									))
+								) : (
+									<Text type="secondary">Nenhum endereço cadastrado.</Text>
+								)}
 							</Radio.Group>
 
 							<Button
@@ -221,7 +218,7 @@ export default function ShippingMethodPage() {
 						<Divider />
 					</Flex>
 
-					{/* Coluna direita - Imagem */}
+					{/* Coluna direita */}
 					<Flex
 						justify="center"
 						align="center"
@@ -255,7 +252,7 @@ export default function ShippingMethodPage() {
 						shape="round"
 						style={{ width: 220, backgroundColor: "#2A4BA0" }}
 						onClick={handleFinish}
-						disabled={!tradeId}
+						disabled={!tradeId || !selectedAddress}
 					>
 						Finalizar negociação
 					</Button>

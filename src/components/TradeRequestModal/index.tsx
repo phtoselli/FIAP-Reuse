@@ -7,7 +7,7 @@ import {
 } from "@/hooks/useURLControlledModal";
 import { Product } from "@/types/product";
 import { CategoryCode, CategoryId } from "@/types/type/category";
-import { getUser } from "@/utils/auth";
+import { getUser, getUserId } from "@/utils/auth";
 import {
 	Button,
 	Divider,
@@ -25,9 +25,12 @@ const { Text, Title, Paragraph } = Typography;
 
 export default function TradeRequestModal() {
 	const [loading, setLoading] = useState(false);
-	const [userProducts, setUserProducts] = useState<Product[] | null>(null);
+	const [userProducts, setUserProducts] = useState<Product[]>([]);
 	const [targetProduct, setTargetProduct] = useState<Product | null>(null);
 	const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
+
+	const user = getUser();
+	const userId = getUserId();
 
 	const { isOpen, close, paramValue } = useURLControlledModal(
 		URLControlledModalKeys.TRADE_REQUEST_MODAL
@@ -40,17 +43,16 @@ export default function TradeRequestModal() {
 		return CategoryCode[entry[0] as keyof typeof CategoryCode];
 	};
 
-	const selectedProductsOptions = userProducts?.map((p) => ({
-		label: p.nome,
-		value: p.id,
+	const selectedProductsOptions = userProducts.map((p) => ({
 		key: p.id,
+		value: p.id,
+		label: p.name,
 	}));
 
 	const handleOk = async () => {
 		if (!selectedProduct || !targetProduct) return;
 
 		setLoading(true);
-
 		try {
 			const user = getUser();
 			if (!user) throw new Error("Usuário não está logado");
@@ -60,8 +62,8 @@ export default function TradeRequestModal() {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
 					requesterId: user.id,
-					responderId: targetProduct.usuario.id,
-					message: `Gostaria de trocar meu produto pelo ${targetProduct.nome}`,
+					responderId: targetProduct.user?.id,
+					message: `Gostaria de trocar meu produto pelo ${targetProduct.name}`,
 					items: [
 						{ postId: selectedProduct, isOffered: true },
 						{ postId: targetProduct.id, isOffered: false },
@@ -85,50 +87,49 @@ export default function TradeRequestModal() {
 	const onCancel = () => {
 		setSelectedProduct(null);
 		setTargetProduct(null);
-		setUserProducts(null);
+		setUserProducts([]);
 		close();
 	};
 
 	useEffect(() => {
 		if (!isOpen || !paramValue) return;
 
-		let isMounted = true;
-
 		const fetchData = async () => {
 			setLoading(true);
 			try {
 				const res = await fetch(`/api/produtos/${paramValue}`);
 				if (!res.ok) throw new Error("Produto não encontrado");
+
 				const data: Product = await res.json();
-				if (!isMounted) return;
 				setTargetProduct(data);
 
-				const user = getUser();
 				if (!user) throw new Error("Usuário não está logado");
 
 				const userRes = await fetch(`/api/produtos`);
 				if (!userRes.ok)
 					throw new Error("Não foi possível carregar seus produtos");
-				const userData = await userRes.json();
-				if (!isMounted) return;
 
-				const myProducts = (userData.produtos || []).filter(
-					(p: Product) => p.usuario.id === user.id
+				const userData = await userRes.json();
+				console.log("Resposta de /api/produtos:", userData);
+
+				const allProducts: Product[] =
+					userData?.products ||
+					userData?.produtos ||
+					(Array.isArray(userData) ? userData : []);
+
+				const myProducts = allProducts.filter(
+					(p: Product) => p.user?.id === userId
 				);
 
 				setUserProducts(myProducts);
 			} catch (error: any) {
 				message.error(error.message || "Erro ao carregar dados");
 			} finally {
-				if (isMounted) setLoading(false);
+				setLoading(false);
 			}
 		};
 
 		fetchData();
-
-		return () => {
-			isMounted = false;
-		};
 	}, [isOpen, paramValue]);
 
 	return (
@@ -147,26 +148,25 @@ export default function TradeRequestModal() {
 					<div style={{ display: "flex", gap: 16, marginBottom: 24 }}>
 						<Image
 							src={
-								targetProduct.imagem ??
+								targetProduct.image ??
 								`https://picsum.photos/500/500?random=${Math.floor(
 									Math.random() * 100
 								)}`
 							}
-							alt={targetProduct.nome}
-							width={120}
-							height={120}
+							alt={targetProduct.name}
+							width={350}
 							style={{ objectFit: "cover", borderRadius: 8 }}
 							preview={false}
 						/>
 						<div>
-							<Title level={4}>{targetProduct.nome}</Title>
+							<Title level={4}>{targetProduct.name}</Title>
 							<Text type="secondary">
-								Categoria: {targetProduct.categoria.id || "Sem Categoria"}
+								Categoria: {getCategoryName(targetProduct.category?.id)}
 							</Text>
 							<Paragraph
 								ellipsis={{ rows: 3, expandable: true, symbol: "mais" }}
 							>
-								{targetProduct.descricao || "Sem descrição"}
+								{targetProduct.description || "Sem descrição"}
 							</Paragraph>
 						</div>
 					</div>

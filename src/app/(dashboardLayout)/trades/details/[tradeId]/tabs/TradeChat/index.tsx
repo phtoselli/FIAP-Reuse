@@ -1,42 +1,57 @@
 "use client";
 
-import { Card, Input, List, Typography, Flex, Button } from "antd";
+import { Button, Card, Empty, Flex, Input, List } from "antd";
 import { useState } from "react";
 
-const { Title } = Typography;
 const { TextArea } = Input;
 
-export default function TradeChat({ tradeId }: { tradeId: string | string[] }) {
-  const [messages, setMessages] = useState<string[]>([]);
-  const [input, setInput] = useState("");
+type TradeChatProps = {
+	tradeId: string;
+};
 
-  const sendMessage = () => {
-    if (!input.trim()) return;
-    setMessages((prev) => [...prev, input.trim()]);
-    setInput("");
-  };
+export default function TradeChat({ tradeId }: TradeChatProps) {
+	const [messages, setMessages] = useState<string[]>([]);
+	const [input, setInput] = useState("");
 
-  return (
-    <Card title="Chat da Troca" style={{ height: "100%" }}>
-      <List
-        size="small"
-        dataSource={messages}
-        style={{ maxHeight: 300, overflowY: "auto", marginBottom: 16 }}
-        renderItem={(msg, index) => <List.Item key={index}>{msg}</List.Item>}
-        locale={{ emptyText: "Nenhuma mensagem ainda." }}
-      />
+	const sendMessage = () => {
+		if (!input.trim()) return;
+		setMessages((prev) => [...prev, input.trim()]);
+		setInput("");
+	};
 
-      <Flex gap={8}>
-        <TextArea
-          placeholder="Digite uma mensagem..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          autoSize={{ minRows: 2, maxRows: 4 }}
-        />
-        <Button type="primary" onClick={sendMessage}>
-          Enviar
-        </Button>
-      </Flex>
-    </Card>
-  );
+	return (
+		<Card title="Chat da Troca" style={{ height: "100%" }}>
+			<List
+				size="small"
+				dataSource={messages}
+				style={{
+					maxHeight: 300,
+					height: 150,
+					overflowY: "auto",
+					marginBottom: 16,
+				}}
+				renderItem={(msg, index) => <List.Item key={index}>{msg}</List.Item>}
+				locale={{
+					emptyText: (
+						<Empty
+							description="Nenhuma mensagem ainda"
+							image={Empty.PRESENTED_IMAGE_SIMPLE}
+						/>
+					),
+				}}
+			/>
+
+			<Flex gap={8}>
+				<TextArea
+					placeholder="Digite uma mensagem..."
+					value={input}
+					onChange={(e) => setInput(e.target.value)}
+					autoSize={{ minRows: 1, maxRows: 4 }}
+				/>
+				<Button type="primary" onClick={sendMessage}>
+					Enviar
+				</Button>
+			</Flex>
+		</Card>
+	);
 }

@@ -53,21 +53,26 @@ export default function Trades() {
 		}
 	};
 
-	useEffect(() => {
-		fetchPropostas();
-	}, [role, filters]);
-
 	const filteredTrades = useMemo(() => {
 		const search = (filters.search || "").toLowerCase();
+		const status = filters.status;
 
 		return propostas
 			.filter((trade) => {
-				return (
+				if (role === "requester" && trade.requester?.id !== userId)
+					return false;
+				if (role === "responder" && trade.responder?.id !== userId)
+					return false;
+
+				if (status && trade.status !== status) return false;
+
+				const matchesSearch =
 					!search ||
-					trade.message.toLowerCase().includes(search) ||
+					trade.message?.toLowerCase().includes(search) ||
 					trade.requester?.name?.toLowerCase().includes(search) ||
-					trade.responder?.name?.toLowerCase().includes(search)
-				);
+					trade.responder?.name?.toLowerCase().includes(search);
+
+				return matchesSearch;
 			})
 			.sort((a, b) => {
 				if (filters.ordem === "maisRecentes") {
@@ -81,7 +86,7 @@ export default function Trades() {
 				}
 				return 0;
 			});
-	}, [filters, propostas]);
+	}, [filters, propostas, role, userId]);
 
 	const getStatusLabel = (status: string) => {
 		switch (status) {
@@ -94,9 +99,13 @@ export default function Trades() {
 			case "finished":
 				return "Proposta Finalizada";
 			default:
-				return status; // fallback caso venha um status inesperado
+				return status;
 		}
 	};
+
+	useEffect(() => {
+		fetchPropostas();
+	}, [role, filters]);
 
 	return (
 		<ContentLayout
@@ -125,13 +134,6 @@ export default function Trades() {
 								<Option value="finished">Finalizada</Option>
 							</Select>
 						</Form.Item>
-
-						{/* <Form.Item name="ordem" style={{ margin: 0 }}>
-              <Select defaultValue="maisRecentes" style={{ width: 200 }}>
-                <Option value="maisRecentes">Mais recentes</Option>
-                <Option value="maisAntigos">Mais antigos</Option>
-              </Select>
-            </Form.Item> */}
 
 						<Segmented
 							options={[
@@ -174,7 +176,8 @@ export default function Trades() {
 								<Flex gap={16}>
 									<Image
 										src={
-											trade.items?.[0]?.post.imageUrl ??
+											trade.items?.[0]?.post.imageUrl ||
+											trade.items?.[0]?.post.image ||
 											`https://picsum.photos/500/500?random=${Math.floor(
 												Math.random() * 100
 											)}`

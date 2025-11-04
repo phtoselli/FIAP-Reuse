@@ -422,7 +422,7 @@ export class ProposalService {
 							id: item.post?.id || "",
 							title: item.post?.title || "",
 							description: item.post?.description || "",
-							imageUrl: item.post?.imageUrl || "",
+							imageUrl: item.post?.imageUrl || item.post?.image || "",
 							rating: item.post?.rating || 0,
 							isActive: item.post?.isActive || false,
 							category: {

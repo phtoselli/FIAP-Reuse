@@ -1,73 +1,67 @@
 "use client";
 
+import BreadcrumbRoute from "@/components/BreadcrumbRoute";
+import { Flex, message, Spin, Tabs, Typography } from "antd";
+import axios from "axios";
 import { useParams } from "next/navigation";
-import { Flex, Typography, Button } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import TradeChat from "./tabs/TradeChat";
 import TradeInfo from "./tabs/TradeInfo";
-import BreadcrumbRoute from "@/components/BreadcrumbRoute";
 
 const { Title } = Typography;
 
 export default function TradeDetailsPage() {
-  const { tradeId } = useParams();
-  const [selectedKey, setSelectedKey] = useState<"details" | "chat">("details");
+	const params = useParams<{ tradeId: string }>();
+	const tradeId = params.tradeId;
 
-  const renderContent = () => {
-    switch (selectedKey) {
-      case "chat":
-        return <TradeChat tradeId={tradeId} />;
-      case "details":
-      default:
-        return <TradeInfo tradeId={tradeId} />;
-    }
-  };
+	const [trade, setTrade] = useState<any>(null);
+	const [loading, setLoading] = useState(false);
 
-  return (
-    <Flex vertical gap={24} style={{ width: "100%" }}>
-      {/* Breadcrumb */}
-      <BreadcrumbRoute />
+	const fetchTrade = async () => {
+		try {
+			setLoading(true);
+			const { data } = await axios.get(`/api/propostas/${tradeId}`);
+			setTrade(data);
+		} catch (err: any) {
+			message.error(err.response?.data?.error || "Erro ao carregar proposta");
+		} finally {
+			setLoading(false);
+		}
+	};
 
-      {/* Header */}
-      <Title level={2} style={{ color: "#2A4BA0", margin: 0 }}>
-        Proposta Recebida
-      </Title>
+	useEffect(() => {
+		fetchTrade();
+	}, [tradeId]);
 
-      {/* Barra de navegação entre Detalhe e Chat */}
-      <Flex
-        gap={16}
-        align="center"
-        style={{
-          marginBottom: 16,
-          borderBottom: "2px solid #eee",
-          paddingBottom: 8,
-        }}
-      >
-        <Button
-          type="text"
-          style={{
-            fontWeight: selectedKey === "details" ? "bold" : "normal",
-            color: selectedKey === "details" ? "#2A4BA0" : "inherit",
-          }}
-          onClick={() => setSelectedKey("details")}
-        >
-          Detalhe
-        </Button>
+	return (
+		<Spin spinning={loading} tip="Carregando dados da proposta...">
+			<Flex vertical gap={24} style={{ width: "100%" }}>
+				<Flex gap={0} vertical>
+					<BreadcrumbRoute />
+					<Title level={2} style={{ color: "#2A4BA0", margin: 0, padding: 0 }}>
+						Proposta Recebida
+					</Title>
+				</Flex>
 
-        <Button
-          type="text"
-          style={{
-            fontWeight: selectedKey === "chat" ? "bold" : "normal",
-            color: selectedKey === "chat" ? "#2A4BA0" : "inherit",
-          }}
-          onClick={() => setSelectedKey("chat")}
-        >
-          Chat
-        </Button>
-      </Flex>
-
-      {/* Conteúdo dinâmico */}
-      <div style={{ flex: 1, width: "100%" }}>{renderContent()}</div>
-    </Flex>
-  );
+				<Tabs
+					defaultActiveKey="details"
+					items={[
+						{
+							key: "details",
+							label: "Detalhes",
+							children: <TradeInfo trade={trade} />,
+						},
+						{
+							key: "chat",
+							label: "Chat",
+							children: <TradeChat tradeId={tradeId} />,
+						},
+					]}
+					tabBarStyle={{
+						marginBottom: 24,
+					}}
+				/>
+			</Flex>
+		</Spin>
+	);
 }
