@@ -4,6 +4,7 @@
 import ContentLayout from "@/components/ContentLayout";
 import {
 	CloseCircleOutlined,
+	DeleteOutlined,
 	EditOutlined,
 	LoadingOutlined,
 	SwapOutlined,
@@ -15,13 +16,15 @@ import {
 	Descriptions,
 	Divider,
 	Image,
+	Popconfirm,
 	Rate,
 	Result,
 	Tag,
 	Typography,
+	message,
 	theme,
 } from "antd";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import {
@@ -35,6 +38,7 @@ const { Title, Paragraph, Text } = Typography;
 
 export default function PostDetailsPage() {
 	const userId = getUserId();
+	const router = useRouter();
 
 	const { postId } = useParams();
 	const { token } = theme.useToken();
@@ -53,6 +57,25 @@ export default function PostDetailsPage() {
 
 	const filteredProduct = produtos.find((product) => product.id === postId);
 
+	const handleDeleteProduct = async (id: string) => {
+		try {
+			const res = await fetch(`/api/produtos/${id}`, {
+				method: "DELETE",
+			});
+
+			if (!res.ok) {
+				const data = await res.json();
+				throw new Error(data.error || "Erro ao desativar produto");
+			}
+
+			message.success("Produto desativado com sucesso!");
+			await getAllProducts();
+			router.push("/posts/my");
+		} catch (err: any) {
+			message.error(err.message || "Erro ao excluir produto");
+		}
+	};
+
 	useEffect(() => {
 		if (!produtos || produtos.length < 1) {
 			getAllProducts();
@@ -66,14 +89,32 @@ export default function PostDetailsPage() {
 				filteredProduct && (
 					<>
 						{userId === filteredProduct.user.id && (
-							<Button
-								type="primary"
-								icon={<EditOutlined />}
-								size="large"
-								onClick={() => openEditPostModal(filteredProduct.id)}
-							>
-								Editar Publicação
-							</Button>
+							<div style={{ display: "flex", gap: 8 }}>
+								<Button
+									type="primary"
+									icon={<EditOutlined />}
+									size="large"
+									onClick={() => openEditPostModal(filteredProduct.id)}
+								>
+									Editar Publicação
+								</Button>
+
+								<Popconfirm
+									title="Tem certeza que deseja excluir esta publicação?"
+									description="Esta ação não poderá ser desfeita."
+									okText="Sim"
+									cancelText="Não"
+									okButtonProps={{ danger: true }}
+									onConfirm={() => handleDeleteProduct(filteredProduct.id)}
+								>
+									<Button
+										type="default"
+										danger
+										icon={<DeleteOutlined />}
+										size="large"
+									/>
+								</Popconfirm>
+							</div>
 						)}
 
 						{userId !== filteredProduct.user.id && (
