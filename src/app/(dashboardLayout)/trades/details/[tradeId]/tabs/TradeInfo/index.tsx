@@ -32,11 +32,18 @@ export default function TradeInfo({ trade }: TradeInfoProps) {
 
 	const handleAction = async (action: "aceitar" | "recusar") => {
 		try {
+			message.loading(
+				action === "aceitar"
+					? "Aceitando proposta..."
+					: "Recusando proposta...",
+				0
+			);
 			const { data } = await axios.post(
 				`/api/propostas/${trade.id}/${action}`,
 				{ responderId }
 			);
 
+			message.destroy();
 			message.success(data.message);
 
 			if (action === "aceitar") {
