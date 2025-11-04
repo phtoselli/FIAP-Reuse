@@ -61,7 +61,7 @@ export default function TradeInfo({ trade }: TradeInfoProps) {
 		}
 
 		return (
-			<Flex wrap gap={24}>
+			<Flex wrap gap={16}>
 				{items.map((item: any) => (
 					<Card
 						key={item.id}
@@ -75,7 +75,7 @@ export default function TradeInfo({ trade }: TradeInfoProps) {
 						<Image
 							src={
 								item.post?.imageUrl
-									? `data:image/png;base64,${item.post.imageUrl}`
+									? item.post.imageUrl
 									: "https://picsum.photos/200"
 							}
 							alt={item.post?.title || "Produto"}
